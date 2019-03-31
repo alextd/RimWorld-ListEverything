@@ -109,6 +109,7 @@ namespace List_Everything
 		//bool? filterForbidden;
 
 		bool showBase;
+		bool focusOptions;
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal
 		{
@@ -141,7 +142,12 @@ namespace List_Everything
 
 				FloatMenu floatMenu = new FloatMenu(types)
 				{
-					onCloseCallback = delegate { RemakeBaseList(); showBase = true; }
+					onCloseCallback = delegate
+					{
+						RemakeBaseList();
+						showBase = true;
+						focusOptions = true;
+					}
 				};
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
@@ -156,6 +162,7 @@ namespace List_Everything
 				switch (baseType)
 				{
 					case BaseListType.Name:
+						GUI.SetNextControlName("BaseListTypeOptions");
 						string newStr = listing.TextEntry(listByNameStr);
 						if (newStr != listByNameStr)
 						{
@@ -171,6 +178,12 @@ namespace List_Everything
 			//listing.CheckboxLabeledSelectable("Forbidden", ref listFilth);
 
 			listing.End();
+
+			if (focusOptions)
+			{
+				UI.FocusControl("BaseListTypeOptions", this);
+				focusOptions = false;
+			}
 		}
 		public void DoList(Rect listRect)
 		{
