@@ -77,7 +77,8 @@ namespace List_Everything
 					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
 					break;
 				case BaseListType.Name:
-					allThings = Find.CurrentMap.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
+					if(listByNameStr.Length > 1)
+						allThings = Find.CurrentMap.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
 					break;
 				case BaseListType.Buildings:
 					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
