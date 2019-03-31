@@ -131,17 +131,17 @@ namespace List_Everything
 
 			Widgets.Label(labelRect, $"Category: {baseType} {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
-			if(Widgets.ButtonInvisible(labelRect))
+			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
-				foreach(BaseListType type in Enum.GetValues(typeof(BaseListType)))
+				foreach (BaseListType type in Enum.GetValues(typeof(BaseListType)))
 				{
 					types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
 				}
 
 				FloatMenu floatMenu = new FloatMenu(types)
 				{
-					onCloseCallback = () => RemakeBaseList()
+					onCloseCallback = delegate { RemakeBaseList(); showBase = true; }
 				};
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
