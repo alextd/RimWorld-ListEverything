@@ -165,11 +165,17 @@ namespace List_Everything
 
 			//Header
 			Rect switchRect = headerRect.LeftPartPixels(Text.LineHeight);
-			Rect labelRect = headerRect.RightPartPixels(headerRect.width - Text.LineHeight);
+			Rect refreshRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
+			Rect labelRect = new Rect(headerRect.x + Text.LineHeight, headerRect.y, headerRect.width - 2 * Text.LineHeight, headerRect.height);
 
 			Texture2D tex = showBase ? TexButtonNotInternalForReal.Collapse : TexButtonNotInternalForReal.Reveal;
 			if (Widgets.ButtonImage(switchRect, tex))
 				showBase = !showBase;
+
+			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
+				RemakeBaseList();
+
+			TooltipHandler.TipRegion(refreshRect, "Lists are saved when category is chosen - new items aren't added until refreshed");
 
 			Widgets.Label(labelRect, $"Category: {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
