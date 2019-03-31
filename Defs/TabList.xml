@@ -3,8 +3,8 @@
 
 	<MainButtonDef>
 		<defName>TD_List</defName>
-		<label>lister</label>
-		<description>List things on the map.</description>
+		<label>Find</label>
+		<description>Find and list things on the map.</description>
 		<tabWindowClass>List_Everything.MainTabWindow_List</tabWindowClass>
 		<order>95</order>
 		<validWithoutMap>false</validWithoutMap>

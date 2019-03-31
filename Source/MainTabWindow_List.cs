@@ -68,9 +68,9 @@ namespace List_Everything
 				listByNameStr = "";
 			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
 			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
-			listing.CheckboxLabeled("Haulable things", ref listHaulable);
-			listing.CheckboxLabeled("Mergeable? things", ref listMergable);
-			listing.CheckboxLabeled("All Filth", ref listFilth);
+			listing.CheckboxLabeled("Things Needing Hauling", ref listHaulable);
+			listing.CheckboxLabeled("Stacks Needing Merging", ref listMergable);
+			listing.CheckboxLabeled("Filth in Home Area", ref listFilth);
 
 			listing.End();
 		}
