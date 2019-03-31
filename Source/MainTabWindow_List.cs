@@ -161,15 +161,15 @@ namespace List_Everything
 			{
 				if (Event.current.type == EventType.mouseDown)
 				{
-					if (Event.current.clickCount == 2)
-					{
-						selectAllDef = thing.def;
-					}
 					if (!thing.def.selectable)
 					{
 						CameraJumper.TryJump(thing);
 						if (Event.current.alt)
 							Find.MainTabsRoot.EscapeCurrentTab(false);
+					}
+					else if (Event.current.clickCount == 2)
+					{
+						selectAllDef = thing.def;
 					}
 					else if (Event.current.shift)
 					{
