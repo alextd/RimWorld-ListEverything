@@ -36,6 +36,7 @@ namespace List_Everything
 			DoList(listRect);
 		}
 
+
 		//Lists:
 
 		//public ListerThings listerThings;
@@ -58,6 +59,7 @@ namespace List_Everything
 
 		//public ListerFilthInHomeArea listerFilthInHomeArea;
 		bool listFilth;
+
 
 		//Filters:
 
