@@ -17,14 +17,75 @@ namespace List_Everything
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
-			GUI.BeginGroup(fillRect);
+			Rect filterRect = fillRect.LeftPart(0.6f);
+			Rect listRect = fillRect.RightPart(0.39f);
+
+			GUI.color = Color.grey;
+			Widgets.DrawLineVertical(filterRect.width, 0, filterRect.height);
 			GUI.color = Color.white;
-			
-			Rect viewRect = new Rect(0f, 0f, fillRect.width - 16f, scrollViewHeight);
-			Widgets.BeginScrollView(fillRect, ref scrollPosition, viewRect);
+
+			DoFilter(filterRect);
+			DoList(listRect);
+		}
+
+		//public ListerThings listerThings;
+		bool listAllThings;
+		//TODO: by def, group
+
+		//public ListerBuildings listerBuildings;
+		bool listAllBuildings;
+		//TODO: of class, by def
+
+		//public ListerBuildingsRepairable listerBuildingsRepairable;
+		bool listRepairable;
+
+		//public ListerHaulables listerHaulables;
+		bool listHaulable;
+
+		//public ListerMergeables listerMergeables;
+		bool listMergable;
+
+		//public ListerFilthInHomeArea listerFilthInHomeArea;
+		bool listFilth;
+
+		public void DoFilter(Rect rect)
+		{
+			Listing_Standard listing = new Listing_Standard();
+			listing.Begin(rect);
+			listing.CheckboxLabeled("All things", ref listAllThings);
+			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
+			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
+			listing.CheckboxLabeled("Haulable things", ref listHaulable);
+			listing.CheckboxLabeled("Mergeable? things", ref listMergable);
+			listing.CheckboxLabeled("All Filth", ref listFilth);
+
+			listing.End();
+		}
+		public void DoList(Rect listRect)
+		{
+			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
+			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			float totalHeight = 0f;
 
-			foreach (Thing thing in Find.CurrentMap.listerThings.AllThings)
+			Map map = Find.CurrentMap;
+
+			IEnumerable<Thing> list = Enumerable.Empty<Thing>();
+			if(listAllThings)
+				list = list.Concat(map.listerThings.AllThings);
+			else
+			{
+				if (listAllBuildings)
+					list = list.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
+				if (listRepairable)
+					list = list.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
+				if (listHaulable)
+					list = list.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
+				if (listMergable)
+					list = list.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
+				if (listFilth)
+					list = list.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
+			}
+			foreach (Thing thing in list)
 			{
 				if (!thing.Fogged() || DebugSettings.godMode)
 				{
@@ -35,7 +96,6 @@ namespace List_Everything
 			if (Event.current.type == EventType.Layout)
 				scrollViewHeight = totalHeight;
 			Widgets.EndScrollView();
-			GUI.EndGroup();
 		}
 
 		private static void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
@@ -44,9 +104,49 @@ namespace List_Everything
 			rowY += 34;
 			Rect iconRect = rect.LeftPartPixels(32);
 			Rect labelRect = new Rect(rect.x + 34, rect.y, rect.width - 34, rect.height);
+			
+			//Highlight selected
+			if (Find.Selector.IsSelected(thing))
+				Widgets.DrawHighlightSelected(rect);
 
+			//Draw raw
 			Widgets.ThingIcon(iconRect, thing);
 			Widgets.Label(labelRect, thing.LabelCap);
+
+			//Draw arrow to hovered
+			if (Mouse.IsOver(rect))
+			{
+				Vector3 center = UI.UIToMapPosition((float)(UI.screenWidth / 2), (float)(UI.screenHeight / 2));
+				bool arrow = (center - thing.DrawPos).MagnitudeHorizontalSquared() >= 121f;//Normal arrow is 9^2, using 11^1 seems good too.
+				TargetHighlighter.Highlight(thing, arrow, true, true);
+			}
+			
+			//Mouse event: select.
+			if (Widgets.ButtonInvisible(rect))
+			{
+				if (Event.current.shift)
+				{
+					if (Find.Selector.IsSelected(thing))
+						Find.Selector.Deselect(thing);
+					else
+						Find.Selector.Select(thing);
+				}
+				else if (Event.current.alt)
+				{
+					Find.MainTabsRoot.EscapeCurrentTab(false);
+					CameraJumper.TryJumpAndSelect(thing);
+				}
+				else
+				{
+					if (Find.Selector.IsSelected(thing))
+						CameraJumper.TryJump(thing);
+					if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
+					{
+						Find.Selector.ClearSelection();
+						Find.Selector.Select(thing);
+					}
+				}
+			}
 		}
 	}
 }
