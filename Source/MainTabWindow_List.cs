@@ -37,7 +37,8 @@ namespace List_Everything
 		}
 
 		//public ListerThings listerThings;
-		string listByDef = "";
+		bool listByName;
+		string listByNameStr = "";
 		//TODO: by def, group
 
 		//public ListerBuildings listerBuildings;
@@ -60,8 +61,11 @@ namespace List_Everything
 		{
 			Listing_Standard listing = new Listing_Standard();
 			listing.Begin(rect);
-			listing.Label("Thing by name:");
-			listByDef = listing.TextEntry(listByDef);
+			listing.CheckboxLabeled("Thing by name", ref listByName);
+			if (listByName)
+				listByNameStr = listing.TextEntry(listByNameStr);
+			else
+				listByNameStr = "";
 			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
 			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
 			listing.CheckboxLabeled("Haulable things", ref listHaulable);
@@ -87,8 +91,8 @@ namespace List_Everything
 
 			//Base lists
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			if (listByDef != "")
-				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.Contains(listByDef)));
+			if (listByNameStr != "")
+				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.Contains(listByNameStr)));
 			if (listAllBuildings)
 				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
 			if (listRepairable)
