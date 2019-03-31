@@ -10,6 +10,14 @@ namespace List_Everything
 {
 	public class MainTabWindow_List : MainTabWindow
 	{
+		public override Vector2 RequestedTabSize
+		{
+			get
+			{
+				return new Vector2(900, base.RequestedTabSize.y);
+			}
+		}
+
 		private Vector2 scrollPosition = Vector2.zero;
 
 		private float scrollViewHeight;
@@ -102,16 +110,15 @@ namespace List_Everything
 		{
 			Rect rect = new Rect(fillRect.x, rowY, fillRect.width, 32);
 			rowY += 34;
-			Rect iconRect = rect.LeftPartPixels(32);
-			Rect labelRect = new Rect(rect.x + 34, rect.y, rect.width - 34, rect.height);
 			
 			//Highlight selected
 			if (Find.Selector.IsSelected(thing))
 				Widgets.DrawHighlightSelected(rect);
 
 			//Draw raw
+			Rect iconRect = rect.RightPartPixels(32 * (thing.def.graphicData?.drawSize.x / thing.def.graphicData?.drawSize.y ?? 1));
 			Widgets.ThingIcon(iconRect, thing);
-			Widgets.Label(labelRect, thing.LabelCap);
+			Widgets.Label(rect, thing.LabelCap);
 
 			//Draw arrow to hovered
 			if (Mouse.IsOver(rect))
