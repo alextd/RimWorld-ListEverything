@@ -75,6 +75,8 @@ namespace List_Everything
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			float totalHeight = 0f;
 
+			if (!Input.GetMouseButton(0)) dragSelect = false;
+
 			Map map = Find.CurrentMap;
 
 			IEnumerable<Thing> list = Enumerable.Empty<Thing>();
@@ -106,7 +108,8 @@ namespace List_Everything
 			Widgets.EndScrollView();
 		}
 
-		private static void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
+		bool dragSelect = false;
+		private void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
 		{
 			Rect rect = new Rect(fillRect.x, rowY, fillRect.width, 32);
 			rowY += 34;
@@ -115,44 +118,53 @@ namespace List_Everything
 			if (Find.Selector.IsSelected(thing))
 				Widgets.DrawHighlightSelected(rect);
 
-			//Draw raw
+			//Draw
 			Rect iconRect = rect.RightPartPixels(32 * (thing.def.graphicData?.drawSize.x / thing.def.graphicData?.drawSize.y ?? 1));
 			Widgets.ThingIcon(iconRect, thing);
 			Widgets.Label(rect, thing.LabelCap);
 
-			//Draw arrow to hovered
+			//Draw arrow pointing to hovered thing
 			if (Mouse.IsOver(rect))
 			{
 				Vector3 center = UI.UIToMapPosition((float)(UI.screenWidth / 2), (float)(UI.screenHeight / 2));
 				bool arrow = (center - thing.DrawPos).MagnitudeHorizontalSquared() >= 121f;//Normal arrow is 9^2, using 11^1 seems good too.
 				TargetHighlighter.Highlight(thing, arrow, true, true);
 			}
-			
+
 			//Mouse event: select.
-			if (Widgets.ButtonInvisible(rect))
+			if (Mouse.IsOver(rect))
 			{
-				if (Event.current.shift)
+				if (Event.current.type == EventType.mouseDown)
 				{
-					if (Find.Selector.IsSelected(thing))
-						Find.Selector.Deselect(thing);
-					else
-						Find.Selector.Select(thing);
-				}
-				else if (Event.current.alt)
-				{
-					Find.MainTabsRoot.EscapeCurrentTab(false);
-					CameraJumper.TryJumpAndSelect(thing);
-				}
-				else
-				{
-					if (Find.Selector.IsSelected(thing))
-						CameraJumper.TryJump(thing);
-					if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
+					if (Event.current.shift)
 					{
-						Find.Selector.ClearSelection();
-						Find.Selector.Select(thing);
+						if (Find.Selector.IsSelected(thing))
+							Find.Selector.Deselect(thing);
+						else
+						{
+							dragSelect = true;
+							Find.Selector.Select(thing);
+						}
+					}
+					else if (Event.current.alt)
+					{
+						Find.MainTabsRoot.EscapeCurrentTab(false);
+						CameraJumper.TryJumpAndSelect(thing);
+					}
+					else
+					{
+						if (Find.Selector.IsSelected(thing))
+							CameraJumper.TryJump(thing);
+						if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
+						{
+							Find.Selector.ClearSelection();
+							Find.Selector.Select(thing);
+							dragSelect = true;
+						}
 					}
 				}
+				if (Event.current.type == EventType.mouseDrag && dragSelect)
+					Find.Selector.Select(thing);
 			}
 		}
 	}
