@@ -18,6 +18,12 @@ namespace List_Everything
 			}
 		}
 
+		public override void PreOpen()
+		{
+			base.PreOpen();
+			RemakeBaseList();
+		}
+
 		private Vector2 scrollPosition = Vector2.zero;
 
 		private float scrollViewHeight;
@@ -40,30 +46,63 @@ namespace List_Everything
 		}
 
 
-		//Lists:
+		//Base Lists:
+		enum BaseListType
+		{
+			All,
+			Name,
+			Buildings
+		};
+		BaseListType baseType = BaseListType.All;
 
-		//public ListerThings listerThings;
-		bool listByName;
 		string listByNameStr = "";
-		List<Thing> allThingsByName;
-		//TODO: by def, group
+		//TODO: list all by def, group
+		//TODO: building of class, by def
 
-		//public ListerBuildings listerBuildings;
-		bool listAllBuildings;
-		//TODO: of class, by def
 
-		//public ListerBuildingsRepairable listerBuildingsRepairable;
-		bool listRepairable;
+		List<Thing> baseList;
+		public void RemakeBaseList()
+		{
+			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
+			switch(baseType)
+			{
+				case BaseListType.All:
+					allThings = Find.CurrentMap.listerThings.AllThings;
+					break;
+				case BaseListType.Name:
+					allThings = Find.CurrentMap.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
+					break;
+				case BaseListType.Buildings:
+					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					break;
+			}
+			/*
+			IEnumerable<Thing> allThings = listByNameStr != "" ? allThingsByName.Where(t => t.Spawned) : Enumerable.Empty<Thing>();
+			if (listAllBuildings)
+				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
+			if (listRepairable)
+				allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
+			if (listHaulable)
+				allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
+			if (listMergable)
+				allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
+			if (listFilth)
+				allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
+			*/
 
-		//public ListerHaulables listerHaulables;
-		bool listHaulable;
+			//Sort
+			baseList = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
+		}
 
-		//public ListerMergeables listerMergeables;
-		bool listMergable;
-
-		//public ListerFilthInHomeArea listerFilthInHomeArea;
-		bool listFilth;
-
+		public string BaseTypeDesc()
+		{
+			switch (baseType)
+			{
+				case BaseListType.Name:
+					return $"\"{listByNameStr}\"";
+			}
+			return "";
+		}
 
 		//Filters:
 
@@ -85,10 +124,28 @@ namespace List_Everything
 			//Header
 			Rect switchRect = headerRect.LeftPartPixels(Text.LineHeight);
 			Rect labelRect = headerRect.RightPartPixels(headerRect.width - Text.LineHeight);
+
 			Texture2D tex = showBase ? TexButtonNotInternalForReal.Collapse : TexButtonNotInternalForReal.Reveal;
 			if (Widgets.ButtonImage(switchRect, tex))
 				showBase = !showBase;
-			Widgets.Label(labelRect, "Category");
+
+			Widgets.Label(labelRect, $"Category: {baseType} {BaseTypeDesc()}");
+			Widgets.DrawHighlightIfMouseover(labelRect);
+			if(Widgets.ButtonInvisible(labelRect))
+			{
+				List<FloatMenuOption> types = new List<FloatMenuOption>();
+				foreach(BaseListType type in Enum.GetValues(typeof(BaseListType)))
+				{
+					types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
+				}
+
+				FloatMenu floatMenu = new FloatMenu(types)
+				{
+					onCloseCallback = () => RemakeBaseList()
+				};
+				floatMenu.vanishIfMouseDistant = true;
+				Find.WindowStack.Add(floatMenu);
+			}
 
 			Listing_Standard listing = new Listing_Standard();
 			listing.Begin(filterRect);
@@ -96,26 +153,17 @@ namespace List_Everything
 			//List base
 			if (showBase)
 			{
-				listing.CheckboxLabeled("Thing by name", ref listByName);
-				if (listByName)
+				switch (baseType)
 				{
-					string newStr = listing.TextEntry(listByNameStr);
-					if (newStr != listByNameStr)
-					{
-						listByNameStr = newStr;
-						allThingsByName = Find.CurrentMap.listerThings.AllThings.FindAll(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
-					}
+					case BaseListType.Name:
+						string newStr = listing.TextEntry(listByNameStr);
+						if (newStr != listByNameStr)
+						{
+							listByNameStr = newStr;
+							RemakeBaseList();
+						}
+						break;
 				}
-				else
-				{
-					listByNameStr = "";
-					allThingsByName = null;
-				}
-				listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
-				listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
-				listing.CheckboxLabeled("Things Needing Hauling", ref listHaulable);
-				listing.CheckboxLabeled("Stacks Needing Merging", ref listMergable);
-				listing.CheckboxLabeled("Filth in Home Area", ref listFilth);
 			}
 
 			//Filters
@@ -140,31 +188,18 @@ namespace List_Everything
 			Map map = Find.CurrentMap;
 
 			//Base lists
-			IEnumerable<Thing> allThings = listByNameStr != "" ? allThingsByName.Where(t => t.Spawned) : Enumerable.Empty<Thing>();
-			if (listAllBuildings)
-				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
-			if (listRepairable)
-				allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
-			if (listHaulable)
-				allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
-			if (listMergable)
-				allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
-			if (listFilth)
-				allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
+			IEnumerable<Thing> listedThings = baseList;
 
 			//Filters
-			if (!DebugSettings.godMode)
-				allThings = allThings.Where(t => !t.Fogged());
-
-			//Sort
-			var sorted = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000);
+			//if (!DebugSettings.godMode)
+			//	listedThings = listedThings.Where(t => !t.Fogged());
 
 			//Draw Scrolling List:
 			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
 
-			foreach (Thing thing in sorted)
+			foreach (Thing thing in listedThings)
 			{
 				//Be smart about drawing only what's shown.
 				if (thingRect.y + 32 >= scrollPosition.y)
@@ -177,12 +212,12 @@ namespace List_Everything
 			}
 
 			if (Event.current.type == EventType.Layout)
-				scrollViewHeight = sorted.Count() * 34f;
+				scrollViewHeight = listedThings.Count() * 34f;
 
 			//Select all for double-click
 			if(selectAllDef != null)
 			{
-				foreach(Thing t in sorted)
+				foreach(Thing t in listedThings)
 				{
 					if (t.def == selectAllDef)
 						Find.Selector.Select(t, false);
