@@ -103,7 +103,7 @@ namespace List_Everything
 			//Base lists
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			if (listByNameStr != "")
-				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.Contains(listByNameStr)));
+				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower())));
 			if (listAllBuildings)
 				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
 			if (listRepairable)
