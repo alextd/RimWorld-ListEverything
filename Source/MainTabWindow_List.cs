@@ -91,8 +91,7 @@ namespace List_Everything
 			//Filters
 			if (!DebugSettings.godMode)
 				allThings = allThings.Where(t => !t.Fogged());
-			if (filterName.Length > 1)
-				allThings = allThings.Where(t => t.Label.ToLower().Contains(filterName.ToLower()));
+			allThings = filter.Apply(allThings);
 
 			//Sort
 			listedThings = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
@@ -136,8 +135,7 @@ namespace List_Everything
 		}
 
 		//Filters:
-
-		string filterName = "";
+		ListFilter filter = new ListFilter();
 
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal
@@ -184,12 +182,8 @@ namespace List_Everything
 
 			//Filters
 			listing.GapLine();
-			string newStr = listing.TextEntry(filterName);
-			if (newStr != filterName)
-			{
-				filterName = newStr;
+			if(filter.Listing(listing))
 				RemakeList();
-			}
 
 			listing.End();
 		}
