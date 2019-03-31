@@ -194,10 +194,15 @@ namespace List_Everything
 							CameraJumper.TryJump(thing);
 							dragSelect = true;
 						}
-						if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
+						else if (Event.current.button == 1)
 						{
 							Find.Selector.ClearSelection();
 							CameraJumper.TryJumpAndSelect(thing);
+						}
+						else
+						{
+							Find.Selector.ClearSelection();
+							Find.Selector.Select(thing);
 							dragSelect = true;
 						}
 					}
