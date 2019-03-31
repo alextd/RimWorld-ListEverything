@@ -42,6 +42,7 @@ namespace List_Everything
 		//public ListerThings listerThings;
 		bool listByName;
 		string listByNameStr = "";
+		List<Thing> allThingsByName;
 		//TODO: by def, group
 
 		//public ListerBuildings listerBuildings;
@@ -71,9 +72,19 @@ namespace List_Everything
 			listing.Begin(rect);
 			listing.CheckboxLabeled("Thing by name", ref listByName);
 			if (listByName)
-				listByNameStr = listing.TextEntry(listByNameStr);
+			{
+				string newStr = listing.TextEntry(listByNameStr);
+				if (newStr != listByNameStr)
+				{
+					listByNameStr = newStr;
+					allThingsByName = Find.CurrentMap.listerThings.AllThings.FindAll(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
+				}
+			}
 			else
+			{
 				listByNameStr = "";
+				allThingsByName = null;
+			}
 			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
 			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
 			listing.CheckboxLabeled("Things Needing Hauling", ref listHaulable);
@@ -103,9 +114,7 @@ namespace List_Everything
 			Map map = Find.CurrentMap;
 
 			//Base lists
-			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			if (listByNameStr != "")
-				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower())));
+			IEnumerable<Thing> allThings = listByNameStr != "" ? allThingsByName.Where(t => t.Spawned) : Enumerable.Empty<Thing>();
 			if (listAllBuildings)
 				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
 			if (listRepairable)
