@@ -32,7 +32,7 @@ namespace List_Everything
 			listHeight = listRect.height;
 
 			GUI.color = Color.grey;
-			Widgets.DrawLineVertical(filterRect.width+2, 0, filterRect.height);
+			Widgets.DrawLineVertical(listRect.x-1, 0, listRect.height);
 			GUI.color = Color.white;
 
 			DoFilter(filterRect);
@@ -69,30 +69,56 @@ namespace List_Everything
 
 		//bool? filterForbidden;
 
+		bool showBase;
+		[StaticConstructorOnStartup]
+		static class TexButtonNotInternalForReal
+		{
+			public static readonly Texture2D Reveal = ContentFinder<Texture2D>.Get("UI/Buttons/Dev/Reveal", true);
+			public static readonly Texture2D Collapse = ContentFinder<Texture2D>.Get("UI/Buttons/Dev/Collapse", true);
+		}
 		public void DoFilter(Rect rect)
 		{
+			Text.Font = GameFont.Medium;
+			Rect headerRect = rect.TopPartPixels(Text.LineHeight);
+			Rect filterRect = rect.BottomPartPixels(rect.height - Text.LineHeight);
+
+			//Header
+			Rect switchRect = headerRect.LeftPartPixels(Text.LineHeight);
+			Rect labelRect = headerRect.RightPartPixels(headerRect.width - Text.LineHeight);
+			Texture2D tex = showBase ? TexButtonNotInternalForReal.Collapse : TexButtonNotInternalForReal.Reveal;
+			if (Widgets.ButtonImage(switchRect, tex))
+				showBase = !showBase;
+			Widgets.Label(labelRect, "Category");
+
 			Listing_Standard listing = new Listing_Standard();
-			listing.Begin(rect);
-			listing.CheckboxLabeled("Thing by name", ref listByName);
-			if (listByName)
+			listing.Begin(filterRect);
+
+			//List base
+			if (showBase)
 			{
-				string newStr = listing.TextEntry(listByNameStr);
-				if (newStr != listByNameStr)
+				listing.CheckboxLabeled("Thing by name", ref listByName);
+				if (listByName)
 				{
-					listByNameStr = newStr;
-					allThingsByName = Find.CurrentMap.listerThings.AllThings.FindAll(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
+					string newStr = listing.TextEntry(listByNameStr);
+					if (newStr != listByNameStr)
+					{
+						listByNameStr = newStr;
+						allThingsByName = Find.CurrentMap.listerThings.AllThings.FindAll(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
+					}
 				}
+				else
+				{
+					listByNameStr = "";
+					allThingsByName = null;
+				}
+				listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
+				listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
+				listing.CheckboxLabeled("Things Needing Hauling", ref listHaulable);
+				listing.CheckboxLabeled("Stacks Needing Merging", ref listMergable);
+				listing.CheckboxLabeled("Filth in Home Area", ref listFilth);
 			}
-			else
-			{
-				listByNameStr = "";
-				allThingsByName = null;
-			}
-			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
-			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
-			listing.CheckboxLabeled("Things Needing Hauling", ref listHaulable);
-			listing.CheckboxLabeled("Stacks Needing Merging", ref listMergable);
-			listing.CheckboxLabeled("Filth in Home Area", ref listFilth);
+
+			//Filters
 			//listing.GapLine();
 			//listing.CheckboxLabeledSelectable("Forbidden", ref listFilth);
 
