@@ -57,13 +57,11 @@ namespace List_Everything
 			Mergables,
 			Filth
 		};
-		BaseListType[] debugOnlyTypes = { BaseListType.ThingRequestGroup };
+		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Name, BaseListType.Buildings };
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
 		string listByNameStr = "";
-		//TODO: list all by def, group
-		//TODO: building of class, by def
 
 
 		List<Thing> baseList;
@@ -180,7 +178,7 @@ namespace List_Everything
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Enum.GetValues(typeof(BaseListType)))
 				{
-					if(Prefs.DevMode || !debugOnlyTypes.Contains(type))
+					if(Prefs.DevMode || normalTypes.Contains(type))
 						types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
 				}
 
