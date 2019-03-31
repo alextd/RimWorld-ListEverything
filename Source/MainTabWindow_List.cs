@@ -51,7 +51,10 @@ namespace List_Everything
 		{
 			All,
 			Name,
-			Buildings
+			Buildings,
+			Haulables,
+			Mergables,
+			Filth
 		};
 		BaseListType baseType = BaseListType.All;
 
@@ -75,20 +78,16 @@ namespace List_Everything
 				case BaseListType.Buildings:
 					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
 					break;
+				case BaseListType.Haulables:
+					allThings = Find.CurrentMap.listerHaulables.ThingsPotentiallyNeedingHauling();
+					break;
+				case BaseListType.Mergables:
+					allThings = Find.CurrentMap.listerMergeables.ThingsPotentiallyNeedingMerging();
+					break;
+				case BaseListType.Filth:
+					allThings = Find.CurrentMap.listerFilthInHomeArea.FilthInHomeArea;
+					break;
 			}
-			/*
-			IEnumerable<Thing> allThings = listByNameStr != "" ? allThingsByName.Where(t => t.Spawned) : Enumerable.Empty<Thing>();
-			if (listAllBuildings)
-				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
-			if (listRepairable)
-				allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
-			if (listHaulable)
-				allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
-			if (listMergable)
-				allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
-			if (listFilth)
-				allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
-			*/
 
 			//Sort
 			baseList = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
@@ -99,9 +98,15 @@ namespace List_Everything
 			switch (baseType)
 			{
 				case BaseListType.Name:
-					return $"\"{listByNameStr}\"";
+					return $"Name: \"{listByNameStr}\"";
+				case BaseListType.Haulables:
+					return "Things to be hauled";
+				case BaseListType.Mergables:
+					return "Stacks to be merged";
+				case BaseListType.Filth:
+					return "Filth in home area";
 			}
-			return "";
+			return baseType.ToString();
 		}
 
 		//Filters:
@@ -130,7 +135,7 @@ namespace List_Everything
 			if (Widgets.ButtonImage(switchRect, tex))
 				showBase = !showBase;
 
-			Widgets.Label(labelRect, $"Category: {baseType} {BaseTypeDesc()}");
+			Widgets.Label(labelRect, $"Category: {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
