@@ -162,7 +162,7 @@ namespace List_Everything
 						if (Event.current.alt)
 							Find.MainTabsRoot.EscapeCurrentTab(false);
 					}
-					else if (Event.current.clickCount == 2)
+					else if (Event.current.clickCount == 2 && Event.current.button == 0)
 					{
 						selectAllDef = thing.def;
 					}
@@ -194,7 +194,7 @@ namespace List_Everything
 						if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
 						{
 							Find.Selector.ClearSelection();
-							Find.Selector.Select(thing);
+							CameraJumper.TryJumpAndSelect(thing);
 							dragSelect = true;
 						}
 					}
