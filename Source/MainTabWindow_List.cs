@@ -137,6 +137,7 @@ namespace List_Everything
 
 		//Filters:
 		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName(), new ListFilterForbidden() };
+		static List<Type> filterTypes = new List<Type>(typeof(ListFilter).AllLeafSubclasses());
 
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal
@@ -186,6 +187,17 @@ namespace List_Everything
 			foreach(ListFilter filter in filters)
 				if(filter.Listing(listing))
 					RemakeList();
+
+			if(listing.ButtonText("Add Filter"))
+			{
+				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
+				foreach (Type type in filterTypes)
+					filterClasses.Add(new FloatMenuOption(type.ToString(), () => filters.Add((ListFilter)Activator.CreateInstance(type))));
+
+				FloatMenu floatMenu = new FloatMenu(filterClasses) { onCloseCallback = RemakeList };
+				floatMenu.vanishIfMouseDistant = true;
+				Find.WindowStack.Add(floatMenu);
+			}
 
 			listing.End();
 		}
