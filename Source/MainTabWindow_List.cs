@@ -109,10 +109,9 @@ namespace List_Everything
 				allThings = allThings.Where(t => !t.Fogged());
 
 			//Sort
-			List<Thing> list = allThings.ToList();
-			list.SortBy(t => t.def.shortHash);
+			var sorted = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000);
 
-			foreach (Thing thing in list)
+			foreach (Thing thing in sorted)
 				DrawThingRow(thing, ref totalHeight, viewRect);
 
 			if (Event.current.type == EventType.Layout)
@@ -120,7 +119,7 @@ namespace List_Everything
 
 			if(selectAllDef != null)
 			{
-				foreach(Thing t in list)
+				foreach(Thing t in sorted)
 				{
 					if (t.def == selectAllDef)
 						Find.Selector.Select(t, false);
