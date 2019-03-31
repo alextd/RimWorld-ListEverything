@@ -236,16 +236,26 @@ namespace List_Everything
 			//Label
 			Widgets.Label(rect, thing.LabelCap);
 
-
+			ThingDef def = thing.def.entityDefToBuild as ThingDef ?? thing.def;
 			//Icon
 			if (thing is Frame frame)
 			{
-				Rect iconRect = rect.RightPartPixels(32 * (frame.def.entityDefToBuild?.graphic?.drawSize.x / frame.def.entityDefToBuild?.graphic?.drawSize.y ?? 1f));
-				Widgets.ThingIcon(iconRect, frame.def.entityDefToBuild as ThingDef);
+				Rect iconRect = rect.RightPartPixels(32 * (def?.graphic?.drawSize.x / def?.graphic?.drawSize.y ?? 1f));
+				Widgets.ThingIcon(iconRect, def);
+			}
+			else if (def.graphic is Graphic_Linked && def.uiIconPath.NullOrEmpty())
+			{
+				Rect iconRect = rect.RightPartPixels(32 * (def.graphicData?.drawSize.x / def.graphicData?.drawSize.y ?? 1));
+
+				Material iconMat = def.graphic.MatSingle;
+				Rect texCoords = new Rect(iconMat.mainTextureOffset, iconMat.mainTextureScale);
+				GUI.color = thing.DrawColor;
+				Widgets.DrawTextureFitted(iconRect, def.uiIcon, 1f, Vector2.one, texCoords);
+				GUI.color = Color.white;
 			}
 			else
 			{
-				Rect iconRect = rect.RightPartPixels(32 * (thing.def.graphicData?.drawSize.x / thing.def.graphicData?.drawSize.y ?? 1));
+				Rect iconRect = rect.RightPartPixels(32 * (def.graphicData?.drawSize.x / def.graphicData?.drawSize.y ?? 1));
 				Widgets.ThingIcon(iconRect, thing);
 			}
 		}
