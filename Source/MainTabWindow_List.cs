@@ -85,6 +85,9 @@ namespace List_Everything
 				dragSelect = false;
 				dragDeselect = false;
 			}
+			if (!Input.GetMouseButton(1))
+				dragJump = false;
+
 			selectAllDef = null;
 
 			Map map = Find.CurrentMap;
@@ -131,6 +134,7 @@ namespace List_Everything
 
 		bool dragSelect = false;
 		bool dragDeselect = false;
+		bool dragJump = false;
 		ThingDef selectAllDef;
 		private void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
 		{
@@ -189,15 +193,15 @@ namespace List_Everything
 					}
 					else
 					{
-						if (Find.Selector.IsSelected(thing))
+						if (Event.current.button == 1)
+						{
+							CameraJumper.TryJump(thing);
+							dragJump = true;
+						}
+						else if (Find.Selector.IsSelected(thing))
 						{
 							CameraJumper.TryJump(thing);
 							dragSelect = true;
-						}
-						else if (Event.current.button == 1)
-						{
-							Find.Selector.ClearSelection();
-							CameraJumper.TryJumpAndSelect(thing);
 						}
 						else
 						{
@@ -210,6 +214,8 @@ namespace List_Everything
 				if (Event.current.type == EventType.mouseDrag)
 				{
 					if (!thing.def.selectable)
+						CameraJumper.TryJump(thing);
+					else if (dragJump)
 						CameraJumper.TryJump(thing);
 					else if (dragSelect)
 						Find.Selector.Select(thing, false);
