@@ -38,7 +38,7 @@ namespace List_Everything
 			listHeight = listRect.height;
 
 			GUI.color = Color.grey;
-			Widgets.DrawLineVertical(listRect.x-1, 0, listRect.height);
+			Widgets.DrawLineVertical(listRect.x-3, 0, listRect.height);
 			GUI.color = Color.white;
 
 			DoFilter(filterRect);
