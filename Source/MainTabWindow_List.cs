@@ -50,6 +50,7 @@ namespace List_Everything
 		enum BaseListType
 		{
 			All,
+			Group,
 			Name,
 			Buildings,
 			Haulables,
@@ -58,6 +59,7 @@ namespace List_Everything
 		};
 		BaseListType baseType = BaseListType.All;
 
+		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
 		string listByNameStr = "";
 		//TODO: list all by def, group
 		//TODO: building of class, by def
@@ -71,6 +73,9 @@ namespace List_Everything
 			{
 				case BaseListType.All:
 					allThings = Find.CurrentMap.listerThings.AllThings;
+					break;
+				case BaseListType.Group:
+					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
 					break;
 				case BaseListType.Name:
 					allThings = Find.CurrentMap.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
@@ -97,8 +102,12 @@ namespace List_Everything
 		{
 			switch (baseType)
 			{
+				case BaseListType.Group:
+					return $"Group: \"{listGroup}\"";
 				case BaseListType.Name:
 					return $"Name: \"{listByNameStr}\"";
+				case BaseListType.Buildings:
+					return "Colonist buildings";
 				case BaseListType.Haulables:
 					return "Things to be hauled";
 				case BaseListType.Mergables:
@@ -107,6 +116,34 @@ namespace List_Everything
 					return "Filth in home area";
 			}
 			return baseType.ToString();
+		}
+
+		public void DoListingBase(Listing_Standard listing)
+		{
+			switch (baseType)
+			{
+				case BaseListType.Group:
+					if (listing.ButtonTextLabeled("Group:", listGroup.ToString()))
+					{
+						List<FloatMenuOption> groups = new List<FloatMenuOption>();
+						foreach (ThingRequestGroup type in Enum.GetValues(typeof(ThingRequestGroup)))
+							groups.Add(new FloatMenuOption(type.ToString(), () => listGroup = type));
+
+						FloatMenu floatMenu = new FloatMenu(groups) { onCloseCallback = () => RemakeBaseList() };
+						floatMenu.vanishIfMouseDistant = true;
+						Find.WindowStack.Add(floatMenu);
+					}
+					break;
+				case BaseListType.Name:
+					GUI.SetNextControlName("BaseListTypeOptions");
+					string newStr = listing.TextEntry(listByNameStr);
+					if (newStr != listByNameStr)
+					{
+						listByNameStr = newStr;
+						RemakeBaseList();
+					}
+					break;
+			}
 		}
 
 		//Filters:
@@ -163,20 +200,7 @@ namespace List_Everything
 
 			//List base
 			if (showBase)
-			{
-				switch (baseType)
-				{
-					case BaseListType.Name:
-						GUI.SetNextControlName("BaseListTypeOptions");
-						string newStr = listing.TextEntry(listByNameStr);
-						if (newStr != listByNameStr)
-						{
-							listByNameStr = newStr;
-							RemakeBaseList();
-						}
-						break;
-				}
-			}
+				DoListingBase(listing);
 
 			//Filters
 			//listing.GapLine();
