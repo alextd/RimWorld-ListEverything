@@ -21,7 +21,7 @@ namespace List_Everything
 		public override void PreOpen()
 		{
 			base.PreOpen();
-			RemakeBaseList();
+			RemakeList();
 		}
 
 		private Vector2 scrollPosition = Vector2.zero;
@@ -51,21 +51,19 @@ namespace List_Everything
 		{
 			All,
 			ThingRequestGroup,
-			Name,
 			Buildings,
 			Haulables,
 			Mergables,
 			Filth
 		};
-		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Name, BaseListType.Buildings };
+		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Buildings };
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
-		string listByNameStr = "";
 
 
-		List<Thing> baseList;
-		public void RemakeBaseList()
+		List<Thing> listedThings;
+		public void RemakeList()
 		{
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch(baseType)
@@ -75,10 +73,6 @@ namespace List_Everything
 					break;
 				case BaseListType.ThingRequestGroup:
 					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
-					break;
-				case BaseListType.Name:
-					if(listByNameStr.Length > 1)
-						allThings = Find.CurrentMap.listerThings.AllThings.Where(t => t.Label.ToLower().Contains(listByNameStr.ToLower()));
 					break;
 				case BaseListType.Buildings:
 					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
@@ -94,8 +88,14 @@ namespace List_Everything
 					break;
 			}
 
+			//Filters
+			if (!DebugSettings.godMode)
+				allThings = allThings.Where(t => !t.Fogged());
+			if (filterName.Length > 1)
+				allThings = allThings.Where(t => t.Label.ToLower().Contains(filterName.ToLower()));
+
 			//Sort
-			baseList = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
+			listedThings = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
 		}
 
 		public string BaseTypeDesc()
@@ -104,8 +104,6 @@ namespace List_Everything
 			{
 				case BaseListType.ThingRequestGroup:
 					return $"Group: \"{listGroup}\"";
-				case BaseListType.Name:
-					return $"Name: \"{listByNameStr}\"";
 				case BaseListType.Buildings:
 					return "Colonist buildings";
 				case BaseListType.Haulables:
@@ -129,18 +127,9 @@ namespace List_Everything
 						foreach (ThingRequestGroup type in Enum.GetValues(typeof(ThingRequestGroup)))
 							groups.Add(new FloatMenuOption(type.ToString(), () => listGroup = type));
 
-						FloatMenu floatMenu = new FloatMenu(groups) { onCloseCallback = () => RemakeBaseList() };
+						FloatMenu floatMenu = new FloatMenu(groups) { onCloseCallback = RemakeList };
 						floatMenu.vanishIfMouseDistant = true;
 						Find.WindowStack.Add(floatMenu);
-					}
-					break;
-				case BaseListType.Name:
-					GUI.SetNextControlName("BaseListTypeOptions");
-					string newStr = listing.TextEntry(listByNameStr);
-					if (newStr != listByNameStr)
-					{
-						listByNameStr = newStr;
-						RemakeBaseList();
 					}
 					break;
 			}
@@ -148,10 +137,8 @@ namespace List_Everything
 
 		//Filters:
 
-		//bool? filterForbidden;
+		string filterName = "";
 
-		bool showBase;
-		bool focusOptions;
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal
 		{
@@ -165,16 +152,11 @@ namespace List_Everything
 			Rect filterRect = rect.BottomPartPixels(rect.height - Text.LineHeight);
 
 			//Header
-			Rect switchRect = headerRect.LeftPartPixels(Text.LineHeight);
 			Rect refreshRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
-			Rect labelRect = new Rect(headerRect.x + Text.LineHeight, headerRect.y, headerRect.width - 2 * Text.LineHeight, headerRect.height);
-
-			Texture2D tex = showBase ? TexButtonNotInternalForReal.Collapse : TexButtonNotInternalForReal.Reveal;
-			if (Widgets.ButtonImage(switchRect, tex))
-				showBase = !showBase;
+			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
 
 			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
-				RemakeBaseList();
+				RemakeList();
 
 			TooltipHandler.TipRegion(refreshRect, "Lists are saved when category is chosen - new items aren't added until refreshed");
 
@@ -189,15 +171,7 @@ namespace List_Everything
 						types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
 				}
 
-				FloatMenu floatMenu = new FloatMenu(types)
-				{
-					onCloseCallback = delegate
-					{
-						RemakeBaseList();
-						showBase = true;
-						focusOptions = true;
-					}
-				};
+				FloatMenu floatMenu = new FloatMenu(types) { onCloseCallback = RemakeList };
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
 			}
@@ -206,20 +180,18 @@ namespace List_Everything
 			listing.Begin(filterRect);
 
 			//List base
-			if (showBase)
-				DoListingBase(listing);
+			DoListingBase(listing);
 
 			//Filters
-			//listing.GapLine();
-			//listing.CheckboxLabeledSelectable("Forbidden", ref listFilth);
+			listing.GapLine();
+			string newStr = listing.TextEntry(filterName);
+			if (newStr != filterName)
+			{
+				filterName = newStr;
+				RemakeList();
+			}
 
 			listing.End();
-
-			if (focusOptions)
-			{
-				UI.FocusControl("BaseListTypeOptions", this);
-				focusOptions = false;
-			}
 		}
 		public void DoList(Rect listRect)
 		{
@@ -235,14 +207,7 @@ namespace List_Everything
 			selectAllDef = null;
 
 			Map map = Find.CurrentMap;
-
-			//Base lists
-			IEnumerable<Thing> listedThings = baseList;
-
-			//Filters
-			//if (!DebugSettings.godMode)
-			//	listedThings = listedThings.Where(t => !t.Fogged());
-
+			
 			//Draw Scrolling List:
 			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
