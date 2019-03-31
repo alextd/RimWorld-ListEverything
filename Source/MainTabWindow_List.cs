@@ -50,13 +50,14 @@ namespace List_Everything
 		enum BaseListType
 		{
 			All,
-			Group,
+			ThingRequestGroup,
 			Name,
 			Buildings,
 			Haulables,
 			Mergables,
 			Filth
 		};
+		BaseListType[] debugOnlyTypes = { BaseListType.ThingRequestGroup };
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
@@ -74,7 +75,7 @@ namespace List_Everything
 				case BaseListType.All:
 					allThings = Find.CurrentMap.listerThings.AllThings;
 					break;
-				case BaseListType.Group:
+				case BaseListType.ThingRequestGroup:
 					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
 					break;
 				case BaseListType.Name:
@@ -102,7 +103,7 @@ namespace List_Everything
 		{
 			switch (baseType)
 			{
-				case BaseListType.Group:
+				case BaseListType.ThingRequestGroup:
 					return $"Group: \"{listGroup}\"";
 				case BaseListType.Name:
 					return $"Name: \"{listByNameStr}\"";
@@ -122,7 +123,7 @@ namespace List_Everything
 		{
 			switch (baseType)
 			{
-				case BaseListType.Group:
+				case BaseListType.ThingRequestGroup:
 					if (listing.ButtonTextLabeled("Group:", listGroup.ToString()))
 					{
 						List<FloatMenuOption> groups = new List<FloatMenuOption>();
@@ -179,7 +180,8 @@ namespace List_Everything
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Enum.GetValues(typeof(BaseListType)))
 				{
-					types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
+					if(Prefs.DevMode || !debugOnlyTypes.Contains(type))
+						types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
 				}
 
 				FloatMenu floatMenu = new FloatMenu(types)
