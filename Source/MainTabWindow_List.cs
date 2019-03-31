@@ -164,7 +164,7 @@ namespace List_Everything
 					}
 				}
 				if (Event.current.type == EventType.mouseDrag && dragSelect)
-					Find.Selector.Select(thing);
+					Find.Selector.Select(thing, false);
 			}
 		}
 	}
