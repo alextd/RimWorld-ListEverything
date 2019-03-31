@@ -80,25 +80,34 @@ namespace List_Everything
 				dragSelect = false;
 				dragDeselect = false;
 			}
+			selectAllDef = null;
 
 			Map map = Find.CurrentMap;
 
-			IEnumerable<Thing> list = Enumerable.Empty<Thing>();
+			//Base lists
+			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			if(listAllThings)
-				list = list.Concat(map.listerThings.AllThings);
+				allThings = allThings.Concat(map.listerThings.AllThings);
 			else
 			{
 				if (listAllBuildings)
-					list = list.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
+					allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
 				if (listRepairable)
-					list = list.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
+					allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
 				if (listHaulable)
-					list = list.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
+					allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
 				if (listMergable)
-					list = list.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
+					allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
 				if (listFilth)
-					list = list.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
+					allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
 			}
+
+			//Filters
+
+			//Sort
+			List<Thing> list = allThings.ToList();
+			list.SortBy(t => t.def.shortHash);
+
 			foreach (Thing thing in list)
 			{
 				if (!thing.Fogged() || DebugSettings.godMode)
@@ -109,11 +118,22 @@ namespace List_Everything
 
 			if (Event.current.type == EventType.Layout)
 				scrollViewHeight = totalHeight;
+
+			if(selectAllDef != null)
+			{
+				foreach(Thing t in list)
+				{
+					if (t.def == selectAllDef)
+						Find.Selector.Select(t, false);
+				}
+			}
+
 			Widgets.EndScrollView();
 		}
 
 		bool dragSelect = false;
 		bool dragDeselect = false;
+		ThingDef selectAllDef;
 		private void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
 		{
 			Rect rect = new Rect(fillRect.x, rowY, fillRect.width, 32);
@@ -141,6 +161,10 @@ namespace List_Everything
 			{
 				if (Event.current.type == EventType.mouseDown)
 				{
+					if (Event.current.clickCount == 2)
+					{
+						selectAllDef = thing.def;
+					}
 					if (!thing.def.selectable)
 					{
 						CameraJumper.TryJump(thing);
