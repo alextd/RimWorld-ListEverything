@@ -25,11 +25,11 @@ namespace List_Everything
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
-			Rect filterRect = fillRect.LeftPart(0.6f);
-			Rect listRect = fillRect.RightPart(0.39f);
+			Rect filterRect = fillRect.LeftPart(0.50f);
+			Rect listRect = fillRect.RightPart(0.49f);
 
 			GUI.color = Color.grey;
-			Widgets.DrawLineVertical(filterRect.width, 0, filterRect.height);
+			Widgets.DrawLineVertical(filterRect.width+2, 0, filterRect.height);
 			GUI.color = Color.white;
 
 			DoFilter(filterRect);
