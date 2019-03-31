@@ -75,7 +75,11 @@ namespace List_Everything
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			float totalHeight = 0f;
 
-			if (!Input.GetMouseButton(0)) dragSelect = false;
+			if (!Input.GetMouseButton(0))
+			{
+				dragSelect = false;
+				dragDeselect = false;
+			}
 
 			Map map = Find.CurrentMap;
 
@@ -109,6 +113,7 @@ namespace List_Everything
 		}
 
 		bool dragSelect = false;
+		bool dragDeselect = false;
 		private void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
 		{
 			Rect rect = new Rect(fillRect.x, rowY, fillRect.width, 32);
@@ -139,7 +144,10 @@ namespace List_Everything
 					if (Event.current.shift)
 					{
 						if (Find.Selector.IsSelected(thing))
+						{
+							dragDeselect = true;
 							Find.Selector.Deselect(thing);
+						}
 						else
 						{
 							dragSelect = true;
@@ -154,7 +162,10 @@ namespace List_Everything
 					else
 					{
 						if (Find.Selector.IsSelected(thing))
+						{
 							CameraJumper.TryJump(thing);
+							dragSelect = true;
+						}
 						if (!Find.Selector.IsSelected(thing) || Find.Selector.NumSelected > 1 && Event.current.button == 1)
 						{
 							Find.Selector.ClearSelection();
@@ -163,8 +174,13 @@ namespace List_Everything
 						}
 					}
 				}
-				if (Event.current.type == EventType.mouseDrag && dragSelect)
-					Find.Selector.Select(thing, false);
+				if (Event.current.type == EventType.mouseDrag)
+				{
+					if (dragSelect)
+						Find.Selector.Select(thing, false);
+					else if (dragDeselect)
+						Find.Selector.Deselect(thing);
+				}
 			}
 		}
 	}
