@@ -54,4 +54,26 @@ namespace List_Everything
 			return false;
 		}
 	}
+
+	class ListFilterDesignation : ListFilter
+	{
+		bool show;
+		public override IEnumerable<Thing> Apply(IEnumerable<Thing> list)
+		{
+			var des = Find.CurrentMap.designationManager;
+			return list.Where(t => show == 
+			(des.AllDesignationsOn(t).Count() > 0 || 
+			des.AllDesignationsAt(t.Position).Count() > 0));
+		}
+
+		public override bool Listing(Listing_Standard listing)
+		{
+			if (listing.ButtonTextLabeled(show ? "Showing designated items" : "Showing undesignated items", "Swap"))
+			{
+				show = !show;
+				return true;
+			}
+			return false;
+		}
+	}
 }
