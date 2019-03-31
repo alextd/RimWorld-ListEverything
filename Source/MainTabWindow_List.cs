@@ -37,7 +37,7 @@ namespace List_Everything
 		}
 
 		//public ListerThings listerThings;
-		bool listAllThings;
+		string listByDef = "";
 		//TODO: by def, group
 
 		//public ListerBuildings listerBuildings;
@@ -60,7 +60,8 @@ namespace List_Everything
 		{
 			Listing_Standard listing = new Listing_Standard();
 			listing.Begin(rect);
-			listing.CheckboxLabeled("All things", ref listAllThings);
+			listing.Label("Thing by name:");
+			listByDef = listing.TextEntry(listByDef);
 			listing.CheckboxLabeled("All Buildings", ref listAllBuildings);
 			listing.CheckboxLabeled("Repairable Buildings", ref listRepairable);
 			listing.CheckboxLabeled("Haulable things", ref listHaulable);
@@ -86,21 +87,18 @@ namespace List_Everything
 
 			//Base lists
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			if(listAllThings)
-				allThings = allThings.Concat(map.listerThings.AllThings);
-			else
-			{
-				if (listAllBuildings)
-					allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
-				if (listRepairable)
-					allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
-				if (listHaulable)
-					allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
-				if (listMergable)
-					allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
-				if (listFilth)
-					allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
-			}
+			if (listByDef != "")
+				allThings = allThings.Concat(map.listerThings.AllThings.Where(t => t.Label.Contains(listByDef)));
+			if (listAllBuildings)
+				allThings = allThings.Concat(map.listerBuildings.allBuildingsColonist.Cast<Thing>());
+			if (listRepairable)
+				allThings = allThings.Concat(map.listerBuildingsRepairable.RepairableBuildings(Faction.OfPlayer));
+			if (listHaulable)
+				allThings = allThings.Concat(map.listerHaulables.ThingsPotentiallyNeedingHauling());
+			if (listMergable)
+				allThings = allThings.Concat(map.listerMergeables.ThingsPotentiallyNeedingMerging());
+			if (listFilth)
+				allThings = allThings.Concat(map.listerFilthInHomeArea.FilthInHomeArea);
 
 			//Filters
 			if (!DebugSettings.godMode)
