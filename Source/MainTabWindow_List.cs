@@ -238,8 +238,16 @@ namespace List_Everything
 
 
 			//Icon
-			Rect iconRect = rect.RightPartPixels(32 * (thing.def.graphicData?.drawSize.x / thing.def.graphicData?.drawSize.y ?? 1));
-			Widgets.ThingIcon(iconRect, thing);
+			if (thing is Frame frame)
+			{
+				Rect iconRect = rect.RightPartPixels(32 * (frame.def.entityDefToBuild?.graphic?.drawSize.x / frame.def.entityDefToBuild?.graphic?.drawSize.y ?? 1f));
+				Widgets.ThingIcon(iconRect, frame.def.entityDefToBuild as ThingDef);
+			}
+			else
+			{
+				Rect iconRect = rect.RightPartPixels(32 * (thing.def.graphicData?.drawSize.x / thing.def.graphicData?.drawSize.y ?? 1));
+				Widgets.ThingIcon(iconRect, thing);
+			}
 		}
 	}
 }
