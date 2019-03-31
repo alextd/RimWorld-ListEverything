@@ -103,18 +103,15 @@ namespace List_Everything
 			}
 
 			//Filters
+			if (!DebugSettings.godMode)
+				allThings = allThings.Where(t => !t.Fogged());
 
 			//Sort
 			List<Thing> list = allThings.ToList();
 			list.SortBy(t => t.def.shortHash);
 
 			foreach (Thing thing in list)
-			{
-				if (!thing.Fogged() || DebugSettings.godMode)
-				{
-					 DrawThingRow(thing, ref totalHeight, viewRect);
-				}
-			}
+				DrawThingRow(thing, ref totalHeight, viewRect);
 
 			if (Event.current.type == EventType.Layout)
 				scrollViewHeight = totalHeight;
