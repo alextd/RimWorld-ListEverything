@@ -237,16 +237,14 @@ namespace List_Everything
 			Widgets.Label(rect, thing.LabelCap);
 
 			ThingDef def = thing.def.entityDefToBuild as ThingDef ?? thing.def;
+			Rect iconRect = rect.RightPartPixels(32 * (def.graphicData?.drawSize.x / def.graphicData?.drawSize.y ?? 1f));
 			//Icon
 			if (thing is Frame frame)
 			{
-				Rect iconRect = rect.RightPartPixels(32 * (def?.graphic?.drawSize.x / def?.graphic?.drawSize.y ?? 1f));
 				Widgets.ThingIcon(iconRect, def);
 			}
 			else if (def.graphic is Graphic_Linked && def.uiIconPath.NullOrEmpty())
 			{
-				Rect iconRect = rect.RightPartPixels(32 * (def.graphicData?.drawSize.x / def.graphicData?.drawSize.y ?? 1));
-
 				Material iconMat = def.graphic.MatSingle;
 				Rect texCoords = new Rect(iconMat.mainTextureOffset, iconMat.mainTextureScale);
 				GUI.color = thing.DrawColor;
@@ -255,7 +253,6 @@ namespace List_Everything
 			}
 			else
 			{
-				Rect iconRect = rect.RightPartPixels(32 * (def.graphicData?.drawSize.x / def.graphicData?.drawSize.y ?? 1));
 				Widgets.ThingIcon(iconRect, thing);
 			}
 		}
