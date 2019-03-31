@@ -141,7 +141,13 @@ namespace List_Everything
 			{
 				if (Event.current.type == EventType.mouseDown)
 				{
-					if (Event.current.shift)
+					if (!thing.def.selectable)
+					{
+						CameraJumper.TryJump(thing);
+						if (Event.current.alt)
+							Find.MainTabsRoot.EscapeCurrentTab(false);
+					}
+					else if (Event.current.shift)
 					{
 						if (Find.Selector.IsSelected(thing))
 						{
@@ -176,7 +182,9 @@ namespace List_Everything
 				}
 				if (Event.current.type == EventType.mouseDrag)
 				{
-					if (dragSelect)
+					if (!thing.def.selectable)
+						CameraJumper.TryJump(thing);
+					else if (dragSelect)
 						Find.Selector.Select(thing, false);
 					else if (dragDeselect)
 						Find.Selector.Deselect(thing);
