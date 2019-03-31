@@ -22,11 +22,14 @@ namespace List_Everything
 
 		private float scrollViewHeight;
 
+		private float listHeight;
+
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
 			Rect filterRect = fillRect.LeftPart(0.50f);
 			Rect listRect = fillRect.RightPart(0.49f);
+			listHeight = listRect.height;
 
 			GUI.color = Color.grey;
 			Widgets.DrawLineVertical(filterRect.width+2, 0, filterRect.height);
@@ -97,10 +100,7 @@ namespace List_Everything
 		}
 		public void DoList(Rect listRect)
 		{
-			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
-			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
-			float totalHeight = 0f;
-
+			//Handle mouse selection
 			if (!Input.GetMouseButton(0))
 			{
 				dragSelect = false;
@@ -133,12 +133,27 @@ namespace List_Everything
 			//Sort
 			var sorted = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000);
 
+			//Draw Scrolling List:
+			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
+			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
+			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
+
 			foreach (Thing thing in sorted)
-				DrawThingRow(thing, ref totalHeight, viewRect);
+			{
+				//Be smart about drawing only what's shown.
+				if (thingRect.y + 32 >= scrollPosition.y)
+					DrawThingRow(thing, ref thingRect);
+
+				thingRect.y += 34;
+
+				if (thingRect.y > scrollPosition.y + listHeight)
+					break;
+			}
 
 			if (Event.current.type == EventType.Layout)
-				scrollViewHeight = totalHeight;
+				scrollViewHeight = sorted.Count() * 34f;
 
+			//Select all for double-click
 			if(selectAllDef != null)
 			{
 				foreach(Thing t in sorted)
@@ -155,11 +170,8 @@ namespace List_Everything
 		bool dragDeselect = false;
 		bool dragJump = false;
 		ThingDef selectAllDef;
-		private void DrawThingRow(Thing thing, ref float rowY, Rect fillRect)
+		private void DrawThingRow(Thing thing, ref Rect rect)
 		{
-			Rect rect = new Rect(fillRect.x, rowY, fillRect.width, 32);
-			rowY += 34;
-
 			//Highlight selected
 			if (Find.Selector.IsSelected(thing))
 				Widgets.DrawHighlightSelected(rect);
