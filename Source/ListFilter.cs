@@ -179,4 +179,28 @@ namespace List_Everything
 			return false;
 		}
 	}
+
+	class ListFilterGrowth : ListFilter
+	{
+		FloatRange range = FloatRange.ZeroToOne;
+
+		public override bool Applies(Thing thing) =>
+			thing is Plant p && range.Includes(p.Growth);
+
+		public override bool PreFilter(Thing thing) =>
+			thing is Plant;
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			FloatRange newRange = range;
+			Widgets.FloatRange(rect.RightPart(0.5f), 85246, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			if (range != newRange)
+			{
+				range = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
 }
