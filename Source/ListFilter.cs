@@ -252,4 +252,16 @@ namespace List_Everything
 		public override string NameFor(object o) => (o as ThingCategoryDef).LabelCap;
 		public override void Callback(object o) => catDef = o as ThingCategoryDef;
 	}
+
+	class ListFilterMineable : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.mineable;
+	}
+
+	class ListFilterResourceRock: ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.building?.isResourceRock ?? false;
+	}
 }
