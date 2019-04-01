@@ -90,10 +90,15 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			string newStr = Widgets.TextField(rect, name);
+			string newStr = Widgets.TextField(rect.LeftPart(0.9f), name);
 			if (newStr != name)
 			{
 				name = newStr;
+				return true;
+			}
+			if(Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
+			{
+				name = "";
 				return true;
 			}
 			return false;
