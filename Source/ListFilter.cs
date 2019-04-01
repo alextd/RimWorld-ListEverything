@@ -90,6 +90,14 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
+			if (GUI.GetNameOfFocusedControl() == "LIST_FILTER_NAME_INPUT" && 
+				Mouse.IsOver(rect) && Event.current.type == EventType.mouseDown && Event.current.button == 1)
+			{
+				GUI.FocusControl("");
+				Event.current.Use();
+			}
+
+			GUI.SetNextControlName("LIST_FILTER_NAME_INPUT");
 			string newStr = Widgets.TextField(rect.LeftPart(0.9f), name);
 			if (newStr != name)
 			{
