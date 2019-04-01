@@ -36,9 +36,10 @@ namespace List_Everything
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return enabled ? list.Where(t => Applies(t) == include) : list;
+			return enabled ? list.Where(t => PreFilter(t) && Applies(t) == include) : list;
 		}
 		public abstract bool Applies(Thing list);
+		public virtual bool PreFilter(Thing thing) => true;
 
 		public bool Listing(Listing_Standard listing)
 		{
@@ -103,6 +104,9 @@ namespace List_Everything
 	{
 		public override bool Applies(Thing thing) =>
 			thing.IsForbidden(Faction.OfPlayer);
+
+		public override bool PreFilter(Thing thing) =>
+			thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 	}
 
 	class ListFilterDesignation : ListFilter
@@ -140,7 +144,10 @@ namespace List_Everything
 		RotStage stage = RotStage.Fresh;
 
 		public override bool Applies(Thing thing) =>
-			thing.TryGetComp<CompRottable>() is CompRottable comp && comp.Stage == stage;
+			thing.GetRotStage() == stage;
+
+		public override bool PreFilter(Thing thing) =>
+			thing.def.HasComp(typeof(CompRottable));
 
 		public override bool DrawOption(Rect rect)
 		{
