@@ -107,8 +107,31 @@ namespace List_Everything
 
 	class ListFilterDesignation : ListFilter
 	{
+		DesignationDef des;
+
 		public override bool Applies(Thing thing) =>
-			Find.CurrentMap.designationManager.AllDesignationsOn(thing).Count() > 0 ||
-			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0;
+			des != null ? 
+			(des.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, des) != null :
+			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, des) != null) :
+			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
+			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			if(Widgets.ButtonText(rect.RightPart(0.3f), des?.defName ?? "Any"))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				options.Add(new FloatMenuOption("Any", () => des = null));
+				foreach (DesignationDef def in DefDatabase<DesignationDef>.AllDefs)
+				{
+					options.Add(new FloatMenuOption(def.defName, () => des = def));
+				}
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+
+				return true;
+			}
+			return false;
+		}
 	}
 }

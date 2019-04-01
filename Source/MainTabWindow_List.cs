@@ -65,6 +65,8 @@ namespace List_Everything
 
 
 		List<Thing> listedThings;
+		public static void RemakeListPlease() =>
+			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
 		public void RemakeList()
 		{
 			Map map = Find.CurrentMap;
