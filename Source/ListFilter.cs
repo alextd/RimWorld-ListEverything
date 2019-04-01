@@ -37,10 +37,9 @@ namespace List_Everything
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return enabled ? list.Where(t => PreFilter(t) && Applies(t) == include) : list;
+			return enabled ? list.Where(t => Applies(t) == include) : list;
 		}
 		public abstract bool Applies(Thing list);
-		public virtual bool PreFilter(Thing thing) => true;
 
 		public bool Listing(Listing_Standard listing)
 		{
@@ -118,8 +117,11 @@ namespace List_Everything
 	{
 		public override bool Applies(Thing thing) =>
 			thing.IsForbidden(Faction.OfPlayer);
+	}
 
-		public override bool PreFilter(Thing thing) =>
+	class ListFilterForbiddable : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
 			thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 	}
 
@@ -176,12 +178,15 @@ namespace List_Everything
 		public override bool Applies(Thing thing) =>
 			thing.GetRotStage() == stage;
 
-		public override bool PreFilter(Thing thing) =>
-			thing.def.HasComp(typeof(CompRottable));
-
 		public override string GetLabel() => stage.ToString();
 		public override IEnumerable<object> Options() => Enum.GetValues(typeof(RotStage)).Cast<object>();
 		public override void Callback(object o) => stage = (RotStage)o;
+	}
+
+	class ListFilterRottable : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.HasComp(typeof(CompRottable));
 	}
 
 	class ListFilterGrowth : ListFilter
@@ -190,10 +195,6 @@ namespace List_Everything
 
 		public override bool Applies(Thing thing) =>
 			thing is Plant p && range.Includes(p.Growth);
-
-		public override bool PreFilter(Thing thing) =>
-			thing is Plant;
-
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
@@ -206,6 +207,12 @@ namespace List_Everything
 			}
 			return false;
 		}
+	}
+
+	class ListFilterPlant : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.category == ThingCategory.Plant;
 	}
 
 	class ListFilterClassType : ListFilterDropDown
@@ -227,14 +234,17 @@ namespace List_Everything
 
 		public override bool Applies(Thing thing) =>
 			thing.Faction == faction;
-
-		public override bool PreFilter(Thing thing) =>
-			thing.def.CanHaveFaction;
 		
 		public override string GetLabel() => faction?.Name ?? "None";
 		public override string NullOption() => "None";
 		public override IEnumerable<object> Options() => Find.FactionManager.AllFactionsVisibleInViewOrder.Cast<object>();
 		public override void Callback(object o) => faction = o as Faction;
+	}
+
+	class ListFilterCanFaction : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.CanHaveFaction;
 	}
 
 	class ListFilterCategory : ListFilterDropDown
@@ -243,14 +253,17 @@ namespace List_Everything
 
 		public override bool Applies(Thing thing) =>
 			thing.def.IsWithinCategory(catDef);
-
-		public override bool PreFilter(Thing thing) =>
-			thing.def.FirstThingCategory != null;
 		
 		public override string GetLabel() => catDef.LabelCap;
 		public override IEnumerable<object> Options() => DefDatabase<ThingCategoryDef>.AllDefsListForReading.Cast<object>();
 		public override string NameFor(object o) => (o as ThingCategoryDef).LabelCap;
 		public override void Callback(object o) => catDef = o as ThingCategoryDef;
+	}
+
+	class ListFilterCategorizable : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing.def.FirstThingCategory != null;
 	}
 
 	class ListFilterMineable : ListFilter
