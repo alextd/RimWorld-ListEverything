@@ -220,4 +220,20 @@ namespace List_Everything
 		public override IEnumerable<object> Options() => types;
 		public override void Callback(object o) => type = o as Type;
 	}
+
+	class ListFilterFaction : ListFilterDropDown
+	{
+		Faction faction = null;
+
+		public override bool Applies(Thing thing) =>
+			thing.Faction == faction;
+
+		public override bool PreFilter(Thing thing) =>
+			thing.def.CanHaveFaction;
+		
+		public override string GetLabel() => faction?.Name ?? "None";
+		public override string NullOption() => "None";
+		public override IEnumerable<object> Options() => Find.FactionManager.AllFactionsVisibleInViewOrder.Cast<object>();
+		public override void Callback(object o) => faction = o as Faction;
+	}
 }
