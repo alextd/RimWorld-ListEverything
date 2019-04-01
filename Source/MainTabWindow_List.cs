@@ -146,7 +146,7 @@ namespace List_Everything
 		}
 
 		//Filters:
-		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName(), new ListFilterForbidden() };
+		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
 		static List<Type> filterTypes = new List<Type>(typeof(ListFilter).AllLeafSubclasses());
 
 		[StaticConstructorOnStartup]
