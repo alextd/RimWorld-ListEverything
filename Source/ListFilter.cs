@@ -74,7 +74,7 @@ namespace List_Everything
 			listing.Gap(listing.verticalSpacing);
 			return changed;
 		}
-		
+
 		public virtual bool DrawOption(Rect rect)
 		{
 			Widgets.Label(rect, def.LabelCap);
@@ -90,7 +90,7 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			if (GUI.GetNameOfFocusedControl() == "LIST_FILTER_NAME_INPUT" && 
+			if (GUI.GetNameOfFocusedControl() == "LIST_FILTER_NAME_INPUT" &&
 				Mouse.IsOver(rect) && Event.current.type == EventType.mouseDown && Event.current.button == 1)
 			{
 				GUI.FocusControl("");
@@ -104,7 +104,7 @@ namespace List_Everything
 				name = newStr;
 				return true;
 			}
-			if(Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
+			if (Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
 			{
 				name = "";
 				return true;
@@ -122,7 +122,35 @@ namespace List_Everything
 			thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 	}
 
-	class ListFilterDesignation : ListFilter
+	abstract class ListFilterDropDown : ListFilter
+	{
+		public abstract string GetLabel();
+		public virtual string NullOption() => null;
+		public abstract IEnumerable<object> Options();
+		public virtual string NameFor(object o) => o.ToString();
+		public abstract void Callback(object o);
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			if (Widgets.ButtonText(rect.RightPart(0.3f), GetLabel()))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				if (NullOption() is string nullOption)
+					options.Add(new FloatMenuOption(nullOption, () => Callback(null)));
+				foreach (object o in Options())
+				{
+					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
+				}
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+
+				return true;
+			}
+			return false;
+		}
+	}
+
+	class ListFilterDesignation : ListFilterDropDown
 	{
 		DesignationDef des;
 
@@ -133,26 +161,14 @@ namespace List_Everything
 			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
-		public override bool DrawOption(Rect rect)
-		{
-			base.DrawOption(rect);
-			if(Widgets.ButtonText(rect.RightPart(0.3f), des?.defName ?? "Any"))
-			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				options.Add(new FloatMenuOption("Any", () => des = null));
-				foreach (DesignationDef desDef in DefDatabase<DesignationDef>.AllDefs)
-				{
-					options.Add(new FloatMenuOption(desDef.defName, () => des = desDef));
-				}
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
-
-				return true;
-			}
-			return false;
-		}
+		public override string GetLabel() => des?.defName ?? "Any";
+		public override string NullOption() => "Any";
+		public override IEnumerable<object> Options() => DefDatabase<DesignationDef>.AllDefs.Cast<object>();
+		public override string NameFor(object o) => (o as DesignationDef).defName;
+		public override void Callback(object o) => des = o as DesignationDef;
 	}
 
-	class ListFilterFreshness : ListFilter
+	class ListFilterFreshness : ListFilterDropDown
 	{
 		RotStage stage = RotStage.Fresh;
 
@@ -162,22 +178,9 @@ namespace List_Everything
 		public override bool PreFilter(Thing thing) =>
 			thing.def.HasComp(typeof(CompRottable));
 
-		public override bool DrawOption(Rect rect)
-		{
-			base.DrawOption(rect);
-			if (Widgets.ButtonText(rect.RightPart(0.3f), stage.ToString()))
-			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (RotStage s in Enum.GetValues(typeof(RotStage)))
-				{
-					options.Add(new FloatMenuOption(s.ToString(), () => stage = s));
-				}
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
-
-				return true;
-			}
-			return false;
-		}
+		public override string GetLabel() => stage.ToString();
+		public override IEnumerable<object> Options() => Enum.GetValues(typeof(RotStage)).Cast<object>();
+		public override void Callback(object o) => stage = (RotStage)o;
 	}
 
 	class ListFilterGrowth : ListFilter
