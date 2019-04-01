@@ -67,38 +67,39 @@ namespace List_Everything
 		List<Thing> listedThings;
 		public void RemakeList()
 		{
+			Map map = Find.CurrentMap;
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch(baseType)
 			{
 				case BaseListType.All:
-					allThings = Find.CurrentMap.spawnedThings;
+					allThings = ThingOwnerUtility.GetAllThingsRecursively(map);
 					break;
 				case BaseListType.ThingRequestGroup:
-					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
+					allThings = map.listerThings.ThingsInGroup(listGroup);
 					break;
 				case BaseListType.Buildings:
-					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					allThings = map.listerBuildings.allBuildingsColonist.Cast<Thing>();
 					break;
 				case BaseListType.Items:
-					allThings = Find.CurrentMap.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
+					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
 					break;
 				case BaseListType.People:
-					allThings = Find.CurrentMap.mapPawns.AllPawnsSpawned.Cast<Thing>();
+					allThings = map.mapPawns.AllPawnsSpawned.Cast<Thing>();
 					break;
 				case BaseListType.Haulables:
-					allThings = Find.CurrentMap.listerHaulables.ThingsPotentiallyNeedingHauling();
+					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
 					break;
 				case BaseListType.Mergables:
-					allThings = Find.CurrentMap.listerMergeables.ThingsPotentiallyNeedingMerging();
+					allThings = map.listerMergeables.ThingsPotentiallyNeedingMerging();
 					break;
 				case BaseListType.Filth:
-					allThings = Find.CurrentMap.listerFilthInHomeArea.FilthInHomeArea;
+					allThings = map.listerFilthInHomeArea.FilthInHomeArea;
 					break;
 			}
 
 			//Filters
 			if (!DebugSettings.godMode)
-				allThings = allThings.Where(t => !t.Fogged());
+				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
 			foreach(ListFilter filter in filters)
 				allThings = filter.Apply(allThings);
 
@@ -265,7 +266,7 @@ namespace List_Everything
 				foreach(Thing t in listedThings)
 				{
 					if (t.def == selectAllDef)
-						Find.Selector.Select(t, false);
+						TrySelect.Select(t, false);
 				}
 			}
 
@@ -298,7 +299,7 @@ namespace List_Everything
 			{
 				if (Event.current.type == EventType.mouseDown)
 				{
-					if (!thing.def.selectable)
+					if (!thing.def.selectable || !thing.Spawned)
 					{
 						CameraJumper.TryJump(thing);
 						if (Event.current.alt)
@@ -318,7 +319,7 @@ namespace List_Everything
 						else
 						{
 							dragSelect = true;
-							Find.Selector.Select(thing);
+							TrySelect.Select(thing);
 						}
 					}
 					else if (Event.current.alt)
@@ -341,19 +342,19 @@ namespace List_Everything
 						else
 						{
 							Find.Selector.ClearSelection();
-							Find.Selector.Select(thing);
+							TrySelect.Select(thing);
 							dragSelect = true;
 						}
 					}
 				}
 				if (Event.current.type == EventType.mouseDrag)
 				{
-					if (!thing.def.selectable)
+					if (!thing.def.selectable || !thing.Spawned)
 						CameraJumper.TryJump(thing);
 					else if (dragJump)
 						CameraJumper.TryJump(thing);
 					else if (dragSelect)
-						Find.Selector.Select(thing, false);
+						TrySelect.Select(thing, false);
 					else if (dragDeselect)
 						Find.Selector.Deselect(thing);
 				}
