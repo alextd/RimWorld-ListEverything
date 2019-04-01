@@ -149,9 +149,6 @@ namespace List_Everything
 
 		//Filters:
 		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
-		static List<Pair<Type, string>> filterTypes = new List<Pair<Type, string>>(
-			typeof(ListFilter).AllLeafSubclasses()
-			.Select(t => new Pair<Type, string>(t, Activator.CreateInstance(t).ToString())));
 
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal
@@ -210,8 +207,8 @@ namespace List_Everything
 			if (listing.ButtonText("Add Filter"))
 			{
 				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
-				foreach (Pair<Type, string> pair in filterTypes)
-					filterClasses.Add(new FloatMenuOption(pair.Second, () => filters.Add((ListFilter)Activator.CreateInstance(pair.First))));
+				foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs)
+					filterClasses.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
 				FloatMenu floatMenu = new FloatMenu(filterClasses) { onCloseCallback = RemakeList };
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);

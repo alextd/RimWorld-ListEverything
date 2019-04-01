@@ -8,8 +8,26 @@ using UnityEngine;
 
 namespace List_Everything
 {
+	public class ListFilterDef : Def
+	{
+		public Type filterClass;
+	}
+
+	public static class ListFilterMaker
+	{
+		public static ListFilter MakeFilter(ListFilterDef def)
+		{
+			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
+			filter.def = def;
+			return filter;
+		}
+	}
+
+	[StaticConstructorOnStartup]
 	public abstract class ListFilter
 	{
+		public ListFilterDef def;
+
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
 		public bool enabled = true;
@@ -58,21 +76,13 @@ namespace List_Everything
 		
 		public virtual bool DrawOption(Rect rect)
 		{
-			Widgets.Label(rect, Name());
+			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
-
-		public override string ToString()
-		{
-			return Name();
-		}
-		public abstract string Name();
 	}
 
 	class ListFilterName : ListFilter
 	{
-		public override string Name() => "Name";
-
 		string name = "";
 		public override bool Applies(Thing thing) =>
 			thing.Label.ToLower().Contains(name.ToLower());
@@ -91,16 +101,12 @@ namespace List_Everything
 
 	class ListFilterForbidden : ListFilter
 	{
-		public override string Name() => "Forbidden";
-
 		public override bool Applies(Thing thing) =>
 			thing.IsForbidden(Faction.OfPlayer);
 	}
 
 	class ListFilterDesignation : ListFilter
 	{
-		public override string Name() => "Designated";
-
 		public override bool Applies(Thing thing) =>
 			Find.CurrentMap.designationManager.AllDesignationsOn(thing).Count() > 0 ||
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0;
