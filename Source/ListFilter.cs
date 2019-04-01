@@ -12,25 +12,27 @@ namespace List_Everything
 	{
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
-		//bool enabled;
+		//public bool enabled;
 		public bool delete;
+		//public bool include;
 
 		public abstract IEnumerable<Thing> Apply(IEnumerable<Thing> list);
 
 		public bool Listing(Listing_Standard listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
-			Rect clearRect = rowRect.RightPartPixels(Text.LineHeight);
-			Rect optionRect = rowRect.LeftPartPixels(rowRect.width - (Text.LineHeight + listing.verticalSpacing));
+			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.yMin, UIDirection.LeftThenDown, rowRect.width);
 
 			//Clear button
-			if(Widgets.ButtonImage(clearRect, CancelTex))
+			if(row.ButtonIcon(CancelTex, "Delete this filter"))
 			{
 				delete = true;
 			}
 
+
 			//Draw option row
-			bool result = DrawOption(optionRect);
+			rowRect.width = row.FinalX;
+			bool result = DrawOption(rowRect);
 			listing.Gap(listing.verticalSpacing);
 			return result;
 		}
