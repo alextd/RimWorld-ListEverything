@@ -11,6 +11,7 @@ namespace List_Everything
 	public class ListFilterDef : Def
 	{
 		public Type filterClass;
+		public bool devOnly;
 	}
 
 	public static class ListFilterMaker
@@ -205,5 +206,18 @@ namespace List_Everything
 			}
 			return false;
 		}
+	}
+
+	class ListFilterClassType : ListFilterDropDown
+	{
+		Type type = typeof(Thing);
+
+		public override bool Applies(Thing thing) =>
+			type.IsAssignableFrom(thing.GetType());
+
+		public static List<object> types = typeof(Thing).AllSubclassesNonAbstract().Cast<object>().ToList();
+		public override string GetLabel() => type.ToString();
+		public override IEnumerable<object> Options() => types;
+		public override void Callback(object o) => type = o as Type;
 	}
 }

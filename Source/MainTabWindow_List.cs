@@ -229,7 +229,7 @@ namespace List_Everything
 			if (listing.ButtonText("Add Filter"))
 			{
 				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
-				foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs)
+				foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => Prefs.DevMode || !d.devOnly))
 					filterClasses.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
 				FloatMenu floatMenu = new FloatMenu(filterClasses) { onCloseCallback = RemakeList };
 				floatMenu.vanishIfMouseDistant = true;
