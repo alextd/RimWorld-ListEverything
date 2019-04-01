@@ -71,7 +71,7 @@ namespace List_Everything
 			switch(baseType)
 			{
 				case BaseListType.All:
-					allThings = Find.CurrentMap.listerThings.AllThings;
+					allThings = Find.CurrentMap.spawnedThings;
 					break;
 				case BaseListType.ThingRequestGroup:
 					allThings = Find.CurrentMap.listerThings.ThingsInGroup(listGroup);
