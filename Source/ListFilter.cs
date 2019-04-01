@@ -330,7 +330,7 @@ namespace List_Everything
 		ThingDef stuffDef;
 
 		public override bool Applies(Thing thing) =>
-			thing.Stuff == stuffDef;
+			thing.Stuff == stuffDef || thing is IConstructible c && c.UIStuff() == stuffDef;
 
 		public override string GetLabel() => stuffDef?.LabelCap ?? NullOption();
 		public override string NullOption() => "No Stuff";
