@@ -193,7 +193,7 @@ namespace List_Everything
 
 			TooltipHandler.TipRegion(refreshRect, "The list is saved when filter is changed - new items aren't added until refreshed");
 
-			Widgets.Label(labelRect, $"Category: {BaseTypeDesc()}");
+			Widgets.Label(labelRect, $"Listing: {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{

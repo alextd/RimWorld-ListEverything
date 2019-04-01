@@ -236,4 +236,20 @@ namespace List_Everything
 		public override IEnumerable<object> Options() => Find.FactionManager.AllFactionsVisibleInViewOrder.Cast<object>();
 		public override void Callback(object o) => faction = o as Faction;
 	}
+
+	class ListFilterCategory : ListFilterDropDown
+	{
+		ThingCategoryDef catDef = ThingCategoryDefOf.Root;
+
+		public override bool Applies(Thing thing) =>
+			thing.def.IsWithinCategory(catDef);
+
+		public override bool PreFilter(Thing thing) =>
+			thing.def.FirstThingCategory != null;
+		
+		public override string GetLabel() => catDef.LabelCap;
+		public override IEnumerable<object> Options() => DefDatabase<ThingCategoryDef>.AllDefsListForReading.Cast<object>();
+		public override string NameFor(object o) => (o as ThingCategoryDef).LabelCap;
+		public override void Callback(object o) => catDef = o as ThingCategoryDef;
+	}
 }
