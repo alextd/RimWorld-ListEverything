@@ -7,7 +7,7 @@ using RimWorld;
 
 namespace List_Everything
 {
-	abstract class ListFilter
+	public abstract class ListFilter
 	{
 		public abstract IEnumerable<Thing> Apply(IEnumerable<Thing> list);
 

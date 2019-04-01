@@ -194,11 +194,10 @@ namespace List_Everything
 
 			//Filters
 			listing.GapLine();
-			foreach(ListFilter filter in filters)
-				if(filter.Listing(listing))
-					RemakeList();
+			foreach (ListFilter filter in filters)
+				DoFilterRow(filter, listing);
 
-			if(listing.ButtonText("Add Filter"))
+			if (listing.ButtonText("Add Filter"))
 			{
 				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
 				foreach (Type type in filterTypes)
@@ -208,9 +207,23 @@ namespace List_Everything
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
 			}
+			if (listing.ButtonText("Reset Filter"))
+			{
+				baseType = BaseListType.All;
+				filters = new List<ListFilter>() { new ListFilterName() };
+				RemakeList();
+			}
 
 			listing.End();
 		}
+
+		public void DoFilterRow(ListFilter filter, Listing_Standard listing)
+		{
+			if (filter.Listing(listing))
+				RemakeList();
+		}
+
+
 		public void DoList(Rect listRect)
 		{
 			//Handle mouse selection
