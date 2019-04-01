@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Verse;
 using RimWorld;
+using UnityEngine;
 
 namespace List_Everything
 {
@@ -11,7 +12,18 @@ namespace List_Everything
 	{
 		public abstract IEnumerable<Thing> Apply(IEnumerable<Thing> list);
 
-		public abstract bool Listing(Listing_Standard listing);
+		public bool Listing(Listing_Standard listing)
+		{
+			Rect rowRect = listing.GetRect(Text.LineHeight);
+
+			bool result = DrawOption(rowRect);
+			listing.Gap(listing.verticalSpacing);
+			return result;
+		}
+
+		public abstract bool DrawOption(Rect rect);
+
+		//bool enabled;
 	}
 
 	class ListFilterName : ListFilter
@@ -24,9 +36,9 @@ namespace List_Everything
 			return list.Where(t => t.Label.ToLower().Contains(name.ToLower()));
 		}
 
-		public override bool Listing(Listing_Standard listing)
+		public override bool DrawOption(Rect rect)
 		{
-			string newStr = listing.TextEntry(name);
+			string newStr = Widgets.TextField(rect, name);
 			if (newStr != name)
 			{
 				name = newStr;
@@ -44,9 +56,10 @@ namespace List_Everything
 			return list.Where(t => t.IsForbidden(Faction.OfPlayer) == show);
 		}
 
-		public override bool Listing(Listing_Standard listing)
+		public override bool DrawOption(Rect rect)
 		{
-			if(listing.ButtonTextLabeled(show ? "Showing forbidden items" : "Showing allowed items", "Swap"))
+			Widgets.Label(rect.LeftPart(0.8f), "Forbidden");
+			if (Widgets.ButtonText(rect.RightPart(0.2f), show ? "Show" : "Hide"))
 			{
 				show = !show;
 				return true;
@@ -66,9 +79,10 @@ namespace List_Everything
 			des.AllDesignationsAt(t.Position).Count() > 0));
 		}
 
-		public override bool Listing(Listing_Standard listing)
+		public override bool DrawOption(Rect rect)
 		{
-			if (listing.ButtonTextLabeled(show ? "Showing designated items" : "Showing undesignated items", "Swap"))
+			Widgets.Label(rect.LeftPart(0.8f), "Designated");
+			if (Widgets.ButtonText(rect.RightPart(0.2f), show ? "Show" : "Hide"))
 			{
 				show = !show;
 				return true;
