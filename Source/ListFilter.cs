@@ -12,13 +12,13 @@ namespace List_Everything
 	{
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
-		//public bool enabled;
+		public bool enabled = true;
+		public bool include = true;
 		public bool delete;
-		public bool include;
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return list.Where(t => Applies(t) == include);
+			return enabled ? list.Where(t => Applies(t) == include) : list;
 		}
 		public abstract bool Applies(Thing list);
 
@@ -28,25 +28,32 @@ namespace List_Everything
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.yMin, UIDirection.LeftThenDown, rowRect.width);
 
 			//Clear button
-			if(row.ButtonIcon(CancelTex, "Delete this filter"))
+			if (row.ButtonIcon(CancelTex, "Delete this filter"))
 			{
 				delete = true;
 			}
 
+			bool changed = false;
+			//Toggle button
+			if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Toggle This Filter"))
+			{
+				enabled = !enabled;
+				changed = true;
+			}
+
 			//Include/Exclude
-			bool result = false;
 			if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude this filter"))
 			{
 				include = !include;
-				result = true;
+				changed = true;
 			}
 
 
 			//Draw option row
 			rowRect.width = row.FinalX;
-			result |= DrawOption(rowRect);
+			changed |= DrawOption(rowRect);
 			listing.Gap(listing.verticalSpacing);
-			return result;
+			return changed;
 		}
 
 		public abstract bool DrawOption(Rect rect);
