@@ -164,7 +164,7 @@ namespace List_Everything
 			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
-		public override string GetLabel() => des?.defName ?? "Any";
+		public override string GetLabel() => des?.defName ?? NullOption();
 		public override string NullOption() => "Any";
 		public override IEnumerable<object> Options() => DefDatabase<DesignationDef>.AllDefs.Cast<object>();
 		public override string NameFor(object o) => (o as DesignationDef).defName;
@@ -236,7 +236,7 @@ namespace List_Everything
 		public override bool Applies(Thing thing) =>
 			thing.Faction == faction;
 		
-		public override string GetLabel() => faction?.Name ?? "None";
+		public override string GetLabel() => faction?.Name ?? NullOption();
 		public override string NullOption() => "None";
 		public override IEnumerable<object> Options() => Find.FactionManager.AllFactionsVisibleInViewOrder.Cast<object>();
 		public override void Callback(object o) => faction = o as Faction;
@@ -323,5 +323,19 @@ namespace List_Everything
 			}
 			return false;
 		}
+	}
+
+	class ListFilterStuff : ListFilterDropDown
+	{
+		ThingDef stuffDef;
+
+		public override bool Applies(Thing thing) =>
+			thing.Stuff == stuffDef;
+
+		public override string GetLabel() => stuffDef?.LabelCap ?? NullOption();
+		public override string NullOption() => "No Stuff";
+		public override IEnumerable<object> Options() => DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
+		public override string NameFor(object o) => (o as ThingDef).LabelCap;
+		public override void Callback(object o) => stuffDef = o as ThingDef;
 	}
 }
