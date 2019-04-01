@@ -199,6 +199,7 @@ namespace List_Everything
 		{
 			base.DrawOption(rect);
 			FloatRange newRange = range;
+			//arbitrary 85246
 			Widgets.FloatRange(rect.RightPart(0.5f), 85246, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (range != newRange)
 			{
@@ -276,5 +277,51 @@ namespace List_Everything
 	{
 		public override bool Applies(Thing thing) =>
 			thing.def.building?.isResourceRock ?? false;
+	}
+
+	class ListFilterHP : ListFilter
+	{
+		FloatRange range = FloatRange.ZeroToOne;
+
+		public override bool Applies(Thing thing) =>
+			thing.def.useHitPoints &&
+			range.Includes(thing.HitPoints / thing.MaxHitPoints);
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			FloatRange newRange = range;
+			//arbitrary 85246 + 1
+			Widgets.FloatRange(rect.RightPart(0.5f), 85247, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			if (range != newRange)
+			{
+				range = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
+
+	class ListFilterQuality : ListFilter
+	{
+		QualityRange range = QualityRange.All;
+
+		public override bool Applies(Thing thing) =>
+			thing.TryGetQuality(out QualityCategory qc) &&
+			range.Includes(qc);
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			QualityRange newRange = range;
+			//arbitrary 85246 + 2
+			Widgets.QualityRange(rect.RightPart(0.5f), 85248, ref newRange);
+			if (range != newRange)
+			{
+				range = newRange;
+				return true;
+			}
+			return false;
+		}
 	}
 }
