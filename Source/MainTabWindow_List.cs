@@ -390,7 +390,11 @@ namespace List_Everything
 			}
 			else
 			{
+				if (thing.Graphic is Graphic_Cluster)
+					Rand.PushState();
 				Widgets.ThingIcon(iconRect, thing);
+				if (thing.Graphic is Graphic_Cluster)
+					Rand.PopState();
 			}
 		}
 	}
