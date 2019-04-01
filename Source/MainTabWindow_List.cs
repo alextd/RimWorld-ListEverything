@@ -53,12 +53,16 @@ namespace List_Everything
 			Items,
 			People,
 			Buildings,
+			Plants,
+			Inventory,
 			ThingRequestGroup,
 			Haulables,
 			Mergables,
 			Filth
 		};
-		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Items, BaseListType.People, BaseListType.Buildings};
+		BaseListType[] normalTypes = 
+			{ BaseListType.All, BaseListType.Items, BaseListType.People,
+			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
@@ -81,6 +85,14 @@ namespace List_Everything
 					break;
 				case BaseListType.Buildings:
 					allThings = map.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					break;
+				case BaseListType.Plants:
+					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
+					break;
+				case BaseListType.Inventory:
+					List<IThingHolder> holders = new List<IThingHolder>();
+					map.GetChildHolders(holders);
+					allThings = holders.SelectMany(h => ThingOwnerUtility.GetAllThingsRecursively(h));
 					break;
 				case BaseListType.Items:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
