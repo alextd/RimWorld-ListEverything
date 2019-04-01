@@ -123,9 +123,34 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				options.Add(new FloatMenuOption("Any", () => des = null));
-				foreach (DesignationDef def in DefDatabase<DesignationDef>.AllDefs)
+				foreach (DesignationDef desDef in DefDatabase<DesignationDef>.AllDefs)
 				{
-					options.Add(new FloatMenuOption(def.defName, () => des = def));
+					options.Add(new FloatMenuOption(desDef.defName, () => des = desDef));
+				}
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+
+				return true;
+			}
+			return false;
+		}
+	}
+
+	class ListFilterFreshness : ListFilter
+	{
+		RotStage stage = RotStage.Fresh;
+
+		public override bool Applies(Thing thing) =>
+			thing.TryGetComp<CompRottable>() is CompRottable comp && comp.Stage == stage;
+
+		public override bool DrawOption(Rect rect)
+		{
+			base.DrawOption(rect);
+			if (Widgets.ButtonText(rect.RightPart(0.3f), stage.ToString()))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (RotStage s in Enum.GetValues(typeof(RotStage)))
+				{
+					options.Add(new FloatMenuOption(s.ToString(), () => stage = s));
 				}
 				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 
