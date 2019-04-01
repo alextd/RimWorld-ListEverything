@@ -171,7 +171,7 @@ namespace List_Everything
 			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
 				RemakeList();
 
-			TooltipHandler.TipRegion(refreshRect, "Lists are saved when category is chosen - new items aren't added until refreshed");
+			TooltipHandler.TipRegion(refreshRect, "The list is saved when filter is changed - new items aren't added until refreshed");
 
 			Widgets.Label(labelRect, $"Category: {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
