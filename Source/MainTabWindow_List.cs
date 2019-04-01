@@ -98,7 +98,7 @@ namespace List_Everything
 			}
 
 			//Filters
-			allThings = allThings.Where(t => !(t.ParentHolder is Corpse));
+			allThings = allThings.Where(t => !(t.ParentHolder is Corpse) && !(t.ParentHolder is MinifiedThing));
 			if (!DebugSettings.godMode)
 				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
 			foreach(ListFilter filter in filters)
