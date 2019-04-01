@@ -14,9 +14,13 @@ namespace List_Everything
 
 		//public bool enabled;
 		public bool delete;
-		//public bool include;
+		public bool include;
 
-		public abstract IEnumerable<Thing> Apply(IEnumerable<Thing> list);
+		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
+		{
+			return list.Where(t => Applies(t) == include);
+		}
+		public abstract bool Applies(Thing list);
 
 		public bool Listing(Listing_Standard listing)
 		{
@@ -29,10 +33,18 @@ namespace List_Everything
 				delete = true;
 			}
 
+			//Include/Exclude
+			bool result = false;
+			if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude this filter"))
+			{
+				include = !include;
+				result = true;
+			}
+
 
 			//Draw option row
 			rowRect.width = row.FinalX;
-			bool result = DrawOption(rowRect);
+			result |= DrawOption(rowRect);
 			listing.Gap(listing.verticalSpacing);
 			return result;
 		}
@@ -43,12 +55,8 @@ namespace List_Everything
 	class ListFilterName : ListFilter
 	{
 		string name = "";
-		public override IEnumerable<Thing> Apply(IEnumerable<Thing> list)
-		{
-			if (name.NullOrEmpty())
-				return list;
-			return list.Where(t => t.Label.ToLower().Contains(name.ToLower()));
-		}
+		public override bool Applies(Thing thing) =>
+			thing.Label.ToLower().Contains(name.ToLower());
 
 		public override bool DrawOption(Rect rect)
 		{
@@ -64,43 +72,25 @@ namespace List_Everything
 
 	class ListFilterForbidden : ListFilter
 	{
-		bool show;
-		public override IEnumerable<Thing> Apply(IEnumerable<Thing> list)
-		{
-			return list.Where(t => t.IsForbidden(Faction.OfPlayer) == show);
-		}
+		public override bool Applies(Thing thing) =>
+			thing.IsForbidden(Faction.OfPlayer);
 
 		public override bool DrawOption(Rect rect)
 		{
-			Widgets.Label(rect.LeftPart(0.8f), "Forbidden");
-			if (Widgets.ButtonText(rect.RightPart(0.2f), show ? "Show" : "Hide"))
-			{
-				show = !show;
-				return true;
-			}
+			Widgets.Label(rect, "Forbidden");
 			return false;
 		}
 	}
 
 	class ListFilterDesignation : ListFilter
 	{
-		bool show;
-		public override IEnumerable<Thing> Apply(IEnumerable<Thing> list)
-		{
-			var des = Find.CurrentMap.designationManager;
-			return list.Where(t => show == 
-			(des.AllDesignationsOn(t).Count() > 0 || 
-			des.AllDesignationsAt(t.Position).Count() > 0));
-		}
+		public override bool Applies(Thing thing) =>
+			Find.CurrentMap.designationManager.AllDesignationsOn(thing).Count() > 0 ||
+			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0;
 
 		public override bool DrawOption(Rect rect)
 		{
-			Widgets.Label(rect.LeftPart(0.8f), "Designated");
-			if (Widgets.ButtonText(rect.RightPart(0.2f), show ? "Show" : "Hide"))
-			{
-				show = !show;
-				return true;
-			}
+			Widgets.Label(rect, "Designated");
 			return false;
 		}
 	}
