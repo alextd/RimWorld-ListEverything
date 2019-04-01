@@ -50,14 +50,15 @@ namespace List_Everything
 		enum BaseListType
 		{
 			All,
-			ThingRequestGroup,
-			Buildings,
+			Items,
 			People,
+			Buildings,
+			ThingRequestGroup,
 			Haulables,
 			Mergables,
 			Filth
 		};
-		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Buildings, BaseListType.People };
+		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Items, BaseListType.People, BaseListType.Buildings};
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
@@ -77,6 +78,9 @@ namespace List_Everything
 					break;
 				case BaseListType.Buildings:
 					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					break;
+				case BaseListType.Items:
+					allThings = Find.CurrentMap.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
 					break;
 				case BaseListType.People:
 					allThings = Find.CurrentMap.mapPawns.AllPawnsSpawned.Cast<Thing>();
