@@ -52,11 +52,12 @@ namespace List_Everything
 			All,
 			ThingRequestGroup,
 			Buildings,
+			People,
 			Haulables,
 			Mergables,
 			Filth
 		};
-		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Buildings };
+		BaseListType[] normalTypes = { BaseListType.All, BaseListType.Buildings, BaseListType.People };
 		BaseListType baseType = BaseListType.All;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
@@ -76,6 +77,9 @@ namespace List_Everything
 					break;
 				case BaseListType.Buildings:
 					allThings = Find.CurrentMap.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					break;
+				case BaseListType.People:
+					allThings = Find.CurrentMap.mapPawns.AllPawnsSpawned.Cast<Thing>();
 					break;
 				case BaseListType.Haulables:
 					allThings = Find.CurrentMap.listerHaulables.ThingsPotentiallyNeedingHauling();
@@ -106,6 +110,8 @@ namespace List_Everything
 					return $"Group: \"{listGroup}\"";
 				case BaseListType.Buildings:
 					return "Colonist buildings";
+				case BaseListType.People:
+					return "People and Animals";
 				case BaseListType.Haulables:
 					return "Things to be hauled";
 				case BaseListType.Mergables:
