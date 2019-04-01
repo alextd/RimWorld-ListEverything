@@ -67,7 +67,6 @@ namespace List_Everything
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
 
-
 		List<Thing> listedThings;
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
@@ -78,7 +77,9 @@ namespace List_Everything
 			switch(baseType)
 			{
 				case BaseListType.All:
-					allThings = ThingOwnerUtility.GetAllThingsRecursively(map);
+					List<Thing> knownThings = new List<Thing>();
+					ThingOwnerUtility.GetAllThingsRecursively(map, knownThings, true, ContentsUtility.CanPeekInventory);
+					allThings = knownThings;
 					break;
 				case BaseListType.ThingRequestGroup:
 					allThings = map.listerThings.ThingsInGroup(listGroup);
@@ -92,7 +93,14 @@ namespace List_Everything
 				case BaseListType.Inventory:
 					List<IThingHolder> holders = new List<IThingHolder>();
 					map.GetChildHolders(holders);
-					allThings = holders.SelectMany(h => ThingOwnerUtility.GetAllThingsRecursively(h));
+					List<Thing> list = new List<Thing>();
+					foreach (IThingHolder holder in holders.Where(ContentsUtility.CanPeekInventory))
+					{
+						List<Thing> tList = new List<Thing>();
+						ThingOwnerUtility.GetAllThingsRecursively(holder, tList, true, ContentsUtility.CanPeekInventory);
+						list.AddRange(tList);
+					}
+					allThings = list;
 					break;
 				case BaseListType.Items:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
