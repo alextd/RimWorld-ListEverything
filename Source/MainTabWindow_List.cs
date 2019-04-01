@@ -198,6 +198,12 @@ namespace List_Everything
 			foreach (ListFilter filter in filters)
 				DoFilterRow(filter, listing);
 
+			if (filters.Any(f => f.delete))
+			{
+				filters = filters.FindAll(f => !f.delete);
+				RemakeList();
+			}
+
 			if (listing.ButtonText("Add Filter"))
 			{
 				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
