@@ -288,7 +288,7 @@ namespace List_Everything
 
 		public override bool Applies(Thing thing) =>
 			thing.def.useHitPoints &&
-			range.Includes(thing.HitPoints / thing.MaxHitPoints);
+			range.Includes((float)thing.HitPoints / thing.MaxHitPoints);
 
 		public override bool DrawOption(Rect rect)
 		{
