@@ -113,6 +113,7 @@ namespace List_Everything
 			}
 			if (Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
 			{
+				GUI.FocusControl("");
 				name = "";
 				return true;
 			}
