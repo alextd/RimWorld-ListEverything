@@ -179,7 +179,7 @@ namespace List_Everything
 		}
 
 		//Filters:
-		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
+		public List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
 
 		[StaticConstructorOnStartup]
 		static class TexButtonNotInternalForReal

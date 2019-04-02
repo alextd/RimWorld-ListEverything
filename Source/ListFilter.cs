@@ -82,15 +82,26 @@ namespace List_Everything
 			//Draw option row
 			rowRect.width = row.FinalX;
 			changed |= DrawOption(rowRect);
+			if(shouldFocus)
+			{
+				DoFocus();
+				shouldFocus = false;
+			}
+
 			listing.Gap(listing.verticalSpacing);
 			return changed;
 		}
+
 
 		public virtual bool DrawOption(Rect rect)
 		{
 			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
+
+		private bool shouldFocus;
+		public void Focus() => shouldFocus = true;
+		protected virtual void DoFocus() { }
 	}
 
 	class ListFilterName : ListFilter
@@ -122,6 +133,11 @@ namespace List_Everything
 				return true;
 			}
 			return false;
+		}
+
+		protected override void DoFocus()
+		{
+			GUI.FocusControl($"LIST_FILTER_NAME_INPUT{id}");
 		}
 	}
 
