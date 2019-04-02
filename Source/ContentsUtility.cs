@@ -18,5 +18,12 @@ namespace List_Everything
 		public static bool CanPeekInventory(this IThingHolder holder) =>
 			DebugSettings.godMode ||
 			(holder is Building_Casket c ? c.get_contentsKnown() : true);
+
+		public static List<Thing> AllKnownThings(Map map)
+		{
+			List<Thing> knownThings = new List<Thing>();
+			ThingOwnerUtility.GetAllThingsRecursively(map, knownThings, true, ContentsUtility.CanPeekInventory);
+			return knownThings;
+		}
 	}
 }

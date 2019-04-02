@@ -77,9 +77,7 @@ namespace List_Everything
 			switch(baseType)
 			{
 				case BaseListType.All:
-					List<Thing> knownThings = new List<Thing>();
-					ThingOwnerUtility.GetAllThingsRecursively(map, knownThings, true, ContentsUtility.CanPeekInventory);
-					allThings = knownThings;
+					allThings = ContentsUtility.AllKnownThings(map);
 					break;
 				case BaseListType.ThingRequestGroup:
 					allThings = map.listerThings.ThingsInGroup(listGroup);
@@ -95,11 +93,7 @@ namespace List_Everything
 					map.GetChildHolders(holders);
 					List<Thing> list = new List<Thing>();
 					foreach (IThingHolder holder in holders.Where(ContentsUtility.CanPeekInventory))
-					{
-						List<Thing> tList = new List<Thing>();
-						ThingOwnerUtility.GetAllThingsRecursively(holder, tList, true, ContentsUtility.CanPeekInventory);
-						list.AddRange(tList);
-					}
+						list.AddRange(ContentsUtility.AllKnownThings(map));
 					allThings = list;
 					break;
 				case BaseListType.Items:

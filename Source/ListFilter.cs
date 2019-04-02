@@ -385,7 +385,7 @@ namespace List_Everything
 		public override bool Applies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
-			if (pawn == null) return false;
+			if (pawn == null) return hediffDef == null;
 			switch(prop)
 			{
 				case PawnFilterProp.Skill:
@@ -464,10 +464,16 @@ namespace List_Everything
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 						options.Add(new FloatMenuOption("None", () => hediffDef = null));
-						foreach (HediffDef hDef in DefDatabase<HediffDef>.AllDefs)
-						{
+
+						HashSet<HediffDef> hediffsOnMap = new HashSet<HediffDef>();
+						foreach(Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
+							if (t is Pawn pawn)
+								foreach(HediffDef hDef in pawn.health.hediffSet.hediffs.Select(h => h.def).ToList())
+									hediffsOnMap.Add(hDef);
+
+						foreach (HediffDef hDef in hediffsOnMap)
 							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
-						}
+
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
