@@ -237,7 +237,7 @@ namespace List_Everything
 
 	class ListFilterFaction : ListFilterDropDown
 	{
-		Faction faction = null;
+		Faction faction = Faction.OfPlayer;
 
 		public override bool Applies(Thing thing) =>
 			faction == null ?
@@ -250,11 +250,11 @@ namespace List_Everything
 		public override void Callback(object o) => faction = o as Faction;
 	}
 
-	class ListFilterCanFaction : ListFilter
+	/*class ListFilterCanFaction : ListFilter
 	{
 		public override bool Applies(Thing thing) =>
 			thing.def.CanHaveFaction;
-	}
+	}*/
 
 	class ListFilterCategory : ListFilterDropDown
 	{
@@ -267,12 +267,6 @@ namespace List_Everything
 		public override IEnumerable<object> Options() => DefDatabase<ThingCategoryDef>.AllDefsListForReading.Cast<object>();
 		public override string NameFor(object o) => (o as ThingCategoryDef).LabelCap;
 		public override void Callback(object o) => catDef = o as ThingCategoryDef;
-	}
-
-	class ListFilterCategorizable : ListFilter
-	{
-		public override bool Applies(Thing thing) =>
-			thing.def.FirstThingCategory != null;
 	}
 
 	class ListFilterMineable : ListFilter
