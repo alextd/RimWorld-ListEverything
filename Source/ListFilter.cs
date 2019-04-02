@@ -14,8 +14,11 @@ namespace List_Everything
 		public bool devOnly;
 	}
 
+	[DefOf]
 	public static class ListFilterMaker
 	{
+		public static ListFilterDef Filter_Name;
+
 		public static ListFilter MakeFilter(ListFilterDef def)
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);

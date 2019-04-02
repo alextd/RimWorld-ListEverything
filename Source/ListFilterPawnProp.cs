@@ -45,7 +45,8 @@ namespace List_Everything
 				def.defName;
 
 		HediffDef hediffDef;
-		//string itemName;
+
+		ListFilter nameFilter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
 
 		public override bool Applies(Thing thing)
 		{
@@ -64,12 +65,14 @@ namespace List_Everything
 				case PawnFilterProp.Skill:
 					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 				case PawnFilterProp.Trait:
-					return pawn.story?.traits.GetTrait(traitDef) is Trait t && t.Degree == traitDegree;
+					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && trait.Degree == traitDegree;
 				case PawnFilterProp.Hediff:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
-					//case PawnFilterProp.Item: return "Inventory";
+				case PawnFilterProp.Item:
+					return ThingOwnerUtility.GetAllThingsRecursively(pawn)
+						.Any(t => nameFilter.Applies(t));
 			}
 			return false;
 		}
@@ -154,7 +157,10 @@ namespace List_Everything
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
-					//case PawnFilterProp.Item: return itemName;
+				case PawnFilterProp.Item:
+					Rect subRect = rect;
+					subRect.xMin = row.FinalX;
+					return nameFilter.DrawOption(subRect);
 			}
 			return false;
 		}
