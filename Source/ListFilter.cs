@@ -365,4 +365,10 @@ namespace List_Everything
 		public override IEnumerable<object> Options() => Enum.GetValues(typeof(DrawerType)).Cast<object>();
 		public override void Callback(object o) => type = (DrawerType)o;
 	}
+
+	class ListFilterHeadless : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing is Pawn p && !p.health.hediffSet.HasHead;
+	}
 }
