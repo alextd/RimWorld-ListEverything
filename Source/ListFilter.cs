@@ -470,11 +470,8 @@ namespace List_Everything
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 						options.Add(new FloatMenuOption("None", () => hediffDef = null));
 
-						HashSet<HediffDef> hediffsOnMap = new HashSet<HediffDef>();
-						foreach(Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
-							if (t is Pawn pawn)
-								foreach(HediffDef hDef in pawn.health.hediffSet.hediffs.Select(h => h.def).ToList())
-									hediffsOnMap.Add(hDef);
+						HashSet<HediffDef> hediffsOnMap = ContentsUtility.AvailableOnMap(
+							t => t is Pawn p ? p.health.hediffSet.hediffs.Select(h => h.def) : Enumerable.Empty<HediffDef>());
 
 						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
 							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));

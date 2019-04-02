@@ -25,5 +25,15 @@ namespace List_Everything
 			ThingOwnerUtility.GetAllThingsRecursively(map, knownThings, true, ContentsUtility.CanPeekInventory);
 			return knownThings;
 		}
+
+		public static HashSet<T> AvailableOnMap<T>(Func<Thing, IEnumerable<T>> validGetter)
+		{
+			HashSet<T> ret = new HashSet<T>();
+			foreach (Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
+				foreach (T tDef in validGetter(t))
+					ret.Add(tDef);
+
+			return ret;
+		}
 	}
 }
