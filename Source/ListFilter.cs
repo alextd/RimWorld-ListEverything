@@ -27,7 +27,14 @@ namespace List_Everything
 	[StaticConstructorOnStartup]
 	public abstract class ListFilter
 	{
+		public int id;//For window purposes
+		public static int nextID = 1;
 		public ListFilterDef def;
+
+		public ListFilter()
+		{
+			id = nextID++;
+		}
 
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
@@ -199,8 +206,7 @@ namespace List_Everything
 		{
 			base.DrawOption(rect);
 			FloatRange newRange = range;
-			//arbitrary 85246
-			Widgets.FloatRange(rect.RightPart(0.5f), 85246, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (range != newRange)
 			{
 				range = newRange;
@@ -291,8 +297,7 @@ namespace List_Everything
 		{
 			base.DrawOption(rect);
 			FloatRange newRange = range;
-			//arbitrary 85246 + 1
-			Widgets.FloatRange(rect.RightPart(0.5f), 85247, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (range != newRange)
 			{
 				range = newRange;
@@ -314,8 +319,7 @@ namespace List_Everything
 		{
 			base.DrawOption(rect);
 			QualityRange newRange = range;
-			//arbitrary 85246 + 2
-			Widgets.QualityRange(rect.RightPart(0.5f), 85248, ref newRange);
+			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
 			if (range != newRange)
 			{
 				range = newRange;
@@ -337,5 +341,125 @@ namespace List_Everything
 		public override IEnumerable<object> Options() => DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
 		public override string NameFor(object o) => (o as ThingDef).LabelCap;
 		public override void Callback(object o) => stuffDef = o as ThingDef;
+	}
+
+	//Pawn properties is a big one
+	public enum PawnFilterProp
+	{
+		Skill,
+		Trait,
+		Hediff,
+		Item
+	}
+	public static class PawnPropEx
+	{
+		public static string Label(this PawnFilterProp prop)
+		{
+			switch(prop)
+			{
+				case PawnFilterProp.Skill:	return "Skill";
+				case PawnFilterProp.Trait:	return "Trait";
+				case PawnFilterProp.Hediff:	return "Health";
+				case PawnFilterProp.Item:		return "Inventory";
+			}
+			return "???";
+		}
+	}
+	class ListFilterPawnProp : ListFilter
+	{
+		PawnFilterProp prop = PawnFilterProp.Skill;
+
+		SkillDef skillDef = SkillDefOf.Animals;
+		IntRange skillRange = new IntRange(10, 20);
+
+		TraitDef traitDef = TraitDefOf.Beauty;
+		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
+		public static string TraitName(TraitDef def) =>
+			def.degreeDatas.Count == 1 ?
+				def.degreeDatas.First().label.CapitalizeFirst() : 
+				def.defName;
+
+		//HediffDef hediffDef;
+		//string itemName;
+
+		public override bool Applies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+			switch(prop)
+			{
+				case PawnFilterProp.Skill:
+					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
+				case PawnFilterProp.Trait:
+					return pawn.story?.traits.GetTrait(traitDef) is Trait t && t.Degree == traitDegree;
+				//case PawnFilterProp.Hediff: return "Health";
+				//case PawnFilterProp.Item: return "Inventory";
+			}
+			return false;
+		}
+			
+		public override bool DrawOption(Rect rect)
+		{
+			WidgetRow row = new WidgetRow(rect.xMin, rect.yMin);
+			if (row.ButtonText(prop.Label()))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (PawnFilterProp p in Enum.GetValues(typeof(PawnFilterProp)))
+				{
+					options.Add(new FloatMenuOption(p.Label(), () => prop = p));
+				}
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+			}
+			switch (prop)
+			{
+				case PawnFilterProp.Skill:
+					if (row.ButtonText(skillDef.LabelCap))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						foreach (SkillDef sDef in DefDatabase<SkillDef>.AllDefs)
+						{
+							options.Add(new FloatMenuOption(sDef.LabelCap, () => skillDef = sDef));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					Rect rangeRect = rect;
+					rangeRect.xMin = row.FinalX;
+					IntRange newRange = skillRange;
+					Widgets.IntRange(rangeRect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
+					if(newRange != skillRange)
+					{
+						skillRange = newRange;
+						return true;
+					}
+					break;
+				case PawnFilterProp.Trait:
+					if (row.ButtonText(TraitName(traitDef)))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						foreach (TraitDef tDef in DefDatabase<TraitDef>.AllDefs)
+						{
+							options.Add(new FloatMenuOption(TraitName(tDef), () => {
+								traitDef = tDef;
+								traitDegree = tDef.degreeDatas.First().degree; }));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					if(traitDef.degreeDatas.Count > 1 &&
+						row.ButtonText(traitDef.DataAtDegree(traitDegree).label.CapitalizeFirst()))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						foreach (TraitDegreeData deg in traitDef.degreeDatas)
+						{
+							options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					//TODO: Trait degrees
+					break;
+				//case PawnFilterProp.Hediff: return hediffDef.LabelCap;
+				//case PawnFilterProp.Item: return itemName;
+			}
+			return false;
+		}
 	}
 }
