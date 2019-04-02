@@ -379,7 +379,7 @@ namespace List_Everything
 				def.degreeDatas.First().label.CapitalizeFirst() : 
 				def.defName;
 
-		//HediffDef hediffDef;
+		HediffDef hediffDef;
 		//string itemName;
 
 		public override bool Applies(Thing thing)
@@ -392,7 +392,10 @@ namespace List_Everything
 					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 				case PawnFilterProp.Trait:
 					return pawn.story?.traits.GetTrait(traitDef) is Trait t && t.Degree == traitDegree;
-				//case PawnFilterProp.Hediff: return "Health";
+				case PawnFilterProp.Hediff:
+					return hediffDef == null ?
+						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
+						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
 				//case PawnFilterProp.Item: return "Inventory";
 			}
 			return false;
@@ -426,7 +429,7 @@ namespace List_Everything
 					rangeRect.xMin = row.FinalX;
 					IntRange newRange = skillRange;
 					Widgets.IntRange(rangeRect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
-					if(newRange != skillRange)
+					if (newRange != skillRange)
 					{
 						skillRange = newRange;
 						return true;
@@ -444,7 +447,7 @@ namespace List_Everything
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
-					if(traitDef.degreeDatas.Count > 1 &&
+					if (traitDef.degreeDatas.Count > 1 &&
 						row.ButtonText(traitDef.DataAtDegree(traitDegree).label.CapitalizeFirst()))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
@@ -456,8 +459,19 @@ namespace List_Everything
 					}
 					//TODO: Trait degrees
 					break;
-				//case PawnFilterProp.Hediff: return hediffDef.LabelCap;
-				//case PawnFilterProp.Item: return itemName;
+				case PawnFilterProp.Hediff:
+					if (row.ButtonText(hediffDef?.LabelCap ?? "None"))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						options.Add(new FloatMenuOption("None", () => hediffDef = null));
+						foreach (HediffDef hDef in DefDatabase<HediffDef>.AllDefs)
+						{
+							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					break;
+					//case PawnFilterProp.Item: return itemName;
 			}
 			return false;
 		}
