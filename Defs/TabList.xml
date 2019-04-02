@@ -10,6 +10,13 @@
 		<validWithoutMap>false</validWithoutMap>
 	</MainButtonDef>
 
+	<KeyBindingDef>
+		<category>MainTabs</category>
+		<defName>OpenFindTab</defName>
+		<label>List Everything: Find by name</label>
+		<defaultKeyCodeA>F</defaultKeyCodeA>
+	</KeyBindingDef>
+
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Name</defName>
 		<label>name</label>

@@ -69,6 +69,12 @@ namespace List_Everything
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
 
+		public void Reset()
+		{
+			baseType = BaseListType.All;
+			filters = new List<ListFilter>() { new ListFilterName() };
+			RemakeList();
+		}
 		List<Thing> listedThings;
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
@@ -243,9 +249,7 @@ namespace List_Everything
 			}
 			if (listing.ButtonText("Reset Filter"))
 			{
-				baseType = BaseListType.All;
-				filters = new List<ListFilter>() { new ListFilterName() };
-				RemakeList();
+				Reset();
 			}
 
 			listing.End();
