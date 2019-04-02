@@ -240,7 +240,9 @@ namespace List_Everything
 		Faction faction = null;
 
 		public override bool Applies(Thing thing) =>
-			thing.Faction == faction;
+			faction == null ?
+				thing.Faction == null || thing.Faction.def.hidden:
+				thing.Faction == faction;
 		
 		public override string GetLabel() => faction?.Name ?? NullOption();
 		public override string NullOption() => "None";
