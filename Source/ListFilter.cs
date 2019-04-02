@@ -139,6 +139,8 @@ namespace List_Everything
 
 	abstract class ListFilterDropDown<T> : ListFilter
 	{
+		public T sel;
+
 		public abstract string GetLabel();
 		public virtual string NullOption() => null;
 		public abstract IEnumerable Options();
@@ -167,32 +169,30 @@ namespace List_Everything
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
 	{
-		DesignationDef des;
-
 		public override bool Applies(Thing thing) =>
-			des != null ? 
-			(des.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, des) != null :
-			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, des) != null) :
+			sel != null ? 
+			(sel.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, sel) != null :
+			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
 			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
-		public override string GetLabel() => des?.defName ?? NullOption();
+		public override string GetLabel() => sel?.defName ?? NullOption();
 		public override string NullOption() => "Any";
 		public override IEnumerable Options() => DefDatabase<DesignationDef>.AllDefs.OrderBy(d=>d.defName);
 		public override string NameFor(DesignationDef o) => o.defName;
-		public override void Callback(DesignationDef o) => des = o;
+		public override void Callback(DesignationDef o) => sel = o;
 	}
 
 	class ListFilterFreshness : ListFilterDropDown<RotStage>
 	{
-		RotStage stage = RotStage.Fresh;
+		public ListFilterFreshness() => sel = RotStage.Fresh;
 
 		public override bool Applies(Thing thing) =>
-			thing.TryGetComp<CompRottable>() is CompRottable rot && rot.Stage == stage;
+			thing.TryGetComp<CompRottable>() is CompRottable rot && rot.Stage == sel;
 
-		public override string GetLabel() => stage.ToString();
+		public override string GetLabel() => sel.ToString();
 		public override IEnumerable Options() => Enum.GetValues(typeof(RotStage));
-		public override void Callback(RotStage o) => stage = o;
+		public override void Callback(RotStage o) => sel = o;
 	}
 
 	class ListFilterRottable : ListFilter
@@ -229,30 +229,30 @@ namespace List_Everything
 
 	class ListFilterClassType : ListFilterDropDown<Type>
 	{
-		Type type = typeof(Thing);
+		public ListFilterClassType() => sel = typeof(Thing);
 
 		public override bool Applies(Thing thing) =>
-			type.IsAssignableFrom(thing.GetType());
+			sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
-		public override string GetLabel() => type.ToString();
+		public override string GetLabel() => sel.ToString();
 		public override IEnumerable Options() => types;
-		public override void Callback(Type o) => type = o;
+		public override void Callback(Type o) => sel = o;
 	}
 
 	class ListFilterFaction : ListFilterDropDown<Faction>
 	{
-		Faction faction = Faction.OfPlayer;
+		public ListFilterFaction() => sel = Faction.OfPlayer;
 
 		public override bool Applies(Thing thing) =>
-			faction == null ?
+			sel == null ?
 				thing.Faction == null || thing.Faction.def.hidden:
-				thing.Faction == faction;
+				thing.Faction == sel;
 		
-		public override string GetLabel() => faction?.Name ?? NullOption();
+		public override string GetLabel() => sel?.Name ?? NullOption();
 		public override string NullOption() => "None";
 		public override IEnumerable Options() => Find.FactionManager.AllFactionsVisibleInViewOrder;
-		public override void Callback(Faction o) => faction = o;
+		public override void Callback(Faction o) => sel = o;
 	}
 
 	/*class ListFilterCanFaction : ListFilter
@@ -263,15 +263,15 @@ namespace List_Everything
 
 	class ListFilterCategory : ListFilterDropDown<ThingCategoryDef>
 	{
-		ThingCategoryDef catDef = ThingCategoryDefOf.Root;
+		public ListFilterCategory() => sel = ThingCategoryDefOf.Root;
 
 		public override bool Applies(Thing thing) =>
-			thing.def.IsWithinCategory(catDef);
+			thing.def.IsWithinCategory(sel);
 		
-		public override string GetLabel() => catDef.LabelCap;
+		public override string GetLabel() => sel.LabelCap;
 		public override IEnumerable Options() => DefDatabase<ThingCategoryDef>.AllDefsListForReading;
 		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
-		public override void Callback(ThingCategoryDef o) => catDef = o;
+		public override void Callback(ThingCategoryDef o) => sel = o;
 	}
 
 	class ListFilterMineable : ListFilter
@@ -338,12 +338,10 @@ namespace List_Everything
 
 	class ListFilterStuff : ListFilterDropDown<ThingDef>
 	{
-		ThingDef stuffDef;
-
 		public override bool Applies(Thing thing) =>
-			thing.Stuff == stuffDef || thing is IConstructible c && c.UIStuff() == stuffDef;
+			thing.Stuff == sel || thing is IConstructible c && c.UIStuff() == sel;
 
-		public override string GetLabel() => stuffDef?.LabelCap ?? NullOption();
+		public override string GetLabel() => sel?.LabelCap ?? NullOption();
 		public override string NullOption() => "No Stuff";
 		public override IEnumerable Options()
 		{
@@ -352,37 +350,33 @@ namespace List_Everything
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
 		}
 		public override string NameFor(ThingDef o) => o.LabelCap;
-		public override void Callback(ThingDef o) => stuffDef = o;
+		public override void Callback(ThingDef o) => sel = o;
 	}
 
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
 	{
-		DrawerType type;
-
 		public override bool Applies(Thing thing) =>
-			thing.def.drawerType == type;
+			thing.def.drawerType == sel;
 
-		public override string GetLabel() => type.ToString();
+		public override string GetLabel() => sel.ToString();
 		public override IEnumerable Options() => Enum.GetValues(typeof(DrawerType));
-		public override void Callback(DrawerType o) => type = o;
+		public override void Callback(DrawerType o) => sel = o;
 	}
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
 	{
-		BodyPartDef partDef;
-
 		public override bool Applies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return partDef == null
+			return sel == null
 				? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty()
-				: pawn.RaceProps.body.GetPartsWithDef(partDef)
+				: pawn.RaceProps.body.GetPartsWithDef(sel)
 					.Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
-		public override string GetLabel() => partDef?.LabelCap ?? NullOption();
+		public override string GetLabel() => sel?.LabelCap ?? NullOption();
 		public override string NullOption() => "Any";
 		public override IEnumerable Options()
 		{
@@ -392,19 +386,19 @@ namespace List_Everything
 				: DefDatabase<BodyPartDef>.AllDefs;
 		}
 		public override string NameFor(BodyPartDef o) => o.LabelCap;
-		public override void Callback(BodyPartDef o) => partDef = o;
+		public override void Callback(BodyPartDef o) => sel = o;
 	}
 
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
-		Area area = Find.CurrentMap.areaManager.Home;
+		public ListFilterArea() => sel = Find.CurrentMap.areaManager.Home;
 
 		public override bool Applies(Thing thing) =>
-			area[thing.PositionHeld];
+			sel[thing.PositionHeld];
 
-		public override string GetLabel() => area.Label;
+		public override string GetLabel() => sel.Label;
 		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas;
 		public override string NameFor(Area o) => o.Label;
-		public override void Callback(Area o) => area = o;
+		public override void Callback(Area o) => sel = o;
 	}
 }
