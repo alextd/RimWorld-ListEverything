@@ -44,7 +44,7 @@ namespace List_Everything
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return enabled ? list.Where(t => Applies(t) == include) : list;
+			return enabled ? list.Where(t => Applies(t.GetInnerThing()) == include) : list;
 		}
 		public abstract bool Applies(Thing list);
 
