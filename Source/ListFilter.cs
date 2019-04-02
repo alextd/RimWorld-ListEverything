@@ -435,7 +435,7 @@ namespace List_Everything
 					if (row.ButtonText(TraitName(traitDef)))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						foreach (TraitDef tDef in DefDatabase<TraitDef>.AllDefs)
+						foreach (TraitDef tDef in DefDatabase<TraitDef>.AllDefs.OrderBy(t => TraitName(t)))
 						{
 							options.Add(new FloatMenuOption(TraitName(tDef), () => {
 								traitDef = tDef;
@@ -467,7 +467,7 @@ namespace List_Everything
 								foreach(HediffDef hDef in pawn.health.hediffSet.hediffs.Select(h => h.def).ToList())
 									hediffsOnMap.Add(hDef);
 
-						foreach (HediffDef hDef in hediffsOnMap)
+						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
 							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
 
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
