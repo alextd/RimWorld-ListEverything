@@ -99,7 +99,7 @@
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_HP</defName>
-		<label>Hit Points</label>
+		<label>Health %</label>
 		<filterClass>List_Everything.ListFilterHP</filterClass>
 	</List_Everything.ListFilterDef>
 

@@ -286,9 +286,15 @@ namespace List_Everything
 	{
 		FloatRange range = FloatRange.ZeroToOne;
 
-		public override bool Applies(Thing thing) =>
-			thing.def.useHitPoints &&
-			range.Includes((float)thing.HitPoints / thing.MaxHitPoints);
+		public override bool Applies(Thing thing)
+		{
+			float? pct = null;
+			if (thing is Pawn pawn)
+				pct = pawn.health.summaryHealth.SummaryHealthPercent;
+			if (thing.def.useHitPoints)
+				pct = (float)thing.HitPoints / thing.MaxHitPoints;
+			return pct != null && range.Includes(pct.Value);
+		}
 
 		public override bool DrawOption(Rect rect)
 		{
