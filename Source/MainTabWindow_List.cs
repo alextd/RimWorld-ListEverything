@@ -93,7 +93,7 @@ namespace List_Everything
 					map.GetChildHolders(holders);
 					List<Thing> list = new List<Thing>();
 					foreach (IThingHolder holder in holders.Where(ContentsUtility.CanPeekInventory))
-						list.AddRange(ContentsUtility.AllKnownThings(map));
+						list.AddRange(ContentsUtility.AllKnownThings(holder));
 					allThings = list;
 					break;
 				case BaseListType.Items:

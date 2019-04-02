@@ -19,7 +19,7 @@ namespace List_Everything
 			DebugSettings.godMode ||
 			(holder is Building_Casket c ? c.get_contentsKnown() : true);
 
-		public static List<Thing> AllKnownThings(Map map)
+		public static List<Thing> AllKnownThings(IThingHolder map)
 		{
 			List<Thing> knownThings = new List<Thing>();
 			ThingOwnerUtility.GetAllThingsRecursively(map, knownThings, true, ContentsUtility.CanPeekInventory);
