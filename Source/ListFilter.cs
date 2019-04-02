@@ -220,12 +220,6 @@ namespace List_Everything
 		}
 	}
 
-	class ListFilterPlant : ListFilter
-	{
-		public override bool Applies(Thing thing) =>
-			thing.def.category == ThingCategory.Plant;
-	}
-
 	class ListFilterClassType : ListFilterDropDown
 	{
 		Type type = typeof(Thing);
