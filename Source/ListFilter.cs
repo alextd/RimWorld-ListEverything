@@ -369,7 +369,7 @@ namespace List_Everything
 		SkillDef skillDef = SkillDefOf.Animals;
 		IntRange skillRange = new IntRange(10, 20);
 
-		TraitDef traitDef = TraitDefOf.Beauty;
+		TraitDef traitDef = TraitDefOf.Beauty;	//Todo: beauty shows even if it's not on map
 		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
 		public static string TraitName(TraitDef def) =>
 			def.degreeDatas.Count == 1 ?
@@ -465,7 +465,6 @@ namespace List_Everything
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
-					//TODO: Trait degrees
 					break;
 				case PawnFilterProp.Hediff:
 					if (row.ButtonText(hediffDef?.LabelCap ?? "None"))
