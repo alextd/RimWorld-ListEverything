@@ -184,7 +184,6 @@ namespace List_Everything
 
 			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
 				RemakeList();
-
 			TooltipHandler.TipRegion(refreshRect, "The list is saved when filter is changed - new items aren't added until refreshed");
 
 			Widgets.Label(labelRect, $"Listing: {BaseTypeDesc()}");
@@ -208,6 +207,10 @@ namespace List_Everything
 
 			//List base
 			DoListingBase(listing);
+			listing.CheckboxLabeled(
+				"Restrict Filter Options To Available Things",
+				ref ContentsUtility.onlyAvailable,
+				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
 			//Filters
 			listing.GapLine();

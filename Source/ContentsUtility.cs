@@ -26,6 +26,7 @@ namespace List_Everything
 			return knownThings;
 		}
 
+		public static bool onlyAvailable = true;
 		public static HashSet<T> AvailableOnMap<T>(Func<Thing, IEnumerable<T>> validGetter)
 		{
 			HashSet<T> ret = new HashSet<T>();

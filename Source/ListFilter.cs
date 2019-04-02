@@ -337,8 +337,9 @@ namespace List_Everything
 		public override string NullOption() => "No Stuff";
 		public override IEnumerable<object> Options()
 		{
-			return ContentsUtility.AvailableOnMap<ThingDef>(t => t.Stuff).Cast<object>();
-			//return DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
+			return ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap<ThingDef>(t => t.Stuff).Cast<object>()
+				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
 		}
 		public override string NameFor(object o) => (o as ThingDef).LabelCap;
 		public override void Callback(object o) => stuffDef = o as ThingDef;
@@ -449,9 +450,11 @@ namespace List_Everything
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 
-						HashSet<TraitDef> traitsOnMap = ContentsUtility.AvailableOnMap(
-							t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>());
-						foreach (TraitDef tDef in traitsOnMap)
+						IEnumerable<TraitDef> traitsOnMap = ContentsUtility.onlyAvailable
+							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
+							: DefDatabase<TraitDef>.AllDefs;
+
+						foreach (TraitDef tDef in traitsOnMap.OrderBy(TraitName))
 						{
 							options.Add(new FloatMenuOption(TraitName(tDef), () => {
 								traitDef = tDef;
@@ -476,8 +479,9 @@ namespace List_Everything
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 						options.Add(new FloatMenuOption("None", () => hediffDef = null));
 
-						HashSet<HediffDef> hediffsOnMap = ContentsUtility.AvailableOnMap(
-							t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>());
+						IEnumerable<HediffDef> hediffsOnMap = ContentsUtility.onlyAvailable
+							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
+							: DefDatabase<HediffDef>.AllDefs;
 
 						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
 							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
