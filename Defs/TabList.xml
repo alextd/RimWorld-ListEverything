@@ -111,7 +111,7 @@
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Stuff</defName>
-		<label>Made From:</label>
+		<label>Made From</label>
 		<filterClass>List_Everything.ListFilterStuff</filterClass>
 	</List_Everything.ListFilterDef>
 
