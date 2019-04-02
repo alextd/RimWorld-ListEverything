@@ -381,8 +381,16 @@ namespace List_Everything
 		public override bool Applies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
-			if (pawn == null) return hediffDef == null;
-			switch(prop)
+			if (pawn == null)
+			{
+				switch (prop)
+				{
+					case PawnFilterProp.Trait: return traitDef == null;
+					case PawnFilterProp.Hediff: return hediffDef == null;
+				}
+				return false;
+			}
+			switch (prop)
 			{
 				case PawnFilterProp.Skill:
 					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
