@@ -335,7 +335,11 @@ namespace List_Everything
 
 		public override string GetLabel() => stuffDef?.LabelCap ?? NullOption();
 		public override string NullOption() => "No Stuff";
-		public override IEnumerable<object> Options() => DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
+		public override IEnumerable<object> Options()
+		{
+			return ContentsUtility.AvailableOnMap<ThingDef>(t => t.Stuff).Cast<object>();
+			//return DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff).Cast<object>();
+		}
 		public override string NameFor(object o) => (o as ThingDef).LabelCap;
 		public override void Callback(object o) => stuffDef = o as ThingDef;
 	}

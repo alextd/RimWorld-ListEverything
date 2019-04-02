@@ -35,5 +35,15 @@ namespace List_Everything
 
 			return ret;
 		}
+
+		public static HashSet<T> AvailableOnMap<T>(Func<Thing, T> validGetter)
+		{
+			HashSet<T> ret = new HashSet<T>();
+			foreach (Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
+				if(validGetter(t) is T def)
+					ret.Add(def);
+
+			return ret;
+		}
 	}
 }
