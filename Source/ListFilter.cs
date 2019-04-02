@@ -375,7 +375,7 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return partDef == null 
+			return partDef == null
 				? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty()
 				: pawn.RaceProps.body.GetPartsWithDef(partDef)
 					.Any(r => pawn.health.hediffSet.PartIsMissing(r));
@@ -393,5 +393,18 @@ namespace List_Everything
 		}
 		public override string NameFor(object o) => (o as BodyPartDef).LabelCap;
 		public override void Callback(object o) => partDef = o as BodyPartDef;
+	}
+
+	class ListFilterArea : ListFilterDropDown
+	{
+		Area area = Find.CurrentMap.areaManager.Home;
+
+		public override bool Applies(Thing thing) =>
+			area[thing.PositionHeld];
+
+		public override string GetLabel() => area.Label;
+		public override IEnumerable<object> Options() => Find.CurrentMap.areaManager.AllAreas.Cast<object>();
+		public override string NameFor(object o) => (o as Area).Label;
+		public override void Callback(object o) => area = o as Area;
 	}
 }
