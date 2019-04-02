@@ -366,9 +366,32 @@ namespace List_Everything
 		public override void Callback(object o) => type = (DrawerType)o;
 	}
 
-	class ListFilterHeadless : ListFilter
+	class ListFilterMissingBodyPart : ListFilterDropDown
 	{
-		public override bool Applies(Thing thing) =>
-			thing is Pawn p && !p.health.hediffSet.HasHead;
+		BodyPartDef partDef;
+
+		public override bool Applies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return partDef == null 
+				? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty()
+				: pawn.RaceProps.body.GetPartsWithDef(partDef)
+					.Any(r => pawn.health.hediffSet.PartIsMissing(r));
+		}
+
+		public override string GetLabel() => partDef?.LabelCap ?? NullOption();
+		public override string NullOption() => "Any";
+		public override IEnumerable<object> Options()
+		{
+			return ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(
+					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>()
+					).Cast<object>()
+				: DefDatabase<BodyPartDef>.AllDefs.Cast<object>();
+		}
+		public override string NameFor(object o) => (o as BodyPartDef).LabelCap;
+		public override void Callback(object o) => partDef = o as BodyPartDef;
 	}
 }
