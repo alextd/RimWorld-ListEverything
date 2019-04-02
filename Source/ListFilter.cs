@@ -444,7 +444,10 @@ namespace List_Everything
 					if (row.ButtonText(TraitName(traitDef)))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						foreach (TraitDef tDef in DefDatabase<TraitDef>.AllDefs.OrderBy(t => TraitName(t)))
+
+						HashSet<TraitDef> traitsOnMap = ContentsUtility.AvailableOnMap(
+							t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>());
+						foreach (TraitDef tDef in traitsOnMap)
 						{
 							options.Add(new FloatMenuOption(TraitName(tDef), () => {
 								traitDef = tDef;
@@ -471,7 +474,7 @@ namespace List_Everything
 						options.Add(new FloatMenuOption("None", () => hediffDef = null));
 
 						HashSet<HediffDef> hediffsOnMap = ContentsUtility.AvailableOnMap(
-							t => t is Pawn p ? p.health.hediffSet.hediffs.Select(h => h.def) : Enumerable.Empty<HediffDef>());
+							t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>());
 
 						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
 							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
