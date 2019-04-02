@@ -173,7 +173,7 @@ namespace List_Everything
 
 		public override string GetLabel() => des?.defName ?? NullOption();
 		public override string NullOption() => "Any";
-		public override IEnumerable<object> Options() => DefDatabase<DesignationDef>.AllDefs.Cast<object>();
+		public override IEnumerable<object> Options() => DefDatabase<DesignationDef>.AllDefs.OrderBy(d=>d.defName).Cast<object>();
 		public override string NameFor(object o) => (o as DesignationDef).defName;
 		public override void Callback(object o) => des = o as DesignationDef;
 	}
@@ -229,7 +229,7 @@ namespace List_Everything
 		public override bool Applies(Thing thing) =>
 			type.IsAssignableFrom(thing.GetType());
 
-		public static List<object> types = typeof(Thing).AllSubclassesNonAbstract().Cast<object>().ToList();
+		public static List<object> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).Cast<object>().ToList();
 		public override string GetLabel() => type.ToString();
 		public override IEnumerable<object> Options() => types;
 		public override void Callback(object o) => type = o as Type;
