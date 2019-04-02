@@ -129,7 +129,7 @@ namespace List_Everything
 			switch (baseType)
 			{
 				case BaseListType.ThingRequestGroup:
-					return $"Group: \"{listGroup}\"";
+					return "ThingRequestGroup";
 				case BaseListType.Buildings:
 					return "Colonist buildings";
 				case BaseListType.People:
