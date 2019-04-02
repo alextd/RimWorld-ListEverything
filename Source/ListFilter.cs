@@ -150,7 +150,7 @@ namespace List_Everything
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			if (Widgets.ButtonText(rect.RightPart(0.3f), GetLabel()))
+			if (Widgets.ButtonText(rect.RightPart(0.4f), GetLabel()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				if (NullOption() is string nullOption)
