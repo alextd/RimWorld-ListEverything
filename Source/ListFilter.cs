@@ -500,4 +500,16 @@ namespace List_Everything
 			return false;
 		}
 	}
+
+	class ListFilterDrawerType : ListFilterDropDown
+	{
+		DrawerType type;
+
+		public override bool Applies(Thing thing) =>
+			thing.def.drawerType == type;
+
+		public override string GetLabel() => type.ToString();
+		public override IEnumerable<object> Options() => Enum.GetValues(typeof(DrawerType)).Cast<object>();
+		public override void Callback(object o) => type = (DrawerType)o;
+	}
 }
