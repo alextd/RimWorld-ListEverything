@@ -183,7 +183,7 @@ namespace List_Everything
 		RotStage stage = RotStage.Fresh;
 
 		public override bool Applies(Thing thing) =>
-			thing.GetRotStage() == stage;
+			thing.TryGetComp<CompRottable>() is CompRottable rot && rot.Stage == stage;
 
 		public override string GetLabel() => stage.ToString();
 		public override IEnumerable<object> Options() => Enum.GetValues(typeof(RotStage)).Cast<object>();
