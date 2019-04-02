@@ -51,7 +51,9 @@ namespace List_Everything
 		{
 			All,
 			Items,
-			People,
+			Everyone,
+			Colonists,
+			Animals,
 			Buildings,
 			Plants,
 			Inventory,
@@ -61,7 +63,7 @@ namespace List_Everything
 			Filth
 		};
 		BaseListType[] normalTypes = 
-			{ BaseListType.All, BaseListType.Items, BaseListType.People,
+			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
 			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
 		BaseListType baseType = BaseListType.All;
 
@@ -99,8 +101,14 @@ namespace List_Everything
 				case BaseListType.Items:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
 					break;
-				case BaseListType.People:
+				case BaseListType.Everyone:
 					allThings = map.mapPawns.AllPawnsSpawned.Cast<Thing>();
+					break;
+				case BaseListType.Colonists:
+					allThings = map.mapPawns.FreeColonistsSpawned.Cast<Thing>();
+					break;
+				case BaseListType.Animals:
+					allThings = map.mapPawns.AllPawnsSpawned.Where(p => !p.RaceProps.Humanlike).Cast<Thing>();
 					break;
 				case BaseListType.Haulables:
 					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
@@ -135,8 +143,6 @@ namespace List_Everything
 					return "ThingRequestGroup";
 				case BaseListType.Buildings:
 					return "Colonist buildings";
-				case BaseListType.People:
-					return "People and Animals";
 				case BaseListType.Haulables:
 					return "Things to be hauled";
 				case BaseListType.Mergables:
