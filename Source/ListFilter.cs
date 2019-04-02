@@ -220,6 +220,12 @@ namespace List_Everything
 		}
 	}
 
+	class ListFilterPlantHarvest : ListFilter
+	{
+		public override bool Applies(Thing thing) =>
+			thing is Plant plant && plant.HarvestableNow;
+	}
+
 	class ListFilterClassType : ListFilterDropDown
 	{
 		Type type = typeof(Thing);
