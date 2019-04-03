@@ -17,7 +17,7 @@ namespace List_Everything
 	}
 	class ListFilterGroup : ListFilter
 	{
-		List<ListFilter> filters = new List<ListFilter>();
+		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
 		public override bool FilterApplies(Thing t) => filters.Any(f => f.AppliesTo(t));
 		
 		public override bool DrawOption(Rect rect)
