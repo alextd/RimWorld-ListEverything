@@ -51,7 +51,7 @@ namespace List_Everything
 		{
 			return enabled ? list.Where(t => AppliesTo(t)) : list;
 		}
-		public bool AppliesTo(Thing thing) => FilterApplies(thing.GetInnerThing()) || FilterApplies(thing) == include;
+		public bool AppliesTo(Thing thing) => (FilterApplies(thing.GetInnerThing()) || FilterApplies(thing)) == include;
 
 		public abstract bool FilterApplies(Thing thing);
 
