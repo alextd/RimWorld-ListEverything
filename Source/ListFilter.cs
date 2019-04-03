@@ -51,6 +51,9 @@ namespace List_Everything
 		{
 			return enabled ? list.Where(t => AppliesTo(t)) : list;
 		}
+
+		//This can be problematic for minified things: We want the qualities of the inner things,
+		//But position/status of outer thing. So it just checks both -- but then something like 'no stuff' always applies. Oh well
 		public bool AppliesTo(Thing thing) => (FilterApplies(thing.GetInnerThing()) || FilterApplies(thing)) == include;
 
 		public abstract bool FilterApplies(Thing thing);
