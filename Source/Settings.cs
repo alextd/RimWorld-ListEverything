@@ -37,7 +37,7 @@ namespace List_Everything
 
 		public void Save(string name, List<ListFilter> filters)
 		{
-			savedFilters[name] = filters.ListFullCopy();
+			savedFilters[name] = filters.CloneAll();
 			Write();
 		}
 
@@ -61,7 +61,6 @@ namespace List_Everything
 
 		public override void ExposeData()
 		{
-			Log.Message($"ExposeData: {Scribe.mode}");
 			Scribe_Collections.Look(ref savedFilters, "savedFilters", LookMode.Value, LookMode.Deep);
 		}
 	}
