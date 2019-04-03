@@ -423,4 +423,10 @@ namespace List_Everything
 		public override string NameFor(Area o) => o.Label;
 		public override void Callback(Area o) => sel = o;
 	}
+
+	class ListFilterDeterioration : ListFilter
+	{
+		public override bool FilterApplies(Thing thing) =>
+			SteadyEnvironmentEffects.FinalDeteriorationRate(thing) >= 0.001f;
+	}
 }
