@@ -13,7 +13,7 @@
 	<KeyBindingDef>
 		<category>MainTabs</category>
 		<defName>OpenFindTab</defName>
-		<label>List Everything: Find by name</label>
+		<label>List Everything: Find by name (+ Ctrl)</label>
 		<defaultKeyCodeA>F</defaultKeyCodeA>
 	</KeyBindingDef>
 
