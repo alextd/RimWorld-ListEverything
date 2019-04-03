@@ -30,7 +30,7 @@ namespace List_Everything
 	}
 
 	[StaticConstructorOnStartup]
-	public abstract class ListFilter
+	public abstract class ListFilter : IExposable
 	{
 		public int id;//For window purposes
 		public static int nextID = 1;
@@ -111,6 +111,9 @@ namespace List_Everything
 		private bool shouldFocus;
 		public void Focus() => shouldFocus = true;
 		protected virtual void DoFocus() { }
+
+
+		public virtual void ExposeData() { }
 	}
 
 	class ListFilterName : ListFilter

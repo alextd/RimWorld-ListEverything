@@ -19,5 +19,16 @@ namespace List_Everything
 			
 			harmony.PatchAll();
 		}
+
+		public override void DoSettingsWindowContents(Rect inRect)
+		{
+			base.DoSettingsWindowContents(inRect);
+			GetSettings<Settings>().DoWindowContents(inRect);
+		}
+
+		public override string SettingsCategory()
+		{
+			return "List Everything";
+		}
 	}
 }

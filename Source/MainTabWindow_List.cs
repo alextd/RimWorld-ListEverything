@@ -225,10 +225,26 @@ namespace List_Everything
 
 			//Bottom Buttons
 			Rect buttonRect = listing.GetRect(Text.LineHeight);
-			buttonRect = buttonRect.LeftPart(0.5f);
-			
+			buttonRect = buttonRect.LeftPart(0.25f);
+
 			if (Widgets.ButtonText(buttonRect, "Add"))
 				AddFilterFloat(filters);
+
+			buttonRect.x += buttonRect.width;
+			if (Widgets.ButtonText(buttonRect, "Save"))
+				Settings.Get().Save($"TEST{Rand.Value}", filters);
+
+			buttonRect.x += buttonRect.width;
+			if (Settings.Get().savedFilters.Count > 0 &&
+				Widgets.ButtonText(buttonRect, "Load"))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (var kvp in Settings.Get().savedFilters)
+					options.Add(new FloatMenuOption(kvp.Key, () => filters = kvp.Value.internalList.ToList()));
+				FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
+				floatMenu.vanishIfMouseDistant = true;
+				Find.WindowStack.Add(floatMenu);
+			}
 
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Reset All"))
