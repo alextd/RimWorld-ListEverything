@@ -180,13 +180,6 @@ namespace List_Everything
 
 		//Filters:
 		public List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
-
-		[StaticConstructorOnStartup]
-		static class TexButtonNotInternalForReal
-		{
-			public static readonly Texture2D Reveal = ContentFinder<Texture2D>.Get("UI/Buttons/Dev/Reveal", true);
-			public static readonly Texture2D Collapse = ContentFinder<Texture2D>.Get("UI/Buttons/Dev/Collapse", true);
-		}
 		public void DoFilter(Rect rect)
 		{
 			Text.Font = GameFont.Medium;
@@ -229,23 +222,13 @@ namespace List_Everything
 
 			//Filters
 			listing.GapLine();
-			foreach (ListFilter filter in filters)
-				DoFilterRow(filter, listing);
-
-			if (filters.Any(f => f.delete))
-			{
-				filters = filters.FindAll(f => !f.delete);
+			if (DoFilters(listing, filters))
 				RemakeList();
-			}
 
+			listing.GapLine();
 			if (listing.ButtonText("Add Filter"))
 			{
-				List<FloatMenuOption> filterClasses = new List<FloatMenuOption>();
-				foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => Prefs.DevMode || !d.devOnly))
-					filterClasses.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
-				FloatMenu floatMenu = new FloatMenu(filterClasses) { onCloseCallback = RemakeList };
-				floatMenu.vanishIfMouseDistant = true;
-				Find.WindowStack.Add(floatMenu);
+				AddFilterFloat(filters);
 			}
 			if (listing.ButtonText("Reset Filter"))
 			{
@@ -255,10 +238,24 @@ namespace List_Everything
 			listing.End();
 		}
 
-		public void DoFilterRow(ListFilter filter, Listing_Standard listing)
+		public static bool DoFilters(Listing_Standard listing, List<ListFilter> filters)
 		{
-			if (filter.Listing(listing))
-				RemakeList();
+			bool changed = false;
+			foreach (ListFilter filter in filters)
+				changed |= filter.Listing(listing);
+
+			filters.RemoveAll(f => f.delete);
+			return changed;
+		}
+
+		public static void AddFilterFloat(List<ListFilter> filters, params ListFilterDef[] exclude)
+		{
+			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => !exclude.Contains(d) && (Prefs.DevMode || !d.devOnly)))
+				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
+			FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
+			floatMenu.vanishIfMouseDistant = true;
+			Find.WindowStack.Add(floatMenu);
 		}
 
 

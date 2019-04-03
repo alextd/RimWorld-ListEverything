@@ -19,6 +19,7 @@ namespace List_Everything
 	public static class ListFilterMaker
 	{
 		public static ListFilterDef Filter_Name;
+		public static ListFilterDef Filter_Group;
 
 		public static ListFilter MakeFilter(ListFilterDef def)
 		{
@@ -48,22 +49,25 @@ namespace List_Everything
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return enabled ? list.Where(t => (Applies(t.GetInnerThing()) || Applies(t)) == include) : list;
+			return enabled ? list.Where(t => AppliesTo(t)) : list;
 		}
-		public abstract bool Applies(Thing list);
+		public bool AppliesTo(Thing thing) => FilterApplies(thing.GetInnerThing()) || FilterApplies(thing) == include;
+
+		public abstract bool FilterApplies(Thing thing);
 
 		public bool Listing(Listing_Standard listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.yMin, UIDirection.LeftThenDown, rowRect.width);
 
+			bool changed = false;
 			//Clear button
 			if (row.ButtonIcon(CancelTex, "Delete this filter"))
 			{
 				delete = true;
+				changed = true;
 			}
 
-			bool changed = false;
 			//Toggle button
 			if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Toggle This Filter"))
 			{
@@ -82,6 +86,7 @@ namespace List_Everything
 			//Draw option row
 			rowRect.width = row.FinalX;
 			changed |= DrawOption(rowRect);
+			changed |= DrawMore(listing);
 			if(shouldFocus)
 			{
 				DoFocus();
@@ -98,6 +103,7 @@ namespace List_Everything
 			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
+		public virtual bool DrawMore(Listing_Standard listing) => false;
 
 		private bool shouldFocus;
 		public void Focus() => shouldFocus = true;
@@ -107,7 +113,7 @@ namespace List_Everything
 	class ListFilterName : ListFilter
 	{
 		string name = "";
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.Label.ToLower().Contains(name.ToLower());
 
 		public override bool DrawOption(Rect rect)
@@ -143,13 +149,13 @@ namespace List_Everything
 
 	class ListFilterForbidden : ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.IsForbidden(Faction.OfPlayer);
 	}
 
 	class ListFilterForbiddable : ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 	}
 
@@ -185,7 +191,7 @@ namespace List_Everything
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			sel != null ? 
 			(sel.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, sel) != null :
 			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
@@ -203,7 +209,7 @@ namespace List_Everything
 	{
 		public ListFilterFreshness() => sel = RotStage.Fresh;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.TryGetComp<CompRottable>() is CompRottable rot && rot.Stage == sel;
 
 		public override string GetLabel() => sel.ToString();
@@ -213,7 +219,7 @@ namespace List_Everything
 
 	class ListFilterRottable : ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.HasComp(typeof(CompRottable));
 	}
 
@@ -221,7 +227,7 @@ namespace List_Everything
 	{
 		FloatRange range = FloatRange.ZeroToOne;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing is Plant p && range.Includes(p.Growth);
 		public override bool DrawOption(Rect rect)
 		{
@@ -239,7 +245,7 @@ namespace List_Everything
 
 	class ListFilterPlantHarvest : ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing is Plant plant && plant.HarvestableNow;
 	}
 
@@ -247,7 +253,7 @@ namespace List_Everything
 	{
 		public ListFilterClassType() => sel = typeof(Thing);
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
@@ -260,7 +266,7 @@ namespace List_Everything
 	{
 		public ListFilterFaction() => sel = Faction.OfPlayer;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			sel == null ?
 				thing.Faction == null || thing.Faction.def.hidden:
 				thing.Faction == sel;
@@ -281,7 +287,7 @@ namespace List_Everything
 	{
 		public ListFilterCategory() => sel = ThingCategoryDefOf.Root;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.IsWithinCategory(sel);
 		
 		public override string GetLabel() => sel.LabelCap;
@@ -292,13 +298,13 @@ namespace List_Everything
 
 	class ListFilterMineable : ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.mineable;
 	}
 
 	class ListFilterResourceRock: ListFilter
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.building?.isResourceRock ?? false;
 	}
 
@@ -306,7 +312,7 @@ namespace List_Everything
 	{
 		FloatRange range = FloatRange.ZeroToOne;
 
-		public override bool Applies(Thing thing)
+		public override bool FilterApplies(Thing thing)
 		{
 			float? pct = null;
 			if (thing is Pawn pawn)
@@ -334,7 +340,7 @@ namespace List_Everything
 	{
 		QualityRange range = QualityRange.All;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.TryGetQuality(out QualityCategory qc) &&
 			range.Includes(qc);
 
@@ -354,7 +360,7 @@ namespace List_Everything
 
 	class ListFilterStuff : ListFilterDropDown<ThingDef>
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.Stuff == sel || thing is IConstructible c && c.UIStuff() == sel;
 
 		public override string GetLabel() => sel?.LabelCap ?? NullOption();
@@ -371,7 +377,7 @@ namespace List_Everything
 
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
 	{
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			thing.def.drawerType == sel;
 
 		public override string GetLabel() => sel.ToString();
@@ -381,7 +387,7 @@ namespace List_Everything
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
 	{
-		public override bool Applies(Thing thing)
+		public override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -409,7 +415,7 @@ namespace List_Everything
 	{
 		public ListFilterArea() => sel = Find.CurrentMap.areaManager.Home;
 
-		public override bool Applies(Thing thing) =>
+		public override bool FilterApplies(Thing thing) =>
 			sel[thing.PositionHeld];
 
 		public override string GetLabel() => sel.Label;

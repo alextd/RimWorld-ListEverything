@@ -48,7 +48,7 @@ namespace List_Everything
 
 		ListFilter nameFilter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
 
-		public override bool Applies(Thing thing)
+		public override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null)
@@ -72,7 +72,7 @@ namespace List_Everything
 						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
 				case PawnFilterProp.Item:
 					return ThingOwnerUtility.GetAllThingsRecursively(pawn)
-						.Any(t => nameFilter.Applies(t));
+						.Any(t => nameFilter.FilterApplies(t));
 			}
 			return false;
 		}
