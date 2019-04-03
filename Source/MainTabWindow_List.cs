@@ -215,10 +215,6 @@ namespace List_Everything
 
 			//List base
 			DoListingBase(listing);
-			listing.CheckboxLabeled(
-				"Restrict Filter Options To Available Things",
-				ref ContentsUtility.onlyAvailable,
-				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
 			//Filters
 			listing.GapLine();
@@ -237,6 +233,12 @@ namespace List_Everything
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Reset All"))
 				Reset();
+
+			//Global Options
+			listing.CheckboxLabeled(
+				"Restrict Filter Options To Available Things",
+				ref ContentsUtility.onlyAvailable,
+				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
 			listing.End();
 		}
