@@ -37,7 +37,7 @@ namespace List_Everything
 
 		public void Save(string name, List<ListFilter> filters)
 		{
-			savedFilters[name] = filters.ToList();
+			savedFilters[name] = filters.ListFullCopy();
 			Write();
 		}
 

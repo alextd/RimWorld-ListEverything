@@ -32,7 +32,7 @@ namespace List_Everything
 	[StaticConstructorOnStartup]
 	public abstract class ListFilter : IExposable
 	{
-		public int id;//For window purposes
+		public int id;//For window focus purposes
 		public static int nextID = 1;
 		public ListFilterDef def;
 
@@ -40,7 +40,7 @@ namespace List_Everything
 		{
 			id = nextID++;
 		}
-
+	
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
 		public bool enabled = true;
@@ -111,14 +111,23 @@ namespace List_Everything
 		private bool shouldFocus;
 		public void Focus() => shouldFocus = true;
 		protected virtual void DoFocus() { }
-
-
-		public virtual void ExposeData() { }
+		
+		public virtual void ExposeData()
+		{
+			Scribe_Defs.Look(ref def, "def");
+			Scribe_Values.Look(ref enabled, "enabled", true);
+			Scribe_Values.Look(ref include, "include", true);
+		}
 	}
 
 	class ListFilterName : ListFilter
 	{
 		string name = "";
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref name, "name", "");
+		}
 		public override bool FilterApplies(Thing thing) =>
 			thing.Label.ToLower().Contains(name.ToLower());
 
