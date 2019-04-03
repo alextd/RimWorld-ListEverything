@@ -26,8 +26,7 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\List Everything - Release\Assemblies\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants></DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -53,16 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContentsUtility.cs" />
-    <Compile Include="DebugLog.cs" />
-    <Compile Include="FindKeystrokeGameComp.cs" />
-    <Compile Include="ListFilter.cs" />
-    <Compile Include="ListFilterPawnProp.cs" />
-    <Compile Include="List_Everything.cs" />
-    <Compile Include="MainTabWindow_List.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrySelect.cs" />
-    <Compile Include="GetInnerThing.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
