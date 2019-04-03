@@ -20,7 +20,7 @@
 	
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Group</defName>
-		<label>filter group (any)</label>
+		<label>filter group</label>
 		<filterClass>List_Everything.ListFilterGroup</filterClass>
 	</List_Everything.ListFilterDef>
 	

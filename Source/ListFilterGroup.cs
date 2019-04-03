@@ -20,6 +20,12 @@ namespace List_Everything
 		List<ListFilter> filters = new List<ListFilter>();
 		public override bool FilterApplies(Thing t) => filters.Any(f => f.AppliesTo(t));
 		
+		public override bool DrawOption(Rect rect)
+		{
+			Widgets.Label(rect, "Matching any of:" );
+			return false;
+		}
+
 		public override bool DrawMore(Listing_Standard outerListing)
 		{
 			//Get rect enough for each filter + Add row
