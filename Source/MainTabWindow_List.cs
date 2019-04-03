@@ -226,14 +226,17 @@ namespace List_Everything
 				RemakeList();
 
 			listing.GapLine();
-			if (listing.ButtonText("Add Filter"))
-			{
+
+			//Bottom Buttons
+			Rect buttonRect = listing.GetRect(Text.LineHeight);
+			buttonRect = buttonRect.LeftPart(0.5f);
+			
+			if (Widgets.ButtonText(buttonRect, "Add"))
 				AddFilterFloat(filters);
-			}
-			if (listing.ButtonText("Reset Filter"))
-			{
+
+			buttonRect.x += buttonRect.width;
+			if (Widgets.ButtonText(buttonRect, "Reset All"))
 				Reset();
-			}
 
 			listing.End();
 		}
