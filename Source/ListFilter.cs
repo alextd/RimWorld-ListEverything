@@ -126,7 +126,7 @@ namespace List_Everything
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref name, "name", "");
+			Scribe_Values.Look(ref name, "name");
 		}
 		public override bool FilterApplies(Thing thing) =>
 			thing.Label.ToLower().Contains(name.ToLower());
@@ -177,6 +177,26 @@ namespace List_Everything
 	abstract class ListFilterDropDown<T> : ListFilter
 	{
 		public T sel;
+		public override void ExposeData()
+		{
+			base.ExposeData();
+
+			if (typeof(Def).IsAssignableFrom(typeof(T)))
+			{
+				// *magic*
+				Def temp = sel as Def;
+				Scribe_Defs.Look(ref temp, "sel");
+				sel = (T)(object)temp;
+			}
+			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+			{
+				ILoadReferenceable temp = sel as ILoadReferenceable;
+				Scribe_References.Look(ref temp, "sel");
+				sel = (T)(object)temp;
+			}
+			else
+				Scribe_Values.Look(ref sel, "sel");
+		}
 
 		public abstract string GetLabel();
 		public virtual string NullOption() => null;
@@ -241,6 +261,11 @@ namespace List_Everything
 	class ListFilterGrowth : ListFilter
 	{
 		FloatRange range = FloatRange.ZeroToOne;
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref range, "range");
+		}
 
 		public override bool FilterApplies(Thing thing) =>
 			thing is Plant p && range.Includes(p.Growth);
@@ -326,6 +351,11 @@ namespace List_Everything
 	class ListFilterHP : ListFilter
 	{
 		FloatRange range = FloatRange.ZeroToOne;
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref range, "range");
+		}
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -354,6 +384,11 @@ namespace List_Everything
 	class ListFilterQuality : ListFilter
 	{
 		QualityRange range = QualityRange.All;
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref range, "range");
+		}
 
 		public override bool FilterApplies(Thing thing) =>
 			thing.TryGetQuality(out QualityCategory qc) &&

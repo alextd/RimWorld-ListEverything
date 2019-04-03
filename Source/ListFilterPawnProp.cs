@@ -47,6 +47,16 @@ namespace List_Everything
 		HediffDef hediffDef;
 
 		ListFilter nameFilter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref prop, "prop");
+			Scribe_Defs.Look(ref skillDef, "skillDef");
+			Scribe_Defs.Look(ref traitDef, "traitDef");
+			Scribe_Values.Look(ref traitDegree, "traitDegree");
+			Scribe_Defs.Look(ref hediffDef, "hediffDef");
+			Scribe_Deep.Look(ref nameFilter, "nameFilter");
+		}
 
 		public override bool FilterApplies(Thing thing)
 		{

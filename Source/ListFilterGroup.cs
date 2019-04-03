@@ -19,7 +19,13 @@ namespace List_Everything
 	{
 		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
 		public override bool FilterApplies(Thing t) => filters.Any(f => f.AppliesTo(t));
-		
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Collections.Look(ref filters, "filters");
+		}
+
 		public override bool DrawOption(Rect rect)
 		{
 			Widgets.Label(rect, "Matching any of:" );
