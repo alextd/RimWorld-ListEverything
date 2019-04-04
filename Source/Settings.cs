@@ -8,19 +8,6 @@ using RimWorld;
 
 namespace List_Everything
 {
-	class SavedFilter : IExposable
-	{
-		public BaseListType baseType;
-		public List<ListFilter> list = new List<ListFilter>();
-
-		public void ExposeData()
-		{
-			Scribe_Values.Look(ref baseType, "baseType");
-			Scribe_Collections.Look(ref list, "list");
-		}
-	}
-
-
 	class Settings : ModSettings
 	{
 		public Dictionary<string, SavedFilter> savedFilters = new Dictionary<string, SavedFilter>();

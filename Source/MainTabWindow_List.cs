@@ -50,8 +50,6 @@ namespace List_Everything
 			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
 		BaseListType baseType;
 
-		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
-
 		public void Reset()
 		{
 			baseType = BaseListType.All;
@@ -61,87 +59,8 @@ namespace List_Everything
 		List<Thing> listedThings;
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
-		public void RemakeList()
-		{
-			Map map = Find.CurrentMap;
-			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			switch(baseType)
-			{
-				case BaseListType.All:
-					allThings = ContentsUtility.AllKnownThings(map);
-					break;
-				case BaseListType.ThingRequestGroup:
-					allThings = map.listerThings.ThingsInGroup(listGroup);
-					break;
-				case BaseListType.Buildings:
-					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
-					break;
-				case BaseListType.Plants:
-					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
-					break;
-				case BaseListType.Inventory:
-					List<IThingHolder> holders = new List<IThingHolder>();
-					map.GetChildHolders(holders);
-					List<Thing> list = new List<Thing>();
-					foreach (IThingHolder holder in holders.Where(ContentsUtility.CanPeekInventory))
-						list.AddRange(ContentsUtility.AllKnownThings(holder));
-					allThings = list;
-					break;
-				case BaseListType.Items:
-					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableAlways);
-					break;
-				case BaseListType.Everyone:
-					allThings = map.mapPawns.AllPawnsSpawned.Cast<Thing>();
-					break;
-				case BaseListType.Colonists:
-					allThings = map.mapPawns.FreeColonistsSpawned.Cast<Thing>();
-					break;
-				case BaseListType.Animals:
-					allThings = map.mapPawns.AllPawnsSpawned.Where(p => !p.RaceProps.Humanlike).Cast<Thing>();
-					break;
-				case BaseListType.Haulables:
-					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
-					break;
-				case BaseListType.Mergables:
-					allThings = map.listerMergeables.ThingsPotentiallyNeedingMerging();
-					break;
-				case BaseListType.Filth:
-					allThings = map.listerFilthInHomeArea.FilthInHomeArea;
-					break;
-			}
-
-			//Filters
-			allThings = allThings.Where(t => !(t.ParentHolder is Corpse) && !(t.ParentHolder is MinifiedThing));
-			if (!DebugSettings.godMode)
-			{
-				allThings = allThings.Where(t => t.def.drawerType != DrawerType.None);//Probably a good filter
-				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
-			}
-			foreach(ListFilter filter in filters)
-				allThings = filter.Apply(allThings);
-
-			//Sort
-			listedThings = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
-		}
-
-		public void DoListingBase(Listing_Standard listing)
-		{
-			switch (baseType)
-			{
-				case BaseListType.ThingRequestGroup:
-					if (listing.ButtonTextLabeled("Group:", listGroup.ToString()))
-					{
-						List<FloatMenuOption> groups = new List<FloatMenuOption>();
-						foreach (ThingRequestGroup type in Enum.GetValues(typeof(ThingRequestGroup)))
-							groups.Add(new FloatMenuOption(type.ToString(), () => listGroup = type));
-
-						FloatMenu floatMenu = new FloatMenu(groups) { onCloseCallback = RemakeList };
-						floatMenu.vanishIfMouseDistant = true;
-						Find.WindowStack.Add(floatMenu);
-					}
-					break;
-			}
-		}
+		public void RemakeList() =>
+			listedThings = FindList.Get(baseType, filters);
 
 		//Filters:
 		public List<ListFilter> filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
@@ -180,9 +99,6 @@ namespace List_Everything
 
 			Listing_Standard listing = new Listing_Standard();
 			listing.Begin(filterRect);
-
-			//List base
-			DoListingBase(listing);
 
 			//Filters
 			listing.GapLine();
@@ -434,22 +350,6 @@ namespace List_Everything
 			}
 		}
 	}
-	
-	public enum BaseListType
-	{
-		All,
-		Items,
-		Everyone,
-		Colonists,
-		Animals,
-		Buildings,
-		Plants,
-		Inventory,
-		ThingRequestGroup,
-		Haulables,
-		Mergables,
-		Filth
-	};
 
 	public class Dialog_Name : Dialog_Rename
 	{
