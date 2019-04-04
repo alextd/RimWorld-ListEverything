@@ -232,7 +232,7 @@ namespace List_Everything
 
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Save"))
-				Settings.Get().Save($"TEST{Rand.Value}", filters);
+				Find.WindowStack.Add(new Dialog_Name(name => Settings.Get().Save(name, filters)));
 
 			buttonRect.x += buttonRect.width;
 			if (Settings.Get().savedFilters.Count > 0 &&
@@ -444,6 +444,22 @@ namespace List_Everything
 				if (thing.Graphic is Graphic_Cluster)
 					Rand.PopState();
 			}
+		}
+	}
+
+	public class Dialog_Name : Dialog_Rename
+	{
+		Action<string> setNameAction;
+
+		public Dialog_Name(Action<string> act)
+		{
+			curName = "";
+			setNameAction = act;
+		}
+
+		protected override void SetName(string name)
+		{
+			setNameAction(name);
 		}
 	}
 }
