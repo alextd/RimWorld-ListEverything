@@ -33,10 +33,15 @@ namespace List_Everything
 				def.defName;
 
 		ThoughtDef thoughtDef = ThoughtDefOf.AteWithoutTable;
-		public static string ThoughtName(ThoughtDef def) =>
-			def.label?.CapitalizeFirst() ?? 
-			def.stages?.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ?? 
-			def.stages?.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
+		public static string ThoughtName(ThoughtDef def)
+		{
+			string label = 
+				def.label?.CapitalizeFirst() ??
+				def.stages?.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
+				def.stages?.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
+
+			return def.stages?.Count > 1 ? label + "*" : label;
+		}
 		int thoughtStage = 0;
 
 		NeedDef needDef = NeedDefOf.Food;
@@ -284,7 +289,10 @@ namespace List_Everything
 			if (row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				for (int i = 0; i < thoughtDef.stages.Count; i++)
+				IEnumerable<int> stages = ContentsUtility.onlyAvailable ? 
+					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, thoughtDef)) :
+					Enumerable.Range(0, thoughtDef.stages.Count);
+				foreach(int i in stages)
 				{
 					int localI = i;
 					options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
@@ -310,5 +318,21 @@ namespace List_Everything
 				yield return thought.def;
 		}
 
+		public static IEnumerable<int> ThoughtStagesForThing(Thing t, ThoughtDef def)
+		{
+			Pawn pawn = t as Pawn;
+			if (pawn == null) yield break;
+
+			IEnumerable<int> stages = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.def == def).Select(th => th.CurStageIndex);
+			if (stages != null)
+				foreach (int stage in stages)
+					yield return stage;
+
+			List<Thought> thoughts = new List<Thought>();
+			pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.situational.AppendMoodThoughts(thoughts);
+			foreach (Thought thought in thoughts)
+				if (thought.def == def)
+					yield return thought.CurStageIndex;
+		}
 	}
 }
