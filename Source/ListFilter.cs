@@ -446,7 +446,7 @@ namespace List_Everything
 			return sel == null ? stuff != null : stuff == sel;
 		}
 
-		public override string NullOption() => "Any Stuff";
+		public override string NullOption() => "Any";
 		public override IEnumerable Options()
 		{
 			return ContentsUtility.onlyAvailable
@@ -492,19 +492,29 @@ namespace List_Everything
 	{
 		public ListFilterArea() => sel = Find.CurrentMap.areaManager.Home;
 
-		public override bool FilterApplies(Thing thing) =>
-			sel[thing.PositionHeld];
+		public override bool FilterApplies(Thing thing)
+		{
+			IntVec3 pos = thing.PositionHeld;
+			return sel != null ? sel[pos] :
+				Find.CurrentMap.areaManager.AllAreas.Any(a => a[pos]);
+		}
 
+		public override string NullOption() => "Any";
 		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas;
 		public override string NameFor(Area o) => o.Label;
 	}
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			sel.ContainsCell(thing.PositionHeld);
+		public override bool FilterApplies(Thing thing)
+		{
+			IntVec3 pos = thing.PositionHeld;
+			return sel != null ? sel.ContainsCell(thing.PositionHeld) :
+				Find.CurrentMap.zoneManager.ZoneAt(pos) != null;
+		}
 
-		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas;
+		public override string NullOption() => "Any";
+		public override IEnumerable Options() => Find.CurrentMap.zoneManager.AllZones;
 	}
 
 	class ListFilterDeterioration : ListFilter
