@@ -205,14 +205,14 @@ namespace List_Everything
 			if (DoFilters(listing, filters))
 				RemakeList();
 
+			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
+				AddFilterFloat(filters);
+
 			listing.GapLine();
 
 			//Bottom Buttons
 			Rect buttonRect = listing.GetRect(Text.LineHeight);
 			buttonRect = buttonRect.LeftPart(0.25f);
-
-			if (Widgets.ButtonText(buttonRect, "Add"))
-				AddFilterFloat(filters);
 
 			buttonRect.x += buttonRect.width * 2;
 			if (Widgets.ButtonText(buttonRect, "Save"))
