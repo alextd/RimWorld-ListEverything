@@ -215,7 +215,7 @@ namespace List_Everything
 
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Save"))
-				Find.WindowStack.Add(new Dialog_Name(name => Settings.Get().Save(name, baseType, filters)));
+				Find.WindowStack.Add(new Dialog_Name(name => Save(name)));
 
 			buttonRect.x += buttonRect.width;
 			if (Settings.Get().savedFilters.Count > 0 &&
@@ -267,6 +267,18 @@ namespace List_Everything
 			FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
 			floatMenu.vanishIfMouseDistant = true;
 			Find.WindowStack.Add(floatMenu);
+		}
+
+		public void Save(string name)
+		{
+			if (Settings.Get().Has(name))
+			{
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+					"Overwrite saved filter?",
+					 () => Settings.Get().Save(name, baseType, filters)));
+			}
+			else
+				Settings.Get().Save(name, baseType, filters);
 		}
 
 

@@ -31,6 +31,11 @@ namespace List_Everything
 			return LoadedModManager.GetMod<Mod>().GetSettings<Settings>();
 		}
 
+		public bool Has(string name)
+		{
+			return savedFilters.ContainsKey(name);
+		}
+
 		public void Save(string name, BaseListType baseType, List<ListFilter> filters)
 		{
 			savedFilters[name] = new SavedFilter()
