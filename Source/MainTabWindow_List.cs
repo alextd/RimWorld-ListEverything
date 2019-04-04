@@ -72,7 +72,7 @@ namespace List_Everything
 		public void Reset()
 		{
 			baseType = BaseListType.All;
-			filters = new List<ListFilter>() { new ListFilterName() };
+			filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
 			RemakeList();
 		}
 		List<Thing> listedThings;
@@ -179,7 +179,7 @@ namespace List_Everything
 		}
 
 		//Filters:
-		public List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
+		public List<ListFilter> filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
 		public void DoFilter(Rect rect)
 		{
 			Text.Font = GameFont.Medium;

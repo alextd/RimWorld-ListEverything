@@ -52,10 +52,23 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref prop, "prop");
 			Scribe_Defs.Look(ref skillDef, "skillDef");
+			Scribe_Values.Look(ref skillRange, "skillRange");
 			Scribe_Defs.Look(ref traitDef, "traitDef");
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
 			Scribe_Defs.Look(ref hediffDef, "hediffDef");
 			Scribe_Deep.Look(ref nameFilter, "nameFilter");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone();
+			clone.prop = prop;
+			clone.skillDef = skillDef;
+			clone.skillRange = skillRange;
+			clone.traitDef = traitDef;
+			clone.traitDegree = traitDegree;
+			clone.hediffDef = hediffDef;
+			clone.nameFilter = nameFilter;
+			return clone;
 		}
 
 		public override bool FilterApplies(Thing thing)

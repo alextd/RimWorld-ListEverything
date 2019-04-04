@@ -17,13 +17,19 @@ namespace List_Everything
 	}
 	class ListFilterGroup : ListFilter
 	{
-		List<ListFilter> filters = new List<ListFilter>() { new ListFilterName() };
+		List<ListFilter> filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
 		public override bool FilterApplies(Thing t) => filters.Any(f => f.AppliesTo(t));
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
 			Scribe_Collections.Look(ref filters, "filters");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterGroup clone = (ListFilterGroup)base.Clone();
+			clone.filters = filters.Select(f => f.Clone()).ToList();
+			return clone;
 		}
 
 		public override bool DrawOption(Rect rect)

@@ -27,6 +27,7 @@ namespace List_Everything
 			filter.def = def;
 			return filter;
 		}
+		public static ListFilter NameFilter => ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
 	}
 
 	[StaticConstructorOnStartup]
@@ -36,15 +37,15 @@ namespace List_Everything
 		public static int nextID = 1;
 		public ListFilterDef def;
 
-		public ListFilter()
+		protected ListFilter()	// Of course protected here doesn't make subclasses protected sooo ?
 		{
 			id = nextID++;
 		}
 	
 		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
-		public bool enabled = true;
-		public bool include = true;
+		public bool enabled = true; //simply turn off but keep in list
+		public bool include = true;	//or exclude
 		public bool delete;
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
@@ -120,7 +121,9 @@ namespace List_Everything
 		}
 		public virtual ListFilter Clone()
 		{
-			ListFilter clone = (ListFilter)Activator.CreateInstance(def.filterClass);
+			ListFilter clone = ListFilterMaker.MakeFilter(def);
+			clone.enabled = enabled;
+			clone.include = include;
 
 			return clone;
 		}
@@ -134,6 +137,13 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref name, "name");
 		}
+		public override ListFilter Clone()
+		{
+			ListFilterName clone = (ListFilterName)base.Clone();
+			clone.name = name;
+			return clone;
+		}
+
 		public override bool FilterApplies(Thing thing) =>
 			thing.Label.ToLower().Contains(name.ToLower());
 
@@ -203,6 +213,12 @@ namespace List_Everything
 			else
 				Scribe_Values.Look(ref sel, "sel");
 		}
+		public override ListFilter Clone()
+		{
+			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone();
+			clone.sel = sel;
+			return clone;
+		}
 
 		public abstract string GetLabel();
 		public virtual string NullOption() => null;
@@ -271,6 +287,12 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterGrowth clone = (ListFilterGrowth)base.Clone();
+			clone.range = range;
+			return clone;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
@@ -362,6 +384,12 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
+		public override ListFilter Clone()
+		{
+			ListFilterHP clone = (ListFilterHP)base.Clone();
+			clone.range = range;
+			return clone;
+		}
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -394,6 +422,12 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterQuality clone = (ListFilterQuality)base.Clone();
+			clone.range = range;
+			return clone;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
