@@ -13,6 +13,7 @@ namespace List_Everything
 	{
 		Skill,
 		Trait,
+		Need,
 		Health,
 		Inventory
 	}
@@ -30,6 +31,9 @@ namespace List_Everything
 				def.degreeDatas.First().label.CapitalizeFirst() :
 				def.defName;
 
+		NeedDef needDef = NeedDefOf.Food;
+		FloatRange needRange = new FloatRange(0, 0.5f);
+
 		HediffDef hediffDef;
 
 		ListFilter nameFilter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
@@ -37,10 +41,16 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref prop, "prop");
+
 			Scribe_Defs.Look(ref skillDef, "skillDef");
 			Scribe_Values.Look(ref skillRange, "skillRange");
+
 			Scribe_Defs.Look(ref traitDef, "traitDef");
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
+
+			Scribe_Defs.Look(ref needDef, "needDef");
+			Scribe_Values.Look(ref needRange, "needRange");
+
 			Scribe_Defs.Look(ref hediffDef, "hediffDef");
 			Scribe_Deep.Look(ref nameFilter, "nameFilter");
 		}
@@ -48,10 +58,16 @@ namespace List_Everything
 		{
 			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone();
 			clone.prop = prop;
+
 			clone.skillDef = skillDef;
 			clone.skillRange = skillRange;
+
 			clone.traitDef = traitDef;
 			clone.traitDegree = traitDegree;
+
+			clone.needDef = needDef;
+			clone.needRange = needRange;
+
 			clone.hediffDef = hediffDef;
 			clone.nameFilter = nameFilter;
 			return clone;
@@ -75,6 +91,8 @@ namespace List_Everything
 					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 				case PawnFilterProp.Trait:
 					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && trait.Degree == traitDegree;
+				case PawnFilterProp.Need:
+					return pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
 				case PawnFilterProp.Health:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
@@ -110,14 +128,16 @@ namespace List_Everything
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
-					Rect rangeRect = rect;
-					rangeRect.xMin = row.FinalX;
-					IntRange newRange = skillRange;
-					Widgets.IntRange(rangeRect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
-					if (newRange != skillRange)
 					{
-						skillRange = newRange;
-						return true;
+						Rect rangeRect = rect;
+						rangeRect.xMin = row.FinalX;
+						IntRange newRange = skillRange;
+						Widgets.IntRange(rangeRect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
+						if (newRange != skillRange)
+						{
+							skillRange = newRange;
+							return true;
+						}
 					}
 					break;
 				case PawnFilterProp.Trait:
@@ -148,6 +168,29 @@ namespace List_Everything
 							options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					break;
+				case PawnFilterProp.Need:
+					if (row.ButtonText(needDef.LabelCap))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						
+						foreach (NeedDef nDef in DefDatabase<NeedDef>.AllDefs)
+						{
+							options.Add(new FloatMenuOption(nDef.LabelCap, () => needDef = nDef));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					{
+						Rect rangeRect = rect;
+						rangeRect.xMin = row.FinalX;
+						FloatRange newRange = needRange;
+						Widgets.FloatRange(rangeRect, id, ref newRange, valueStyle: ToStringStyle.PercentOne);
+						if (newRange != needRange)
+						{
+							needRange = newRange;
+							return true;
+						}
 					}
 					break;
 				case PawnFilterProp.Health:
