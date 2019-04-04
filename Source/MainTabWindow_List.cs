@@ -227,6 +227,11 @@ namespace List_Everything
 				ref ContentsUtility.onlyAvailable,
 				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
+			listing.CheckboxLabeled(
+				"Search every second",
+				ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh,
+				"The list usually only updates when filters are changed - If the search parameters are not stable, check this on");
+
 			listing.End();
 		}
 
