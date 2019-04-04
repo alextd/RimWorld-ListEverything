@@ -69,7 +69,7 @@ namespace List_Everything
 			Rect headerButRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
 			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
 
-			if (Widgets.ButtonImage(headerButRect, ListFilter.CancelTex))
+			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 				Reset();
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
@@ -134,11 +134,6 @@ namespace List_Everything
 				ref ContentsUtility.onlyAvailable,
 				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
-			listing.CheckboxLabeled(
-				"Search every second",
-				ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh,
-				"The list usually only updates when filters are changed - If the search parameters are not stable, check this on");
-
 			listing.End();
 		}
 
@@ -175,18 +170,29 @@ namespace List_Everything
 		}
 
 
+		ThingDef selectAllDef;
+		bool selectAll;
 		public void DoList(Rect listRect)
 		{
 			//Top-row buttons
 			Rect buttRect = listRect.LeftPartPixels(32);
 			buttRect.height = 32;
 			listRect.yMin += 34;
-			
+
+			selectAll = Widgets.ButtonImage(buttRect, TexButton.SelectAll);
+			TooltipHandler.TipRegion(buttRect, "Select All ( game allows up to 80 )");
+
+			buttRect.x += 34;
 			if (Widgets.ButtonImage(buttRect, TexUI.RotRightTex))
 				RemakeList();
 			TooltipHandler.TipRegion(buttRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
 
 			buttRect.x += 34;
+			ref bool refresh = ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh;
+			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.yellow : Color.white, Color.Lerp(Color.yellow,Color.white, 0.5f)))
+				refresh = !refresh;
+			GUI.color = Color.white;//Because Widgets.ButtonImage doesn't set it back
+			TooltipHandler.TipRegion(buttRect, "Continuous Refresh (about every second)");
 
 
 			//Handle mouse selection
@@ -222,15 +228,16 @@ namespace List_Everything
 			if (Event.current.type == EventType.Layout)
 				scrollViewHeight = listedThings.Count() * 34f;
 
+			//Select all 
+			if (selectAll)
+				foreach (Thing t in listedThings)
+					TrySelect.Select(t, false);
+
 			//Select all for double-click
-			if(selectAllDef != null)
-			{
+			if (selectAllDef != null)
 				foreach(Thing t in listedThings)
-				{
 					if (t.def == selectAllDef)
 						TrySelect.Select(t, false);
-				}
-			}
 
 			Widgets.EndScrollView();
 		}
@@ -238,7 +245,6 @@ namespace List_Everything
 		bool dragSelect = false;
 		bool dragDeselect = false;
 		bool dragJump = false;
-		ThingDef selectAllDef;
 		private void DrawThingRow(Thing thing, ref Rect rect)
 		{
 			//Highlight selected

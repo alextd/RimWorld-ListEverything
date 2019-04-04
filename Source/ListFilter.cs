@@ -41,8 +41,6 @@ namespace List_Everything
 		{
 			id = nextID++;
 		}
-	
-		public static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
 		public bool enabled = true; //simply turn off but keep in list
 		public bool include = true;	//or exclude
@@ -66,7 +64,7 @@ namespace List_Everything
 
 			bool changed = false;
 			//Clear button
-			if (row.ButtonIcon(CancelTex, "Delete this filter"))
+			if (row.ButtonIcon(TexButton.CancelTex, "Delete this filter"))
 			{
 				delete = true;
 				changed = true;
