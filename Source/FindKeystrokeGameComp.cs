@@ -23,8 +23,11 @@ namespace List_Everything
 
 		public void AddAlert(string name, FindDescription desc)
 		{
-			alertsByFind[name] = desc;
-			AlertByFind.AllAlerts.Add(new Alert_Find(name, desc));
+			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
+			FindDescription refDesc = desc.Clone();	//This one has string
+			FindDescription alertDesc = refDesc.Clone(); //This one re-resolves reference.
+			alertsByFind[name] = refDesc;
+			AlertByFind.AllAlerts.Add(new Alert_Find(name, alertDesc));
 		}
 		
 		public override void GameComponentOnGUI()
@@ -48,6 +51,23 @@ namespace List_Everything
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				tab.RemakeList();
+			}
+		}
+
+
+		public override void ExposeData()
+		{
+			Log.Message($"GameComp Expose {Scribe.mode}");
+			Scribe_Collections.Look(ref alertsByFind, "alertsByFind");
+			if(Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (alertsByFind == null)
+					alertsByFind = new Dictionary<string, FindDescription>();
+				foreach (var kvp in alertsByFind)
+				{
+					Log.Message($"Adding alert {kvp.Key}");
+					AlertByFind.AllAlerts.Add(new Alert_Find(kvp.Key, kvp.Value.Clone()));
+				}
 			}
 		}
 	}

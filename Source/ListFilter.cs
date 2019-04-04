@@ -573,7 +573,7 @@ namespace List_Everything
 
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
-		public ListFilterArea() => sel = Find.CurrentMap.areaManager.Home;
+		public ListFilterArea() => sel = Find.CurrentMap?.areaManager.Home;
 
 		public override string MakeRefName() => sel.Label;
 		public override void ResolveReference(string refName)
