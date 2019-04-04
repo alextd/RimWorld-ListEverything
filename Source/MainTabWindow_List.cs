@@ -192,7 +192,7 @@ namespace List_Everything
 
 			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
 				RemakeList();
-			TooltipHandler.TipRegion(refreshRect, "The list is saved when filter is changed - new items aren't added until refreshed");
+			TooltipHandler.TipRegion(refreshRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
 
 			Widgets.Label(labelRect, $"Listing: {BaseTypeDesc()}");
 			Widgets.DrawHighlightIfMouseover(labelRect);
@@ -252,7 +252,7 @@ namespace List_Everything
 
 			//Global Options
 			listing.CheckboxLabeled(
-				"Restrict Filter Options To Available Things",
+				"Only show filter options for available things",
 				ref ContentsUtility.onlyAvailable,
 				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
 
