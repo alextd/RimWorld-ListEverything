@@ -67,13 +67,8 @@ namespace List_Everything
 
 			//Header
 			Rect headerButRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
-			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight * 2, headerRect.height);
+			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
 
-			if (Widgets.ButtonImage(headerButRect, TexUI.RotRightTex))
-				RemakeList();
-			TooltipHandler.TipRegion(headerButRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
-
-			headerButRect.x -= Text.LineHeight;
 			if (Widgets.ButtonImage(headerButRect, ListFilter.CancelTex))
 				Reset();
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
@@ -182,6 +177,18 @@ namespace List_Everything
 
 		public void DoList(Rect listRect)
 		{
+			//Top-row buttons
+			Rect buttRect = listRect.LeftPartPixels(32);
+			buttRect.height = 32;
+			listRect.yMin += 34;
+			
+			if (Widgets.ButtonImage(buttRect, TexUI.RotRightTex))
+				RemakeList();
+			TooltipHandler.TipRegion(buttRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
+
+			buttRect.x += 34;
+
+
 			//Handle mouse selection
 			if (!Input.GetMouseButton(0))
 			{
