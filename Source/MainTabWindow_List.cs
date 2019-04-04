@@ -128,8 +128,6 @@ namespace List_Everything
 		{
 			switch (baseType)
 			{
-				case BaseListType.ThingRequestGroup:
-					return "ThingRequestGroup";
 				case BaseListType.Buildings:
 					return "Colonist buildings";
 				case BaseListType.Haulables:
