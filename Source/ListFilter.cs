@@ -193,10 +193,12 @@ namespace List_Everything
 	abstract class ListFilterDropDown<T> : ListFilter
 	{
 		public T sel;
+		public int extraOption;	//0 being use T, 1+ defined in subclass
 		public override void ExposeData()
 		{
 			base.ExposeData();
 
+			//Maybe don't save T sel if extraOption > 0 but that doesn't apply for loading so /shrug
 			if (typeof(Def).IsAssignableFrom(typeof(T)))
 			{
 				// *magic*
@@ -212,19 +214,27 @@ namespace List_Everything
 			}
 			else
 				Scribe_Values.Look(ref sel, "sel");
+
+			Scribe_Values.Look(ref extraOption, "ex");
 		}
 		public override ListFilter Clone()
 		{
 			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone();
 			clone.sel = sel;
+			clone.extraOption = extraOption;
 			return clone;
 		}
 
-		private string GetLabel() => sel != null ? NameFor(sel) : NullOption();
+		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
 		public virtual string NullOption() => null;
 		public abstract IEnumerable Options();
 		public virtual string NameFor(T o) => o.ToString();
-		private void Callback(T o) => sel = o;
+		private void Callback(T o) { sel = o; extraOption = 0; }
+
+		public virtual int ExtraOptionsCount => 0;
+		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
+		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
+		private void CallbackExtra(int ex) => extraOption = ex;
 
 		public override bool DrawOption(Rect rect)
 		{
@@ -235,9 +245,9 @@ namespace List_Everything
 				if (NullOption() is string nullOption)
 					options.Add(new FloatMenuOption(nullOption, () => Callback(default(T))));
 				foreach (T o in Options())
-				{
 					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
-				}
+				foreach (int ex in ExtraOptions())
+					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
 				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 
 				return true;
@@ -324,17 +334,18 @@ namespace List_Everything
 		public override IEnumerable Options() => types;
 	}
 
-	class ListFilterFaction : ListFilterDropDown<Faction>
+	class ListFilterFaction : ListFilterDropDown<FactionRelationKind>
 	{
-		public ListFilterFaction() => sel = Faction.OfPlayer;
+		public ListFilterFaction() => extraOption = 1;
 
 		public override bool FilterApplies(Thing thing) =>
-			sel == null ?
-				thing.Faction == null || thing.Faction.def.hidden:
-				thing.Faction == sel;
-		
-		public override string NullOption() => "None";
-		public override IEnumerable Options() => Find.FactionManager.AllFactionsVisibleInViewOrder;
+			extraOption == 1 ? thing.Faction == Faction.OfPlayer :
+			extraOption == 2 ? thing.Faction == null || thing.Faction.def.hidden :
+			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
+
+		public override IEnumerable Options() => Enum.GetValues(typeof(FactionRelationKind));
+		public override int ExtraOptionsCount => 2; 
+		public override string NameForExtra(int ex) => ex == 1 ? "Player" : "No Faction";
 	}
 
 	/*class ListFilterCanFaction : ListFilter
