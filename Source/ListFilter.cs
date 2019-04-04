@@ -73,14 +73,14 @@ namespace List_Everything
 			}
 
 			//Toggle button
-			if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Toggle This Filter"))
+			if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Enable this filter"))
 			{
 				enabled = !enabled;
 				changed = true;
 			}
 
 			//Include/Exclude
-			if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude this filter"))
+			if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude things matching this filter"))
 			{
 				include = !include;
 				changed = true;
