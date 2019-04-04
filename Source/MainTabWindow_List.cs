@@ -240,7 +240,7 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (var kvp in Settings.Get().savedFilters)
-					options.Add(new FloatMenuOption(kvp.Key, () =>  filters = kvp.Value.internalList.CloneAll()));
+					options.Add(new FloatMenuOption(kvp.Key, () =>  filters = kvp.Value.internalList.Select(f => f.Clone()).ToList()));
 				FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);

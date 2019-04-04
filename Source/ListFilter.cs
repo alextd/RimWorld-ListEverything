@@ -118,6 +118,12 @@ namespace List_Everything
 			Scribe_Values.Look(ref enabled, "enabled", true);
 			Scribe_Values.Look(ref include, "include", true);
 		}
+		public virtual ListFilter Clone()
+		{
+			ListFilter clone = (ListFilter)Activator.CreateInstance(def.filterClass);
+
+			return clone;
+		}
 	}
 
 	class ListFilterName : ListFilter
