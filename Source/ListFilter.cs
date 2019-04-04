@@ -178,16 +178,23 @@ namespace List_Everything
 		}
 	}
 
-	class ListFilterForbidden : ListFilter
+	enum ForbiddenType{ Forbidden, Allowed, Forbiddable}
+	class ListFilterForbidden : ListFilterDropDown<ForbiddenType>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.IsForbidden(Faction.OfPlayer);
-	}
+		public override bool FilterApplies(Thing thing)
+		{
+			bool forbiddable = thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
+			if (!forbiddable) return false;
+			bool forbidden = thing.IsForbidden(Faction.OfPlayer);
+			switch (sel)
+			{
+				case ForbiddenType.Forbidden: return forbidden;
+				case ForbiddenType.Allowed: return !forbidden;
+			}
+			return true;  //forbiddable
+		}
 
-	class ListFilterForbiddable : ListFilter
-	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
+		public override IEnumerable Options() => Enum.GetValues(typeof(ForbiddenType));
 	}
 
 	abstract class ListFilterDropDown<T> : ListFilter
