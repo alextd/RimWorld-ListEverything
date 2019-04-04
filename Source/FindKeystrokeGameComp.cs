@@ -57,7 +57,6 @@ namespace List_Everything
 
 		public override void ExposeData()
 		{
-			Log.Message($"GameComp Expose {Scribe.mode}");
 			Scribe_Collections.Look(ref alertsByFind, "alertsByFind");
 			if(Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
@@ -65,7 +64,6 @@ namespace List_Everything
 					alertsByFind = new Dictionary<string, FindDescription>();
 				foreach (var kvp in alertsByFind)
 				{
-					Log.Message($"Adding alert {kvp.Key}");
 					AlertByFind.AllAlerts.Add(new Alert_Find(kvp.Key, kvp.Value.Clone()));
 				}
 			}
