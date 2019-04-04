@@ -609,12 +609,19 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
-			return sel != null ? sel.ContainsCell(pos) :
-				Find.CurrentMap.zoneManager.ZoneAt(pos) != null;
+			Zone zoneAtPos = Find.CurrentMap.zoneManager.ZoneAt(pos);
+			return 
+				extraOption == 1 ? zoneAtPos is Zone_Stockpile :
+				extraOption == 2 ? zoneAtPos is Zone_Growing :
+				sel != null ? zoneAtPos == sel :
+				zoneAtPos != null;
 		}
 
 		public override string NullOption() => "Any";
 		public override IEnumerable Options() => Find.CurrentMap.zoneManager.AllZones;
+
+		public override int ExtraOptionsCount => 2;
+		public override string NameForExtra(int ex) => ex == 1 ? "Any Stockpile" : "Any Growing Zone";
 	}
 
 	class ListFilterDeterioration : ListFilter
