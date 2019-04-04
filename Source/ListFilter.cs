@@ -417,16 +417,21 @@ namespace List_Everything
 		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
 	}
 
-	class ListFilterMineable : ListFilter
+	enum MineableType { Resource, Rock, All }
+	class ListFilterMineable : ListFilterDropDown<MineableType>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.mineable;
-	}
+		public override bool FilterApplies(Thing thing)
+		{
+			switch (sel)
+			{
+				case MineableType.Resource: return thing.def.building?.isResourceRock ?? false;
+				case MineableType.Rock: return thing.def.building?.isNaturalRock ?? false;
+				case MineableType.All: return thing.def.mineable;
+			}
+			return false;
+		}
 
-	class ListFilterResourceRock: ListFilter
-	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.building?.isResourceRock ?? false;
+		public override IEnumerable Options() => Enum.GetValues(typeof(MineableType));
 	}
 
 	class ListFilterHP : ListFilter
