@@ -8,7 +8,6 @@ using RimWorld;
 
 namespace List_Everything
 {
-	//So it can go inside a dictionary
 	class SavedFilter : IExposable
 	{
 		public BaseListType baseType;
