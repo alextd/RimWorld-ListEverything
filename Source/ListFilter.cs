@@ -193,7 +193,18 @@ namespace List_Everything
 	abstract class ListFilterDropDown<T> : ListFilter
 	{
 		public T sel;
-		public int extraOption;	//0 being use T, 1+ defined in subclass
+		public int extraOption; //0 being use T, 1+ defined in subclass
+
+		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
+		//(probably could be in ListFilter)
+		//ExposeData saves refName instead of sel
+		//Only saved lists get ExposeData called, so only saved lists have refName set
+		//(The in-game list will NOT have this set; The saved lists will have this set)
+		//Saving the list will generate refName from the current filter on Clone() via MakeRefName()
+		//Loading will use refName from the saved list to resolve references in Clone() via ResolveReference()
+		string refName; 
+
+		//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -208,9 +219,8 @@ namespace List_Everything
 			}
 			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
-				ILoadReferenceable temp = sel as ILoadReferenceable;
-				Scribe_References.Look(ref temp, "sel");
-				sel = (T)(object)temp;
+				//Of course between games you can't get references so just save by name should be good enough.
+				Scribe_Values.Look(ref refName, "refName"); //And Clone will handle references
 			}
 			else
 				Scribe_Values.Look(ref sel, "sel");
@@ -220,10 +230,23 @@ namespace List_Everything
 		public override ListFilter Clone()
 		{
 			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone();
-			clone.sel = sel;
+			if (extraOption == 0 && typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+			{
+				if (refName == null)//SAVING: I don't have refName, but I make it and tell saved clone
+					clone.refName = sel == null ? "null" : MakeRefName();
+				else //LOADING: use my refName to resolve loaded clone's reference
+				{
+					if (refName == "null") sel = default(T);
+					else clone.ResolveReference(refName);
+				}
+			}
+			else
+				clone.sel = sel;
 			clone.extraOption = extraOption;
 			return clone;
 		}
+		public virtual string MakeRefName() => NameFor(sel);
+		public virtual void ResolveReference(string refName) => throw new NotImplementedException();
 
 		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
 		public virtual string NullOption() => null;
@@ -503,6 +526,14 @@ namespace List_Everything
 	{
 		public ListFilterArea() => sel = Find.CurrentMap.areaManager.Home;
 
+		public override string MakeRefName() => sel.Label;
+		public override void ResolveReference(string refName)
+		{
+			sel = Find.CurrentMap.areaManager.GetLabeled(refName);
+			if (sel == null)
+				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
+		}
+
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
@@ -517,6 +548,13 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
+		public override void ResolveReference(string refName)
+		{
+			sel = Find.CurrentMap.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
+			if (sel == null)
+				Messages.Message($"Tried to load zone Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
+		}
+
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
