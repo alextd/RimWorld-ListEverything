@@ -10,7 +10,7 @@ namespace List_Everything
 {
 	class Settings : ModSettings
 	{
-		public Dictionary<string, SavedFilter> savedFilters = new Dictionary<string, SavedFilter>();
+		public Dictionary<string, FindDescription> savedFilters = new Dictionary<string, FindDescription>();
 
 		public static Settings Get()
 		{
@@ -22,12 +22,12 @@ namespace List_Everything
 			return savedFilters.ContainsKey(name);
 		}
 
-		public void Save(string name, BaseListType baseType, List<ListFilter> filters)
+		public void Save(string name, FindDescription desc)
 		{
-			savedFilters[name] = new SavedFilter()
+			savedFilters[name] = new FindDescription()
 			{
-				list = filters.Select(f => f.Clone()).ToList(),
-				baseType = baseType
+				filters = desc.filters.Select(f => f.Clone()).ToList(),
+				baseType = desc.baseType
 			};
 			Write();
 		}

@@ -27,7 +27,9 @@ namespace List_Everything
 				Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				tab.Reset();
-				tab.filters.First().Focus();
+				ListFilter filter = ListFilterMaker.NameFilter;
+				tab.findDesc.filters.Add(filter);
+				filter.Focus();
 			}
 		}
 

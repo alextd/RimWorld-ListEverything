@@ -45,25 +45,20 @@ namespace List_Everything
 			DoList(listRect);
 		}
 
-		static readonly BaseListType[] normalTypes = 
-			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
-			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
-		BaseListType baseType;
 
-		public void Reset()
-		{
-			baseType = BaseListType.All;
-			filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
-			RemakeList();
-		}
 		List<Thing> listedThings;
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
 		public void RemakeList() =>
-			listedThings = FindList.Get(baseType, filters);
+			listedThings = findDesc.Get(Find.CurrentMap);
 
 		//Filters:
-		public List<ListFilter> filters = new List<ListFilter>() { ListFilterMaker.NameFilter };
+		public FindDescription findDesc = new FindDescription();
+		public void Reset()
+		{
+			findDesc = new FindDescription();
+			RemakeList();
+		}
 		public void DoFilter(Rect rect)
 		{
 			Text.Font = GameFont.Medium;
@@ -84,13 +79,13 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
 			//Header Title
-			Widgets.Label(labelRect, "Listing: "+ baseType);
+			Widgets.Label(labelRect, "Listing: "+ findDesc.baseType);
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
-				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : normalTypes)
-					types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
+				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
+					types.Add(new FloatMenuOption(type.ToString(), () => findDesc.baseType = type));
 
 				FloatMenu floatMenu = new FloatMenu(types) { onCloseCallback = RemakeList };
 				floatMenu.vanishIfMouseDistant = true;
@@ -102,11 +97,11 @@ namespace List_Everything
 
 			//Filters
 			listing.GapLine();
-			if (DoFilters(listing, filters))
+			if (DoFilters(listing, findDesc.filters))
 				RemakeList();
 
 			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
-				AddFilterFloat(filters);
+				AddFilterFloat(findDesc.filters);
 
 			listing.GapLine();
 
@@ -127,8 +122,8 @@ namespace List_Everything
 				{
 					options.Add(new FloatMenuOption(kvp.Key, () =>
 					{
-						filters = kvp.Value.list.Select(f => f.Clone()).ToList();
-						baseType = kvp.Value.baseType;
+						findDesc.filters = kvp.Value.filters.Select(f => f.Clone()).ToList();
+						findDesc.baseType = kvp.Value.baseType;
 					}));
 				}
 
@@ -177,10 +172,10 @@ namespace List_Everything
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
 					"Overwrite saved filter?",
-					 () => Settings.Get().Save(name, baseType, filters)));
+					 () => Settings.Get().Save(name, findDesc)));
 			}
 			else
-				Settings.Get().Save(name, baseType, filters);
+				Settings.Get().Save(name, findDesc);
 		}
 
 

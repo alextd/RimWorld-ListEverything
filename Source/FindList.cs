@@ -7,39 +7,13 @@ using RimWorld;
 
 namespace List_Everything
 {
-	class SavedFilter : IExposable
+	public class FindDescription : IExposable
 	{
 		public BaseListType baseType;
-		public List<ListFilter> list = new List<ListFilter>();
+		public List<ListFilter> filters = new List<ListFilter>();
 
-		public void ExposeData()
+		public List<Thing> Get(Map map)
 		{
-			Scribe_Values.Look(ref baseType, "baseType");
-			Scribe_Collections.Look(ref list, "list");
-		}
-	}
-
-	public enum BaseListType
-	{
-		All,
-		Items,
-		Everyone,
-		Colonists,
-		Animals,
-		Buildings,
-		Plants,
-		Inventory,
-		ThingRequestGroup,
-		Haulables,
-		Mergables,
-		Filth
-	};
-
-	public static class FindList
-	{
-		public static List<Thing> Get(BaseListType baseType, List<ListFilter> filters)
-		{
-			Map map = Find.CurrentMap;
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch (baseType)
 			{
@@ -96,5 +70,34 @@ namespace List_Everything
 			//Sort
 			return allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
 		}
+
+		public void ExposeData()
+		{
+			Scribe_Values.Look(ref baseType, "baseType");
+			Scribe_Collections.Look(ref filters, "filters");
+		}
+	}
+
+	public enum BaseListType
+	{
+		All,
+		Items,
+		Everyone,
+		Colonists,
+		Animals,
+		Buildings,
+		Plants,
+		Inventory,
+		ThingRequestGroup,
+		Haulables,
+		Mergables,
+		Filth
+	}
+
+	public static class BaseListNormalTypes
+	{
+		public static readonly BaseListType[] normalTypes =
+			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
+			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
 	}
 }
