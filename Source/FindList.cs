@@ -12,6 +12,13 @@ namespace List_Everything
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
 
+		public FindDescription Clone() =>
+			new FindDescription()
+			{
+				filters = filters.Select(f => f.Clone()).ToList(),
+				baseType = baseType
+			};
+
 		public List<Thing> Get(Map map)
 		{
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();

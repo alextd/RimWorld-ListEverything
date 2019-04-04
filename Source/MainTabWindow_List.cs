@@ -109,6 +109,11 @@ namespace List_Everything
 			Rect buttonRect = listing.GetRect(Text.LineHeight);
 			buttonRect = buttonRect.LeftPart(0.25f);
 
+
+			if (Widgets.ButtonText(buttonRect, "Make Alert"))
+				Find.WindowStack.Add(new Dialog_Name(
+					name => Current.Game.GetComponent<ListEverythingGameComp>().AddAlert(name, findDesc)));
+
 			buttonRect.x += buttonRect.width * 2;
 			if (Widgets.ButtonText(buttonRect, "Save"))
 				Find.WindowStack.Add(new Dialog_Name(name => Save(name)));
@@ -120,11 +125,7 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (var kvp in Settings.Get().savedFilters)
 				{
-					options.Add(new FloatMenuOption(kvp.Key, () =>
-					{
-						findDesc.filters = kvp.Value.filters.Select(f => f.Clone()).ToList();
-						findDesc.baseType = kvp.Value.baseType;
-					}));
+					options.Add(new FloatMenuOption(kvp.Key, () => findDesc = kvp.Value.Clone()));
 				}
 
 				FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };

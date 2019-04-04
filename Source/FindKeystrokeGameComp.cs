@@ -17,8 +17,15 @@ namespace List_Everything
 	class ListEverythingGameComp : GameComponent
 	{
 		public bool continuousRefresh = false;
+		public Dictionary<string, FindDescription> alertsByFind = new Dictionary<string, FindDescription>();
 
 		public ListEverythingGameComp(Game g) { }
+
+		public void AddAlert(string name, FindDescription desc)
+		{
+			alertsByFind[name] = desc;
+			AlertByFind.AllAlerts.Add(new Alert_Find(name, desc));
+		}
 		
 		public override void GameComponentOnGUI()
 		{

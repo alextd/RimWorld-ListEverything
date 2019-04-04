@@ -30,12 +30,12 @@ namespace List_Everything
 		public Alert_Find()
 		{
 			//The vanilla alert added to AllAlerts will be constructed but never trigger
-			this.defaultLabel = "Alert!";
 			this.defaultPriority = AlertPriority.Medium;
 		}
 
-		public Alert_Find(FindDescription f) : this()
+		public Alert_Find(string label, FindDescription f) : this()
 		{
+			this.defaultLabel = label;
 			filter = f;
 		}
 

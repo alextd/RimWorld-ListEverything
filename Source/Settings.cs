@@ -24,11 +24,7 @@ namespace List_Everything
 
 		public void Save(string name, FindDescription desc)
 		{
-			savedFilters[name] = new FindDescription()
-			{
-				filters = desc.filters.Select(f => f.Clone()).ToList(),
-				baseType = desc.baseType
-			};
+			savedFilters[name] = desc.Clone();
 			Write();
 		}
 
