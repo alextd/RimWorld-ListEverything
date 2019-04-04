@@ -313,12 +313,23 @@ namespace List_Everything
 
 	class ListFilterFreshness : ListFilterDropDown<RotStage>
 	{
-		public ListFilterFreshness() => sel = RotStage.Fresh;
-
-		public override bool FilterApplies(Thing thing) =>
-			thing.TryGetComp<CompRottable>() is CompRottable rot && rot.Stage == sel;
+		public override bool FilterApplies(Thing thing)
+		{
+			CompRottable rot = thing.TryGetComp<CompRottable>();
+			return 
+				extraOption == 1 ? rot != null : 
+				extraOption == 2 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) is float r && r>0 && r<1 : 
+				extraOption == 3 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) <= 0 : 
+				rot?.Stage == sel;
+		}
 		
 		public override IEnumerable Options() => Enum.GetValues(typeof(RotStage));
+
+		public override int ExtraOptionsCount => 3;
+		public override string NameForExtra(int ex) =>
+			ex == 1 ? "Spoils" :
+			ex == 2 ? "Refrigerated" : 
+			"Frozen";
 	}
 
 	class ListFilterRottable : ListFilter
