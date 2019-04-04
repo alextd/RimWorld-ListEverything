@@ -332,12 +332,6 @@ namespace List_Everything
 			"Frozen";
 	}
 
-	class ListFilterRottable : ListFilter
-	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.HasComp(typeof(CompRottable));
-	}
-
 	class ListFilterGrowth : ListFilter
 	{
 		FloatRange range = FloatRange.ZeroToOne;
