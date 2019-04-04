@@ -182,11 +182,8 @@ namespace List_Everything
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
-				foreach (BaseListType type in Enum.GetValues(typeof(BaseListType)))
-				{
-					if(Prefs.DevMode || normalTypes.Contains(type))
-						types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
-				}
+				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : normalTypes)
+					types.Add(new FloatMenuOption(type.ToString(), () => baseType = type));
 
 				FloatMenu floatMenu = new FloatMenu(types) { onCloseCallback = RemakeList };
 				floatMenu.vanishIfMouseDistant = true;
