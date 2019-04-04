@@ -440,10 +440,13 @@ namespace List_Everything
 
 	class ListFilterStuff : ListFilterDropDown<ThingDef>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.Stuff == sel || thing is IConstructible c && c.UIStuff() == sel;
+		public override bool FilterApplies(Thing thing)
+		{
+			ThingDef stuff = thing is IConstructible c ? c.UIStuff() : thing.Stuff;
+			return sel == null ? stuff != null : stuff == sel;
+		}
 
-		public override string NullOption() => "No Stuff";
+		public override string NullOption() => "Any Stuff";
 		public override IEnumerable Options()
 		{
 			return ContentsUtility.onlyAvailable
