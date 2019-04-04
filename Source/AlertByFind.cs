@@ -21,6 +21,17 @@ namespace List_Everything
 				return null;
 			}
 		}
+
+		public static FieldInfo activeAlertsInfo = typeof(AlertsReadout).GetField("activeAlerts", NonPublic | Instance);
+		public static List<Alert> activeAlerts
+		{
+			get
+			{
+				if ((Find.UIRoot as UIRoot_Play).alerts is AlertsReadout readout)
+					return (List<Alert>)activeAlertsInfo.GetValue(readout);
+				return null;
+			}
+		}
 	}
 
 	public class Alert_Find : Alert
