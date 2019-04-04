@@ -111,10 +111,19 @@ namespace List_Everything
 						trait.Degree == traitDegree;
 
 				case PawnFilterProp.Thought:
-					return pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood && 
-						mood.thoughts.memories.Memories.FirstOrDefault(t => t.def == thoughtDef) is Thought thought &&  
-						thought.CurStageIndex == thoughtStage;
+					if (pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
+					{
+						//memories
+						if (mood.thoughts.memories.Memories.Any(t => t.def == thoughtDef && t.CurStageIndex == thoughtStage))
+							return true;
 
+						//situational
+						List<Thought> thoughts = new List<Thought>();
+						mood.thoughts.situational.AppendMoodThoughts(thoughts);
+						if (thoughts.Any(t => t.def == thoughtDef && t.CurStageIndex == thoughtStage))
+							return true;
+					}
+					return false;
 				case PawnFilterProp.Need:
 					return (!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
 						pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
@@ -202,9 +211,9 @@ namespace List_Everything
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 
-						IEnumerable<ThoughtDef> thoughtsOnMap = ContentsUtility.onlyAvailable
-							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Select(th => th.def) ?? Enumerable.Empty<ThoughtDef>())
-							: DefDatabase<ThoughtDef>.AllDefs;
+						IEnumerable<ThoughtDef> thoughtsOnMap = ContentsUtility.onlyAvailable ?
+							thoughtsOnMap = ContentsUtility.AvailableOnMap(ThoughtsForThing) :
+							thoughtsOnMap = DefDatabase<ThoughtDef>.AllDefs;
 
 						foreach (ThoughtDef tDef in thoughtsOnMap.OrderBy(tDef => ThoughtName(tDef)))
 						{
@@ -274,5 +283,22 @@ namespace List_Everything
 			}
 			return false;
 		}
+
+		public static IEnumerable<ThoughtDef> ThoughtsForThing(Thing t)
+		{
+			Pawn pawn = t as Pawn;
+			if (pawn == null) yield break;
+
+			IEnumerable<ThoughtDef> memories = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Select(th => th.def);
+			if (memories != null)
+				foreach (ThoughtDef def in memories)
+					yield return def;
+
+			List<Thought> thoughts = new List<Thought>();
+			pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.situational.AppendMoodThoughts(thoughts);
+			foreach (Thought thought in thoughts)
+				yield return thought.def;
+		}
+
 	}
 }
