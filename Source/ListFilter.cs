@@ -634,4 +634,35 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			SteadyEnvironmentEffects.FinalDeteriorationRate(thing) >= 0.001f;
 	}
+
+	enum DoorOpenFilter { Open, Close, HoldOpen, BlockedOpenMomentary }
+	class ListFilterDoorOpen : ListFilterDropDown<DoorOpenFilter>
+	{
+		public override bool FilterApplies(Thing thing)
+		{
+			Building_Door door = thing as Building_Door;
+			if (door == null) return false;
+			switch(sel)
+			{
+				case DoorOpenFilter.Open: return door.Open;
+				case DoorOpenFilter.Close: return !door.Open;
+				case DoorOpenFilter.HoldOpen: return door.HoldOpen;
+				case DoorOpenFilter.BlockedOpenMomentary: return door.BlockedOpenMomentary;
+			}
+			return false;//???
+		}
+		public override string NameFor(DoorOpenFilter o)
+		{
+			switch (o)
+			{
+				case DoorOpenFilter.Open: return "Opened";
+				case DoorOpenFilter.Close: return "Closed";
+				case DoorOpenFilter.HoldOpen: return "Hold Open";
+				case DoorOpenFilter.BlockedOpenMomentary: return "Blocked Open";
+			}
+			return "???";
+		}
+		
+		public override IEnumerable Options() => Enum.GetValues(typeof(DoorOpenFilter));
+	}
 }
