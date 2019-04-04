@@ -392,7 +392,8 @@ namespace List_Everything
 		public override string NameForExtra(int ex) => ex == 1 ? "Player" : "No Faction";
 	}
 
-	/*class ListFilterCanFaction : ListFilter
+	/* This is no good, CanHaveFaction includes rock walls.
+	class ListFilterCanFaction : ListFilter
 	{
 		public override bool Applies(Thing thing) =>
 			thing.def.CanHaveFaction;
@@ -582,13 +583,18 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
-			return sel != null ? sel[pos] :
+			return
+				extraOption == 1 ? Find.CurrentMap.roofGrid.Roofed(pos) :
+				sel != null ? sel[pos] :
 				Find.CurrentMap.areaManager.AllAreas.Any(a => a[pos]);
 		}
 
 		public override string NullOption() => "Any";
 		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas;
 		public override string NameFor(Area o) => o.Label;
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "Roofed";
 	}
 
 	class ListFilterZone : ListFilterDropDown<Zone>
