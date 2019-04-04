@@ -509,7 +509,7 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
-			return sel != null ? sel.ContainsCell(thing.PositionHeld) :
+			return sel != null ? sel.ContainsCell(pos) :
 				Find.CurrentMap.zoneManager.ZoneAt(pos) != null;
 		}
 
