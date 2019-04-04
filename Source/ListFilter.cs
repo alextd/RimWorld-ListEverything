@@ -212,10 +212,17 @@ namespace List_Everything
 			//Maybe don't save T sel if extraOption > 0 but that doesn't apply for loading so /shrug
 			if (typeof(Def).IsAssignableFrom(typeof(T)))
 			{
-				// *magic*
-				Def temp = sel as Def;
-				Scribe_Defs.Look(ref temp, "sel");
-				sel = (T)(object)temp;
+				//From Scribe_Collections:
+				if (Scribe.mode == LoadSaveMode.Saving)
+				{
+					Def temp = sel as Def;
+					Scribe_Defs.Look(ref temp, "sel");
+				}
+				else if (Scribe.mode == LoadSaveMode.LoadingVars)
+				{
+					//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
+					sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
+				}
 			}
 			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
