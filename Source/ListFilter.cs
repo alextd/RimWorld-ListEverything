@@ -289,14 +289,18 @@ namespace List_Everything
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
 	{
 		public override bool FilterApplies(Thing thing) =>
-			sel != null ? 
+			sel != null ?
 			(sel.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, sel) != null :
 			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
 			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() => DefDatabase<DesignationDef>.AllDefs.OrderBy(d=>d.defName);
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable ?
+				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct():
+				DefDatabase<DesignationDef>.AllDefs.OrderBy(d => d.defName);
+
 		public override string NameFor(DesignationDef o) => o.defName;
 	}
 
@@ -361,7 +365,10 @@ namespace List_Everything
 			sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
-		public override IEnumerable Options() => types;
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable ?
+				ContentsUtility.AvailableOnMap(t => t.GetType()).ToList() : 
+				types;
 	}
 
 	class ListFilterFaction : ListFilterDropDown<FactionRelationKind>
@@ -391,7 +398,22 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			thing.def.IsWithinCategory(sel);
 		
-		public override IEnumerable Options() => DefDatabase<ThingCategoryDef>.AllDefsListForReading;
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable ?
+				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing).ToList() : 
+				DefDatabase<ThingCategoryDef>.AllDefsListForReading;
+
+		public static IEnumerable<ThingCategoryDef> ThingCategoryDefsOfThing(Thing thing)
+		{
+			if (thing.def.thingCategories == null)
+				yield break;
+			foreach(var def in thing.def.thingCategories)
+			{
+				yield return def;
+				foreach (var pDef in def.Parents)
+					yield return pDef;
+			}
+		}
 		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
 	}
 
@@ -488,12 +510,11 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options()
-		{
-			return ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap<ThingDef>(t => t.Stuff)
+		public override IEnumerable Options() => 
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
-		}
+
 		public override string NameFor(ThingDef o) => o.LabelCap;
 	}
 
@@ -519,13 +540,12 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options()
-		{
-			return ContentsUtility.onlyAvailable
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableOnMap(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
 				: DefDatabase<BodyPartDef>.AllDefs;
-		}
+		
 		public override string NameFor(BodyPartDef o) => o.LabelCap;
 	}
 
