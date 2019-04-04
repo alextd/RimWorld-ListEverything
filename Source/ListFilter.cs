@@ -42,7 +42,7 @@ namespace List_Everything
 			id = nextID++;
 		}
 	
-		private static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
+		public static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 
 		public bool enabled = true; //simply turn off but keep in list
 		public bool include = true;	//or exclude

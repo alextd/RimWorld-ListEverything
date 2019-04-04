@@ -168,14 +168,20 @@ namespace List_Everything
 			Rect filterRect = rect.BottomPartPixels(rect.height - Text.LineHeight);
 
 			//Header
-			Rect refreshRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
-			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
+			Rect headerButRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
+			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight * 2, headerRect.height);
 
-			if (Widgets.ButtonImage(refreshRect, TexUI.RotRightTex))
+			if (Widgets.ButtonImage(headerButRect, TexUI.RotRightTex))
 				RemakeList();
-			TooltipHandler.TipRegion(refreshRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
+			TooltipHandler.TipRegion(headerButRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
 
-			Widgets.Label(labelRect, $"Listing: {BaseTypeDesc()}");
+			headerButRect.x -= Text.LineHeight;
+			if (Widgets.ButtonImage(headerButRect, ListFilter.CancelTex))
+				Reset();
+			TooltipHandler.TipRegion(headerButRect, "Clear All");
+
+			//Header Title
+			Widgets.Label(labelRect, "Listing: "+ BaseTypeDesc());
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
@@ -208,7 +214,7 @@ namespace List_Everything
 			if (Widgets.ButtonText(buttonRect, "Add"))
 				AddFilterFloat(filters);
 
-			buttonRect.x += buttonRect.width;
+			buttonRect.x += buttonRect.width * 2;
 			if (Widgets.ButtonText(buttonRect, "Save"))
 				Find.WindowStack.Add(new Dialog_Name(name => Save(name)));
 
@@ -230,10 +236,6 @@ namespace List_Everything
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
 			}
-
-			buttonRect.x += buttonRect.width;
-			if (Widgets.ButtonText(buttonRect, "Reset All"))
-				Reset();
 
 			//Global Options
 			listing.CheckboxLabeled(
