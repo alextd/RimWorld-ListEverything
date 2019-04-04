@@ -511,7 +511,10 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			ThingDef stuff = thing is IConstructible c ? c.UIStuff() : thing.Stuff;
-			return sel == null ? stuff != null : stuff == sel;
+			return extraOption > 0 ?
+			stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 1]) ?? false :
+			sel == null ? stuff != null :
+			stuff == sel;
 		}
 
 		public override string NullOption() => "Any";
@@ -521,6 +524,9 @@ namespace List_Everything
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
 
 		public override string NameFor(ThingDef o) => o.LabelCap;
+		
+		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount;
+		public override string NameForExtra(int ex) => DefDatabase<StuffCategoryDef>.AllDefsListForReading[ex-1].LabelCap;
 	}
 
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
