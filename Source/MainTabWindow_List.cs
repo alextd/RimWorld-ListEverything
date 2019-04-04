@@ -45,27 +45,10 @@ namespace List_Everything
 			DoList(listRect);
 		}
 
-
-		//Base Lists:
-		enum BaseListType
-		{
-			All,
-			Items,
-			Everyone,
-			Colonists,
-			Animals,
-			Buildings,
-			Plants,
-			Inventory,
-			ThingRequestGroup,
-			Haulables,
-			Mergables,
-			Filth
-		};
-		BaseListType[] normalTypes = 
+		static readonly BaseListType[] normalTypes = 
 			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
 			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
-		BaseListType baseType = BaseListType.All;
+		BaseListType baseType;
 
 		ThingRequestGroup listGroup = ThingRequestGroup.Everything;
 
@@ -232,7 +215,7 @@ namespace List_Everything
 
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Save"))
-				Find.WindowStack.Add(new Dialog_Name(name => Settings.Get().Save(name, filters)));
+				Find.WindowStack.Add(new Dialog_Name(name => Settings.Get().Save(name, baseType, filters)));
 
 			buttonRect.x += buttonRect.width;
 			if (Settings.Get().savedFilters.Count > 0 &&
@@ -240,7 +223,14 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (var kvp in Settings.Get().savedFilters)
-					options.Add(new FloatMenuOption(kvp.Key, () =>  filters = kvp.Value.internalList.Select(f => f.Clone()).ToList()));
+				{
+					options.Add(new FloatMenuOption(kvp.Key, () =>
+					{
+						filters = kvp.Value.list.Select(f => f.Clone()).ToList();
+						baseType = kvp.Value.baseType;
+					}));
+				}
+
 				FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
 				floatMenu.vanishIfMouseDistant = true;
 				Find.WindowStack.Add(floatMenu);
@@ -446,6 +436,22 @@ namespace List_Everything
 			}
 		}
 	}
+	
+	public enum BaseListType
+	{
+		All,
+		Items,
+		Everyone,
+		Colonists,
+		Animals,
+		Buildings,
+		Plants,
+		Inventory,
+		ThingRequestGroup,
+		Haulables,
+		Mergables,
+		Filth
+	};
 
 	public class Dialog_Name : Dialog_Rename
 	{

@@ -9,35 +9,35 @@ using RimWorld;
 namespace List_Everything
 {
 	//So it can go inside a dictionary
-	class ExposeableList<T> : IExposable
+	class SavedFilter : IExposable
 	{
-		public List<T> internalList = new List<T>();
-		public string exposeString = "internalList";
-		public LookMode mode = LookMode.Deep;
+		public BaseListType baseType;
+		public List<ListFilter> list = new List<ListFilter>();
 
-		public void ExposeData() =>
-			Scribe_Collections.Look(ref internalList, exposeString, mode);
-
-		public static implicit operator ExposeableList<T>(List<T> list) =>
-			new ExposeableList<T>() { internalList = list };
-
-		public static implicit operator List<T>(ExposeableList<T> exL) =>
-			exL.internalList;
+		public void ExposeData()
+		{
+			Scribe_Values.Look(ref baseType, "baseType");
+			Scribe_Collections.Look(ref list, "list");
+		}
 	}
 
 
 	class Settings : ModSettings
 	{
-		public Dictionary<string, ExposeableList<ListFilter>> savedFilters = new Dictionary<string, ExposeableList<ListFilter>>();
+		public Dictionary<string, SavedFilter> savedFilters = new Dictionary<string, SavedFilter>();
 
 		public static Settings Get()
 		{
 			return LoadedModManager.GetMod<Mod>().GetSettings<Settings>();
 		}
 
-		public void Save(string name, List<ListFilter> filters)
+		public void Save(string name, BaseListType baseType, List<ListFilter> filters)
 		{
-			savedFilters[name] = filters.Select(f => f.Clone()).ToList();
+			savedFilters[name] = new SavedFilter()
+			{
+				list = filters.Select(f => f.Clone()).ToList(),
+				baseType = baseType
+			};
 			Write();
 		}
 
@@ -61,7 +61,7 @@ namespace List_Everything
 
 		public override void ExposeData()
 		{
-			Scribe_Collections.Look(ref savedFilters, "savedFilters", LookMode.Value, LookMode.Deep);
+			Scribe_Collections.Look(ref savedFilters, "savedFilters");
 		}
 	}
 }
