@@ -13,22 +13,8 @@ namespace List_Everything
 	{
 		Skill,
 		Trait,
-		Hediff,
-		Item
-	}
-	public static class PawnPropEx
-	{
-		public static string Label(this PawnFilterProp prop)
-		{
-			switch (prop)
-			{
-				case PawnFilterProp.Skill: return "Skill";
-				case PawnFilterProp.Trait: return "Trait";
-				case PawnFilterProp.Hediff: return "Health";
-				case PawnFilterProp.Item: return "Inventory";
-			}
-			return "???";
-		}
+		Health,
+		Inventory
 	}
 	class ListFilterPawnProp : ListFilter
 	{
@@ -79,7 +65,7 @@ namespace List_Everything
 				switch (prop)
 				{
 					case PawnFilterProp.Trait: return traitDef == null;
-					case PawnFilterProp.Hediff: return hediffDef == null;
+					case PawnFilterProp.Health: return hediffDef == null;
 				}
 				return false;
 			}
@@ -89,11 +75,11 @@ namespace List_Everything
 					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 				case PawnFilterProp.Trait:
 					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && trait.Degree == traitDegree;
-				case PawnFilterProp.Hediff:
+				case PawnFilterProp.Health:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
-				case PawnFilterProp.Item:
+				case PawnFilterProp.Inventory:
 					return ThingOwnerUtility.GetAllThingsRecursively(pawn)
 						.Any(t => nameFilter.FilterApplies(t));
 			}
@@ -103,12 +89,12 @@ namespace List_Everything
 		public override bool DrawOption(Rect rect)
 		{
 			WidgetRow row = new WidgetRow(rect.xMin, rect.yMin);
-			if (row.ButtonText(prop.Label()))
+			if (row.ButtonText(prop.ToString()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (PawnFilterProp p in Enum.GetValues(typeof(PawnFilterProp)))
 				{
-					options.Add(new FloatMenuOption(p.Label(), () => prop = p));
+					options.Add(new FloatMenuOption(p.ToString(), () => prop = p));
 				}
 				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 			}
@@ -164,7 +150,7 @@ namespace List_Everything
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
-				case PawnFilterProp.Hediff:
+				case PawnFilterProp.Health:
 					if (row.ButtonText(hediffDef?.LabelCap ?? "None"))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
@@ -180,7 +166,7 @@ namespace List_Everything
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
-				case PawnFilterProp.Item:
+				case PawnFilterProp.Inventory:
 					Rect subRect = rect;
 					subRect.xMin = row.FinalX;
 					return nameFilter.DrawOption(subRect);
