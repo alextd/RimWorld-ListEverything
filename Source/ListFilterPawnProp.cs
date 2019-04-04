@@ -13,6 +13,7 @@ namespace List_Everything
 	{
 		Skill,
 		Trait,
+		Thought,
 		Need,
 		Health,
 		Inventory
@@ -31,6 +32,13 @@ namespace List_Everything
 				def.degreeDatas.First().label.CapitalizeFirst() :
 				def.defName;
 
+		ThoughtDef thoughtDef = ThoughtDefOf.AteWithoutTable;
+		public static string ThoughtName(ThoughtDef def) =>
+			def.label?.CapitalizeFirst() ?? 
+			def.stages?.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ?? 
+			def.stages?.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
+		int thoughtStage = 0;
+
 		NeedDef needDef = NeedDefOf.Food;
 		FloatRange needRange = new FloatRange(0, 0.5f);
 
@@ -47,6 +55,9 @@ namespace List_Everything
 
 			Scribe_Defs.Look(ref traitDef, "traitDef");
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
+
+			Scribe_Defs.Look(ref thoughtDef, "thoughtDef");
+			Scribe_Values.Look(ref thoughtStage, "thoughtDegree");
 
 			Scribe_Defs.Look(ref needDef, "needDef");
 			Scribe_Values.Look(ref needRange, "needRange");
@@ -65,6 +76,9 @@ namespace List_Everything
 			clone.traitDef = traitDef;
 			clone.traitDegree = traitDegree;
 
+			clone.thoughtDef = thoughtDef;
+			clone.thoughtStage = thoughtStage;
+
 			clone.needDef = needDef;
 			clone.needRange = needRange;
 
@@ -81,6 +95,7 @@ namespace List_Everything
 				switch (prop)
 				{
 					case PawnFilterProp.Trait: return traitDef == null;
+					case PawnFilterProp.Thought: return thoughtDef == null;
 					case PawnFilterProp.Health: return hediffDef == null;
 				}
 				return false;
@@ -88,16 +103,27 @@ namespace List_Everything
 			switch (prop)
 			{
 				case PawnFilterProp.Skill:
-					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && !rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
+					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && 
+						!rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
+
 				case PawnFilterProp.Trait:
-					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && trait.Degree == traitDegree;
+					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && 
+						trait.Degree == traitDegree;
+
+				case PawnFilterProp.Thought:
+					return pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood && 
+						mood.thoughts.memories.Memories.FirstOrDefault(t => t.def == thoughtDef) is Thought thought &&  
+						thought.CurStageIndex == thoughtStage;
+
 				case PawnFilterProp.Need:
 					return (!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
 						pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
+
 				case PawnFilterProp.Health:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
+
 				case PawnFilterProp.Inventory:
 					return ThingOwnerUtility.GetAllThingsRecursively(pawn)
 						.Any(t => nameFilter.FilterApplies(t));
@@ -167,6 +193,37 @@ namespace List_Everything
 						foreach (TraitDegreeData deg in traitDef.degreeDatas)
 						{
 							options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					break;
+				case PawnFilterProp.Thought:
+					if (row.ButtonText(ThoughtName(thoughtDef)))	//ThoughtDef defines its own Label instead of LabelCap, and it sometimes fails
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+
+						IEnumerable<ThoughtDef> thoughtsOnMap = ContentsUtility.onlyAvailable
+							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Select(th => th.def) ?? Enumerable.Empty<ThoughtDef>())
+							: DefDatabase<ThoughtDef>.AllDefs;
+
+						foreach (ThoughtDef tDef in thoughtsOnMap.OrderBy(tDef => ThoughtName(tDef)))
+						{
+							options.Add(new FloatMenuOption(ThoughtName(tDef), () =>
+							{
+								thoughtDef = tDef;
+								thoughtStage = 0;
+							}));
+						}
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					if (thoughtDef.stages.Count > 1 &&
+						row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+						for(int i=0;i<thoughtDef.stages.Count;i++)
+						{
+							int localI = i;
+							options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
