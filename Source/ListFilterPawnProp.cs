@@ -225,17 +225,6 @@ namespace List_Everything
 						}
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
-					if (thoughtDef.stages.Count > 1 &&
-						row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						for(int i=0;i<thoughtDef.stages.Count;i++)
-						{
-							int localI = i;
-							options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
-						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
-					}
 					break;
 				case PawnFilterProp.Need:
 					if (row.ButtonText(needDef.LabelCap))
@@ -280,6 +269,27 @@ namespace List_Everything
 					Rect subRect = rect;
 					subRect.xMin = row.FinalX;
 					return nameFilter.DrawOption(subRect);
+			}
+			return false;
+		}
+
+		public override bool DrawMore(Listing_Standard listing)
+		{
+			if (prop != PawnFilterProp.Thought || thoughtDef.stages.Count <= 1) return false;
+
+			Rect nextRect = listing.GetRect(Text.LineHeight);
+			listing.Gap(listing.verticalSpacing);
+
+			WidgetRow row = new WidgetRow(nextRect.xMin, nextRect.yMin);
+			if (row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				for (int i = 0; i < thoughtDef.stages.Count; i++)
+				{
+					int localI = i;
+					options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
+				}
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 			}
 			return false;
 		}
