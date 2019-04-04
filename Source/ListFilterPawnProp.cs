@@ -92,7 +92,8 @@ namespace List_Everything
 				case PawnFilterProp.Trait:
 					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && trait.Degree == traitDegree;
 				case PawnFilterProp.Need:
-					return pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
+					return (!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
+						pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
 				case PawnFilterProp.Health:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
