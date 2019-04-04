@@ -74,7 +74,7 @@ namespace List_Everything
 					allThings = map.listerThings.ThingsInGroup(listGroup);
 					break;
 				case BaseListType.Buildings:
-					allThings = map.listerBuildings.allBuildingsColonist.Cast<Thing>();
+					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
 					break;
 				case BaseListType.Plants:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
@@ -124,22 +124,6 @@ namespace List_Everything
 			listedThings = allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
 		}
 
-		public string BaseTypeDesc()
-		{
-			switch (baseType)
-			{
-				case BaseListType.Buildings:
-					return "Colonist buildings";
-				case BaseListType.Haulables:
-					return "Things to be hauled";
-				case BaseListType.Mergables:
-					return "Stacks to be merged";
-				case BaseListType.Filth:
-					return "Filth in home area";
-			}
-			return baseType.ToString();
-		}
-
 		public void DoListingBase(Listing_Standard listing)
 		{
 			switch (baseType)
@@ -181,7 +165,7 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
 			//Header Title
-			Widgets.Label(labelRect, "Listing: "+ BaseTypeDesc());
+			Widgets.Label(labelRect, "Listing: "+ baseType);
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
