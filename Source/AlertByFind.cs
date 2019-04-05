@@ -12,8 +12,8 @@ namespace List_Everything
 {
 	public static class AlertByFind
 	{
-		public static FieldInfo AllAlertsInfo = typeof(AlertsReadout).GetField("AllAlerts", NonPublic | Instance);
-		public static List<Alert> AllAlerts
+		private static FieldInfo AllAlertsInfo = typeof(AlertsReadout).GetField("AllAlerts", NonPublic | Instance);
+		private static List<Alert> AllAlerts
 		{
 			get
 			{
@@ -23,8 +23,8 @@ namespace List_Everything
 			}
 		}
 
-		public static FieldInfo activeAlertsInfo = typeof(AlertsReadout).GetField("activeAlerts", NonPublic | Instance);
-		public static List<Alert> activeAlerts
+		private static FieldInfo activeAlertsInfo = typeof(AlertsReadout).GetField("activeAlerts", NonPublic | Instance);
+		private static List<Alert> activeAlerts
 		{
 			get
 			{
@@ -34,10 +34,45 @@ namespace List_Everything
 			}
 		}
 
+		public static Alert_Find GetAlert(string name, Map map) =>
+			AllAlerts.FirstOrDefault(a => a is Alert_Find af && af.GetLabel() == name && af.map == map) as Alert_Find;
+
+		public static void AddAlert(string name, Map map, FindDescription desc, bool overwrite = false, Action okAction = null)
+		{
+			if (!overwrite && GetAlert(name, map) != null)
+			{
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+					"Overwrite Alert?", () =>
+					{
+						RemoveAlert(name, map);
+						AddAlert(name, map, desc, true, okAction);
+					}));
+			}
+			else
+			{
+				AlertByFind.AllAlerts.Add(new Alert_Find(map, name, desc));
+				okAction?.Invoke();
+			}
+		}
+
 		public static void RemoveAlert(string name, Map map)
 		{
 			AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
 			activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
+		}
+
+		public static void RenameAlert(string name, Map map, string newName, bool overwrite = false, Action okAction = null)
+		{
+			if (!overwrite && GetAlert(newName, map) != null)
+			{
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+					"Overwrite Alert?", () => RenameAlert(name, map, newName, true, okAction)));
+			}
+			else
+			{
+				okAction?.Invoke();
+				GetAlert(name, map)?.Rename(newName);
+			}
 		}
 	}
 
@@ -59,6 +94,8 @@ namespace List_Everything
 			desc = descNew;
 			map = m;
 		}
+
+		public void Rename(string label) => defaultLabel = label;
 
 		public override AlertReport GetReport()
 		{
