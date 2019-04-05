@@ -27,6 +27,10 @@ namespace List_Everything
 			this.absorbInputAroundWindow = true;
 		}
 
+		private const float RowHeight = WidgetRow.IconSize + 6;
+
+		private Vector2 scrollPosition = Vector2.zero;
+		private float scrollViewHeight;
 		public override void DoWindowContents(Rect inRect)
 		{
 			var listing = new Listing_Standard();
@@ -36,42 +40,72 @@ namespace List_Everything
 			Text.Font = GameFont.Medium;
 			listing.Label($"Alerts for {map.Parent.LabelCap}:");
 			Text.Font = GameFont.Small;
-			listing.Gap();
+			listing.GapLine();
+			listing.End();
+
+			inRect.yMin += listing.CurHeight;
+
+			//Useful things:
+			ListEverythingMapComp comp = map.GetComponent<ListEverythingMapComp>();
 			string remove = null;
 
+			//Scrolling!
+			Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, scrollViewHeight);
+			Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
 
-			ListEverythingMapComp comp = map.GetComponent<ListEverythingMapComp>();
+			Rect rowRect = viewRect; rowRect.height = RowHeight;
 			foreach (string name in comp.AlertNames())
 			{
 				FindDescription alert = comp.GetAlert(name);
-				if (listing.ButtonTextLabeled(name, "Delete"))
-					remove = name;
+				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
+				rowRect.y += RowHeight;
 
-				if (listing.ButtonTextLabeled("", "Rename"))
+				row.Label(name, rowRect.width / 4);
+
+				if(row.ButtonText("Rename"))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
-				if (listing.ButtonTextLabeled("", "Load"))
+				if (row.ButtonText("Load"))
 					MainTabWindow_List.OpenWith(alert.Clone(map));
+				
+				if (row.ButtonText("Delete"))
+					remove = name;
 
 				bool crit = alert.alertPriority == AlertPriority.Critical;
-				listing.CheckboxLabeled("Critical Alert", ref crit);
+				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "Critical Alert");
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 
+				row.Label("Seconds until shown:");
 				int sec = alert.ticksToShowAlert / 60;
 				string secStr = $"{sec}";
-				listing.TextFieldNumericLabeled("Seconds until shown", ref sec, ref secStr, 0, 600);
+				Rect textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
+				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 600);
 				comp.SetTicks(name, sec * 60);
 
+				row.Label("# matching required to show alert:");
 				int count = alert.countToAlert;
 				string countStr = $"{count}";
-				listing.TextFieldNumericLabeled("# matching required to show alert", ref count, ref countStr, 1, 600);
+				textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
+				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 1, 600);
 				comp.SetCount(name, count);
 			}
+			
+
+			scrollViewHeight = RowHeight * comp.AlertNames().Count();
+			Widgets.EndScrollView();
 
 			if (remove != null)
 				comp.RemoveAlert(remove);
+		}
+	}
 
-			listing.End();
+	public static class WidgetRowEx
+	{
+		public static Rect GapRect(this WidgetRow row, float width, float gap = WidgetRow.DefaultGap)
+		{
+			Rect result = new Rect(row.FinalX, row.FinalY, width, WidgetRow.IconSize + gap);
+			row.Gap(width);
+			return result;
 		}
 	}
 }
