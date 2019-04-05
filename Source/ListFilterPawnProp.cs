@@ -29,7 +29,7 @@ namespace List_Everything
 		public static string TraitName(TraitDef def) =>
 			def.degreeDatas.Count == 1 ?
 				def.degreeDatas.First().label.CapitalizeFirst() :
-				def.defName;
+				def.defName + "*";//TraitDefs don't have labels
 
 		ThoughtDef thoughtDef = ThoughtDefOf.AteWithoutTable;
 		public static string ThoughtName(ThoughtDef def)
