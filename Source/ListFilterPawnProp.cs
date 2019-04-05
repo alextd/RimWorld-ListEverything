@@ -15,8 +15,7 @@ namespace List_Everything
 		Trait,
 		Thought,
 		Need,
-		Health,
-		Inventory
+		Health
 	}
 	class ListFilterPawnProp : ListFilter
 	{
@@ -49,7 +48,6 @@ namespace List_Everything
 
 		HediffDef hediffDef;
 
-		ListFilter nameFilter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -68,7 +66,6 @@ namespace List_Everything
 			Scribe_Values.Look(ref needRange, "needRange");
 
 			Scribe_Defs.Look(ref hediffDef, "hediffDef");
-			Scribe_Deep.Look(ref nameFilter, "nameFilter");
 		}
 		public override ListFilter Clone()
 		{
@@ -88,7 +85,6 @@ namespace List_Everything
 			clone.needRange = needRange;
 
 			clone.hediffDef = hediffDef;
-			clone.nameFilter = nameFilter;
 			return clone;
 		}
 
@@ -137,10 +133,6 @@ namespace List_Everything
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
-
-				case PawnFilterProp.Inventory:
-					return ThingOwnerUtility.GetAllThingsRecursively(pawn)
-						.Any(t => nameFilter.FilterApplies(t));
 			}
 			return false;
 		}
@@ -270,10 +262,6 @@ namespace List_Everything
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
-				case PawnFilterProp.Inventory:
-					Rect subRect = rect;
-					subRect.xMin = row.FinalX;
-					return nameFilter.DrawOption(subRect);
 			}
 			return false;
 		}

@@ -20,6 +20,7 @@ namespace List_Everything
 	{
 		List<ListFilter> filters = new List<ListFilter>() { };
 		bool any = true; // or all
+
 		public override bool FilterApplies(Thing t) => 
 			any ? filters.Any(f => f.AppliesTo(t)) : 
 			filters.All(f => f.AppliesTo(t));
@@ -28,11 +29,13 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Collections.Look(ref filters, "filters");
+			Scribe_Values.Look(ref any, "any", true);
 		}
 		public override ListFilter Clone()
 		{
 			ListFilterGroup clone = (ListFilterGroup)base.Clone();
 			clone.filters = filters.Select(f => f.Clone()).ToList();
+			clone.any = any;
 			return clone;
 		}
 
