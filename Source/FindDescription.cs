@@ -10,8 +10,10 @@ namespace List_Everything
 	public class FindDescription : IExposable
 	{
 		public string name = "New List";
-		public BaseListType baseType;
 		public AlertPriority alertPriority;
+		public int ticksToShowAlert;
+
+		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
 
 		public virtual FindDescription Clone(Map map) =>
@@ -20,7 +22,8 @@ namespace List_Everything
 				filters = filters.Select(f => f.Clone(map)).ToList(),
 				baseType = baseType,
 				name = name,
-				alertPriority = alertPriority
+				alertPriority = alertPriority,
+				ticksToShowAlert = ticksToShowAlert
 			};
 
 		public List<Thing> Get(Map map)
@@ -88,6 +91,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref baseType, "baseType");
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
+			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
 		}
 	}
 

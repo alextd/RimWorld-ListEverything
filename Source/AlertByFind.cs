@@ -83,5 +83,10 @@ namespace List_Everything
 		{
 			GetAlert(name, map)?.SetPriority(p);
 		}
+
+		public static void SetTicks(string name, Map map, int t)
+		{
+			GetAlert(name, map)?.SetTicks(t);
+		}
 	}
 }

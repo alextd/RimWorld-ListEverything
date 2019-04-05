@@ -13,6 +13,7 @@ namespace List_Everything
 		public FindDescription desc;
 		public int maxItems = 16;
 		public Map map;
+		int tickStarted;
 
 		public Alert_Find()
 		{
@@ -52,11 +53,23 @@ namespace List_Everything
 			defaultPriority = p;
 			desc.alertPriority = p;
 		}
-
+		public void SetTicks(int t)
+		{
+			desc.ticksToShowAlert = t;
+		}
+		
 		public override AlertReport GetReport()
 		{
-			return desc == null ? AlertReport.Inactive :
-				AlertReport.CulpritsAre(FoundThings());
+			if (desc == null)
+				return AlertReport.Inactive;
+
+			List<Thing> things = FoundThings().ToList();
+			if (things.NullOrEmpty())
+				tickStarted = Find.TickManager.TicksGame;
+			else if (Find.TickManager.TicksGame - tickStarted >= desc.ticksToShowAlert)
+				return AlertReport.CulpritsAre(FoundThings());
+			Log.Message($"{Find.TickManager.TicksGame} - {tickStarted} < {desc.ticksToShowAlert}");
+			return AlertReport.Inactive;
 		}
 
 		public override string GetExplanation()

@@ -51,6 +51,12 @@ namespace List_Everything
 			savedAlerts[name].alertPriority = p;
 		}
 
+		public void SetTicks(string name, int t)
+		{
+			AlertByFind.SetTicks(name, map, t);
+			savedAlerts[name].ticksToShowAlert = t;
+		}
+
 		public override void ExposeData()
 		{
 			Scribe_Collections.Look(ref savedAlerts, "alertsByFind");
