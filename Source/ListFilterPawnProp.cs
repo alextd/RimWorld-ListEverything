@@ -34,7 +34,7 @@ namespace List_Everything
 		ThoughtDef thoughtDef = ThoughtDefOf.AteWithoutTable;
 		public static string ThoughtName(ThoughtDef def)
 		{
-			string label = 
+			string label =
 				def.label?.CapitalizeFirst() ??
 				def.stages?.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
 				def.stages?.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
@@ -47,6 +47,7 @@ namespace List_Everything
 		FloatRange needRange = new FloatRange(0, 0.5f);
 
 		HediffDef hediffDef;
+		FloatRange? severityRange = new FloatRange(0, 1);
 
 		public override void ExposeData()
 		{
@@ -66,6 +67,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref needRange, "needRange");
 
 			Scribe_Defs.Look(ref hediffDef, "hediffDef");
+			Scribe_Values.Look(ref severityRange, "severityRange");
 		}
 		public override ListFilter Clone()
 		{
@@ -85,6 +87,7 @@ namespace List_Everything
 			clone.needRange = needRange;
 
 			clone.hediffDef = hediffDef;
+			clone.severityRange = severityRange;
 			return clone;
 		}
 
@@ -104,11 +107,11 @@ namespace List_Everything
 			switch (prop)
 			{
 				case PawnFilterProp.Skill:
-					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec && 
+					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec &&
 						!rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 
 				case PawnFilterProp.Trait:
-					return pawn.story?.traits.GetTrait(traitDef) is Trait trait && 
+					return pawn.story?.traits.GetTrait(traitDef) is Trait trait &&
 						trait.Degree == traitDegree;
 
 				case PawnFilterProp.Thought:
@@ -132,7 +135,8 @@ namespace List_Everything
 				case PawnFilterProp.Health:
 					return hediffDef == null ?
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
-						pawn.health.hediffSet.HasHediff(hediffDef, !DebugSettings.godMode);
+						(pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef, !DebugSettings.godMode) is Hediff hediff &&
+						(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
 			}
 			return false;
 		}
@@ -204,7 +208,7 @@ namespace List_Everything
 					}
 					break;
 				case PawnFilterProp.Thought:
-					if (row.ButtonText(ThoughtName(thoughtDef)))	//ThoughtDef defines its own Label instead of LabelCap, and it sometimes fails
+					if (row.ButtonText(ThoughtName(thoughtDef)))  //ThoughtDef defines its own Label instead of LabelCap, and it sometimes fails
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
 
@@ -227,7 +231,7 @@ namespace List_Everything
 					if (row.ButtonText(needDef.LabelCap))
 					{
 						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						
+
 						foreach (NeedDef nDef in DefDatabase<NeedDef>.AllDefs)
 						{
 							options.Add(new FloatMenuOption(nDef.LabelCap, () => needDef = nDef));
@@ -257,9 +261,26 @@ namespace List_Everything
 							: DefDatabase<HediffDef>.AllDefs;
 
 						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
-							options.Add(new FloatMenuOption(hDef.LabelCap, () => hediffDef = hDef));
+							options.Add(new FloatMenuOption(hDef.LabelCap, () =>
+							{
+								hediffDef = hDef;
+								severityRange = SeverityRangeFor(hediffDef);
+							}));
 
 						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+					}
+					if (hediffDef != null && severityRange.HasValue)
+					{
+						Rect rangeRect = rect;
+						rangeRect.xMin = row.FinalX;
+						FloatRange newRange = severityRange.Value;
+						FloatRange boundRange = SeverityRangeFor(hediffDef).Value;
+						Widgets.FloatRange(rangeRect, id, ref newRange, boundRange.min, boundRange.max, valueStyle: ToStringStyle.FloatOne);
+						if (newRange != severityRange.Value)
+						{
+							severityRange = newRange;
+							return true;
+						}
 					}
 					break;
 			}
@@ -277,10 +298,10 @@ namespace List_Everything
 			if (row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				IEnumerable<int> stages = ContentsUtility.onlyAvailable ? 
+				IEnumerable<int> stages = ContentsUtility.onlyAvailable ?
 					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, thoughtDef)) :
 					Enumerable.Range(0, thoughtDef.stages.Count);
-				foreach(int i in stages)
+				foreach (int i in stages)
 				{
 					int localI = i;
 					options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
@@ -321,6 +342,17 @@ namespace List_Everything
 			foreach (Thought thought in thoughts)
 				if (thought.def == def)
 					yield return thought.CurStageIndex;
+		}
+
+		public static FloatRange? SeverityRangeFor(HediffDef hediffDef)
+		{
+			float min = hediffDef.minSeverity;
+			float max = hediffDef.maxSeverity;
+			if (hediffDef.lethalSeverity != -1f)
+				max = Math.Min(max, hediffDef.lethalSeverity);
+
+			if (max == float.MaxValue) return null;
+			return new FloatRange(min, max);
 		}
 	}
 }
