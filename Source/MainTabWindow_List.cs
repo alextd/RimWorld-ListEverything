@@ -28,14 +28,11 @@ namespace List_Everything
 
 		private float scrollViewHeight;
 
-		private float listHeight;
-
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
 			Rect filterRect = fillRect.LeftPart(0.60f);
 			Rect listRect = fillRect.RightPart(0.39f);
-			listHeight = listRect.height;
 
 			GUI.color = Color.grey;
 			Widgets.DrawLineVertical(listRect.x-3, 0, listRect.height);
@@ -217,7 +214,7 @@ namespace List_Everything
 
 				thingRect.y += 34;
 
-				if (thingRect.y > scrollPosition.y + listHeight)
+				if (thingRect.y > scrollPosition.y + listRect.height)
 					break;
 			}
 
