@@ -11,6 +11,10 @@ namespace List_Everything
 	[StaticConstructorOnStartup]
 	public static class ContentsUtility
 	{
+		public static bool IsValidHolder(this IThingHolder holder)
+			=> holder.IsEnclosingContainer() && !(holder is MinifiedThing);
+
+
 		private static FieldInfo contentsKnownInfo = typeof(Building_Casket).GetField("contentsKnown", BindingFlags.NonPublic | BindingFlags.Instance);
 		public static bool get_contentsKnown(this Building_Casket building) =>
 			(bool)contentsKnownInfo.GetValue(building);
@@ -21,6 +25,8 @@ namespace List_Everything
 
 		public static List<Thing> AllKnownThings(IThingHolder holder)
 		{
+			if (holder == null) return new List<Thing>();
+
 			List<Thing> knownThings = new List<Thing>();
 			ThingOwnerUtility.GetAllThingsRecursively(holder, knownThings, true, ContentsUtility.CanPeekInventory);
 			return knownThings;

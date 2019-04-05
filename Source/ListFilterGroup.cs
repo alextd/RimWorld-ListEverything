@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Verse;
+using RimWorld;
 
 namespace List_Everything
 {
@@ -16,10 +17,10 @@ namespace List_Everything
 		public static readonly Texture2D SelectAll = ContentFinder<Texture2D>.Get("UI/Commands/SelectNextTransporter", true);
 		public static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 	}
-	class ListFilterGroup : ListFilter
+	public class ListFilterGroup : ListFilter
 	{
-		List<ListFilter> filters = new List<ListFilter>() { };
-		bool any = true; // or all
+		protected List<ListFilter> filters = new List<ListFilter>() { };
+		protected bool any = true; // or all
 
 		public override bool FilterApplies(Thing t) => 
 			any ? filters.Any(f => f.AppliesTo(t)) : 
@@ -79,6 +80,61 @@ namespace List_Everything
 			return changed;
 		}
 	}
+
+	public class ListFilterInventory : ListFilterGroup
+	{
+		protected bool parent;//or child
+
+		public override bool FilterApplies(Thing t)
+		{
+			if (parent)
+			{
+				IThingHolder parent = t.ParentHolder;
+				while (parent.IsValidHolder())
+				{
+					if (parent is Thing parentThing && base.FilterApplies(parentThing))
+						return true;
+					parent = parent.ParentHolder;
+				}
+				return false;
+			}
+			else
+			{
+				return ContentsUtility.AllKnownThings(t as IThingHolder).Any(child => base.FilterApplies(child));
+			}
+		}
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref parent, "parent", true);
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterInventory clone = (ListFilterInventory)base.Clone();
+			clone.parent = parent;
+			return clone;
+		}
+
+		public override bool DrawOption(Rect rect)
+		{
+			bool changed = false;
+			WidgetRow row = new WidgetRow(rect.x, rect.y);
+			if (row.ButtonText(parent ? "The thing holding this" : "Anything this is holding"))
+			{
+				changed = true;
+				parent = !parent;
+			}
+			row.Label("matches");
+			if (row.ButtonText(any ? "Any" : "All"))
+			{
+				changed = true;
+				any = !any;
+			}
+			row.Label("of:");
+			return changed;
+		}
+	}
+
 
 	public static class ListingEx
 	{
