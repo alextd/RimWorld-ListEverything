@@ -33,6 +33,12 @@ namespace List_Everything
 				return null;
 			}
 		}
+
+		public static void RemoveAlert(string name, Map map)
+		{
+			AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
+			activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
+		}
 	}
 
 	public class Alert_Find : Alert

@@ -48,8 +48,7 @@ namespace List_Everything
 				comp.savedAlerts.Remove(remove);
 
 				//Remove in-game alerts
-				AlertByFind.AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove && af.map == map);
-				AlertByFind.activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove && af.map == map);
+				AlertByFind.RemoveAlert(remove, map);
 			}
 
 			listing.End();

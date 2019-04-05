@@ -14,8 +14,19 @@ namespace List_Everything
 
 		public ListEverythingMapComp(Map map) :base(map) { }
 
-		public void AddAlert(string name, FindDescription desc)
+		public void AddAlert(string name, FindDescription desc, bool overwrite = false)
 		{
+			if(AlertByFind.AllAlerts.Any(a => a is Alert_Find af && af.GetLabel() == name && af.map == map))
+			{
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+					"Overwrite Alert?",
+					 () =>
+					 {
+						 AlertByFind.RemoveAlert(name, map);
+						 AddAlert(name, desc, true);
+					 }));
+				return;
+			}
 			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
 			FindDescription refDesc = desc.Clone(null); //This one has string
 			FindDescription alertDesc = refDesc.Clone(map); //This one re-resolves reference for this map.
