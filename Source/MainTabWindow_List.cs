@@ -33,8 +33,8 @@ namespace List_Everything
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
-			Rect filterRect = fillRect.LeftPart(0.50f);
-			Rect listRect = fillRect.RightPart(0.49f);
+			Rect filterRect = fillRect.LeftPart(0.60f);
+			Rect listRect = fillRect.RightPart(0.39f);
 			listHeight = listRect.height;
 
 			GUI.color = Color.grey;
@@ -210,8 +210,13 @@ namespace List_Everything
 			selectAllDef = null;
 
 			Map map = Find.CurrentMap;
-			
+
 			//Draw Scrolling List:
+			GUI.color = Color.gray;
+			Widgets.DrawBox(listRect);
+			GUI.color = Color.white;
+
+			listRect = listRect.ContractedBy(1);
 			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
