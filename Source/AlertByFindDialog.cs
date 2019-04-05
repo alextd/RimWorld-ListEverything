@@ -49,7 +49,10 @@ namespace List_Everything
 
 				if (listing.ButtonTextLabeled("", "Rename"))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
-				
+
+				if (listing.ButtonTextLabeled("", "Load"))
+					MainTabWindow_List.OpenWith(alert.Clone(map));
+
 				bool crit = alert.alertPriority == AlertPriority.Critical;
 				listing.CheckboxLabeled("Critical Alert", ref crit);
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
