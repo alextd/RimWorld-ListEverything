@@ -6,6 +6,7 @@ using System.Reflection;
 using static System.Reflection.BindingFlags;
 using Verse;
 using RimWorld;
+using UnityEngine;
 
 namespace List_Everything
 {
@@ -36,26 +37,26 @@ namespace List_Everything
 
 	public class Alert_Find : Alert
 	{
-		public FindDescription filter;
+		public FindDescription desc;
 		public int maxItems = 16;
 		public Map map;
 
 		public Alert_Find()
 		{
-			//The vanilla alert added to AllAlerts will be constructed but never trigger
+			//The vanilla alert added to AllAlerts will be constructed but never be active with null filter
 			defaultPriority = AlertPriority.Medium;
 		}
 
-		public Alert_Find(Map m, string label, FindDescription f) : this()
+		public Alert_Find(Map m, string label, FindDescription descNew) : this()
 		{
 			defaultLabel = label;
-			filter = f;
+			desc = descNew;
 			map = m;
 		}
 
 		public override AlertReport GetReport()
 		{
-			return filter == null ? AlertReport.Inactive : 
+			return desc == null ? AlertReport.Inactive : 
 				AlertReport.CulpritsAre(FoundThings());
 		}
 
@@ -70,6 +71,8 @@ namespace List_Everything
 				stringBuilder.AppendLine("   " + thing.Label);
 			if(things.Count() == maxItems)
 				stringBuilder.AppendLine($"(Maximum {maxItems} displayed)");
+			stringBuilder.AppendLine("");
+			stringBuilder.AppendLine($"(Right-click to open Find Tab)");
 
 			return stringBuilder.ToString().TrimEndNewlines();
 		}
@@ -77,12 +80,29 @@ namespace List_Everything
 		private IEnumerable<Thing> FoundThings()
 		{
 			int i = 0;
-			foreach (Thing t in filter.Get(map))
+			foreach (Thing t in desc.Get(map))
 			{
 				yield return t;
 				if (++i == maxItems)
 					yield break;
 			}
+		}
+
+		public override Rect DrawAt(float topY, bool minimized)
+		{
+			Text.Font = GameFont.Small;
+			string label = this.GetLabel();
+			float height = Text.CalcHeight(label, Alert.Width - 6); //Alert.TextWidth = 148f
+			Rect rect = new Rect((float)UI.screenWidth - Alert.Width, topY, Alert.Width, height);
+			//if (this.alertBounce != null)
+				//rect.x -= this.alertBounce.CalculateHorizontalOffset();
+			if (Event.current.button == 1 && Widgets.ButtonInvisible(rect, false))
+			{
+				MainTabWindow_List.OpenWith(desc.Clone(map));
+
+				Event.current.Use();
+			}
+			return base.DrawAt(topY, minimized);
 		}
 	}
 }

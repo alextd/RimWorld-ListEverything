@@ -54,11 +54,16 @@ namespace List_Everything
 
 		//Filters:
 		public FindDescription findDesc = new FindDescription();
-		public void Reset()
+
+		public static void OpenWith(FindDescription desc)
 		{
-			findDesc = new FindDescription();
-			RemakeList();
+			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
+			MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
+			tab.findDesc = desc;
+			tab.RemakeList();
 		}
+
+		//Draw Filters
 		public void DoFilter(Rect rect)
 		{
 			Text.Font = GameFont.Medium;
@@ -70,7 +75,10 @@ namespace List_Everything
 			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
 
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
-				Reset();
+			{
+				findDesc = new FindDescription();
+				RemakeList();
+			}
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
 			//Header Title

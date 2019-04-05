@@ -26,12 +26,11 @@ namespace List_Everything
 		{
 			if (ListDefOf.OpenFindTab.IsDownEvent && Event.current.control)
 			{
-				Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
-				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
-				tab.Reset();
+				FindDescription desc = new FindDescription();
 				ListFilter filter = ListFilterMaker.NameFilter;
-				tab.findDesc.filters.Add(filter);
+				desc.filters.Add(filter);
 				filter.Focus();
+				MainTabWindow_List.OpenWith(desc);
 			}
 		}
 

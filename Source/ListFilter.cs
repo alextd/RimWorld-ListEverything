@@ -252,8 +252,12 @@ namespace List_Everything
 				}
 				else //LOADING: use my refName to resolve loaded clone's reference
 				{
-					if (refName == "null") sel = default(T);
-					else clone.ResolveReference(refName, map);
+					if (refName == "null")
+						clone.sel = default(T);
+					else if(refName == null)
+						clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
+					else
+						clone.ResolveReference(refName, map);
 				}
 			}
 			else
