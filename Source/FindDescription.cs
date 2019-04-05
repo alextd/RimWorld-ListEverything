@@ -12,10 +12,10 @@ namespace List_Everything
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
 
-		public FindDescription Clone() =>
+		public FindDescription Clone(Map map) =>
 			new FindDescription()
 			{
-				filters = filters.Select(f => f.Clone()).ToList(),
+				filters = filters.Select(f => f.Clone(map)).ToList(),
 				baseType = baseType
 			};
 

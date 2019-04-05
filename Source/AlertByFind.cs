@@ -38,6 +38,7 @@ namespace List_Everything
 	{
 		public FindDescription filter;
 		public int maxItems = 16;
+		public Map map;
 
 		public Alert_Find()
 		{
@@ -45,10 +46,11 @@ namespace List_Everything
 			defaultPriority = AlertPriority.Medium;
 		}
 
-		public Alert_Find(string label, FindDescription f) : this()
+		public Alert_Find(Map m, string label, FindDescription f) : this()
 		{
 			defaultLabel = label;
 			filter = f;
+			map = m;
 		}
 
 		public override AlertReport GetReport()
@@ -61,6 +63,7 @@ namespace List_Everything
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine("Your custom alert:");
+			stringBuilder.AppendLine(map.Parent.LabelCap + " ("+defaultLabel+")");
 			stringBuilder.AppendLine("");
 			var things = FoundThings();
 			foreach (Thing thing in things)
@@ -74,13 +77,12 @@ namespace List_Everything
 		private IEnumerable<Thing> FoundThings()
 		{
 			int i = 0;
-			foreach (Map map in Find.Maps.Where(m => m.IsPlayerHome))
-				foreach (Thing t in filter.Get(map))
-				{
-					yield return t;
-					if (++i == maxItems)
-						yield break;
-				}
+			foreach (Thing t in filter.Get(map))
+			{
+				yield return t;
+				if (++i == maxItems)
+					yield break;
+			}
 		}
 	}
 }

@@ -32,10 +32,10 @@ namespace List_Everything
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref any, "any", true);
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterGroup clone = (ListFilterGroup)base.Clone();
-			clone.filters = filters.Select(f => f.Clone()).ToList();
+			ListFilterGroup clone = (ListFilterGroup)base.Clone(map);
+			clone.filters = filters.Select(f => f.Clone(map)).ToList();
 			clone.any = any;
 			return clone;
 		}
@@ -108,9 +108,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref parent, "parent", true);
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterInventory clone = (ListFilterInventory)base.Clone();
+			ListFilterInventory clone = (ListFilterInventory)base.Clone(map);
 			clone.parent = parent;
 			return clone;
 		}

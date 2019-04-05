@@ -74,9 +74,9 @@ namespace List_Everything
 
 			Scribe_Values.Look(ref incapableWork, "incapableWork");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone();
+			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone(map);
 			clone.prop = prop;
 
 			clone.skillDef = skillDef;

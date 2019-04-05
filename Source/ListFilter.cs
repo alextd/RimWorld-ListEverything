@@ -117,7 +117,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref enabled, "enabled", true);
 			Scribe_Values.Look(ref include, "include", true);
 		}
-		public virtual ListFilter Clone()
+
+		//Clone, and resolve references if map specified
+		public virtual ListFilter Clone(Map map)
 		{
 			ListFilter clone = ListFilterMaker.MakeFilter(def);
 			clone.enabled = enabled;
@@ -135,9 +137,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref name, "name");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterName clone = (ListFilterName)base.Clone();
+			ListFilterName clone = (ListFilterName)base.Clone(map);
 			clone.name = name;
 			return clone;
 		}
@@ -239,17 +241,19 @@ namespace List_Everything
 
 			Scribe_Values.Look(ref extraOption, "ex");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone();
+			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map);
 			if (extraOption == 0 && typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
-				if (refName == null)//SAVING: I don't have refName, but I make it and tell saved clone
+				if(map == null)//SAVING: I don't have refName, but I make it and tell saved clone
+				{
 					clone.refName = sel == null ? "null" : MakeRefName();
+				}
 				else //LOADING: use my refName to resolve loaded clone's reference
 				{
 					if (refName == "null") sel = default(T);
-					else clone.ResolveReference(refName);
+					else clone.ResolveReference(refName, map);
 				}
 			}
 			else
@@ -258,7 +262,7 @@ namespace List_Everything
 			return clone;
 		}
 		public virtual string MakeRefName() => NameFor(sel);
-		public virtual void ResolveReference(string refName) => throw new NotImplementedException();
+		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 
 		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
 		public virtual string NullOption() => null;
@@ -338,9 +342,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterGrowth clone = (ListFilterGrowth)base.Clone();
+			ListFilterGrowth clone = (ListFilterGrowth)base.Clone(map);
 			clone.range = range;
 			return clone;
 		}
@@ -483,9 +487,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterHP clone = (ListFilterHP)base.Clone();
+			ListFilterHP clone = (ListFilterHP)base.Clone(map);
 			clone.range = range;
 			return clone;
 		}
@@ -522,9 +526,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone()
+		public override ListFilter Clone(Map map)
 		{
-			ListFilterQuality clone = (ListFilterQuality)base.Clone();
+			ListFilterQuality clone = (ListFilterQuality)base.Clone(map);
 			clone.range = range;
 			return clone;
 		}
@@ -605,10 +609,9 @@ namespace List_Everything
 	{
 		public ListFilterArea() => sel = Find.CurrentMap?.areaManager.Home;
 
-		public override string MakeRefName() => sel.Label;
-		public override void ResolveReference(string refName)
+		public override void ResolveReference(string refName, Map map)
 		{
-			sel = Find.CurrentMap.areaManager.GetLabeled(refName);
+			sel = map.areaManager.GetLabeled(refName);
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
@@ -632,9 +635,9 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		public override void ResolveReference(string refName)
+		public override void ResolveReference(string refName, Map map)
 		{
-			sel = Find.CurrentMap.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
+			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 			if (sel == null)
 				Messages.Message($"Tried to load zone Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}

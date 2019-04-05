@@ -24,7 +24,7 @@ namespace List_Everything
 
 		public void Save(string name, FindDescription desc)
 		{
-			savedFilters[name] = desc.Clone();
+			savedFilters[name] = desc.Clone(null);
 			Write();
 		}
 

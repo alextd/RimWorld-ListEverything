@@ -14,21 +14,13 @@ namespace List_Everything
 		public static KeyBindingDef OpenFindTab;
 		public static MainButtonDef TD_List;
 	}
+
+	//GameComponent to handle keypress and contiuous refreshing list
 	class ListEverythingGameComp : GameComponent
 	{
 		public bool continuousRefresh = false;
-		public Dictionary<string, FindDescription> alertsByFind = new Dictionary<string, FindDescription>();
 
-		public ListEverythingGameComp(Game g) { }
-
-		public void AddAlert(string name, FindDescription desc)
-		{
-			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
-			FindDescription refDesc = desc.Clone();	//This one has string
-			FindDescription alertDesc = refDesc.Clone(); //This one re-resolves reference.
-			alertsByFind[name] = refDesc;
-			AlertByFind.AllAlerts.Add(new Alert_Find(name, alertDesc));
-		}
+		public ListEverythingGameComp(Game g):base() { }
 		
 		public override void GameComponentOnGUI()
 		{
@@ -51,21 +43,6 @@ namespace List_Everything
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				tab.RemakeList();
-			}
-		}
-
-
-		public override void ExposeData()
-		{
-			Scribe_Collections.Look(ref alertsByFind, "alertsByFind");
-			if(Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (alertsByFind == null)
-					alertsByFind = new Dictionary<string, FindDescription>();
-				foreach (var kvp in alertsByFind)
-				{
-					AlertByFind.AllAlerts.Add(new Alert_Find(kvp.Key, kvp.Value.Clone()));
-				}
 			}
 		}
 	}

@@ -32,23 +32,24 @@ namespace List_Everything
 			var listing = new Listing_Standard();
 			listing.Begin(inRect);
 
-			listing.Label("Alerts:");
+			Map map = Find.CurrentMap;
+			listing.Label($"Alerts for {map.Parent.LabelCap}:");
 			string remove = null;
 
 
-			ListEverythingGameComp comp = Current.Game.GetComponent<ListEverythingGameComp>();
-			foreach (string name in comp.alertsByFind.Keys)
+			ListEverythingMapComp comp = map.GetComponent<ListEverythingMapComp>();
+			foreach (string name in comp.savedAlerts.Keys)
 				if (listing.ButtonTextLabeled(name, "Delete"))
 					remove = name;
 
 			if (remove != null)
 			{
 				//Remove saved ref
-				comp.alertsByFind.Remove(remove);
+				comp.savedAlerts.Remove(remove);
 
 				//Remove in-game alerts
-				AlertByFind.AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove);
-				AlertByFind.activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove);
+				AlertByFind.AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove && af.map == map);
+				AlertByFind.activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == remove && af.map == map);
 			}
 
 			listing.End();
