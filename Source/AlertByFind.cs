@@ -37,16 +37,17 @@ namespace List_Everything
 	public class Alert_Find : Alert
 	{
 		public FindDescription filter;
+		public int maxItems = 16;
 
 		public Alert_Find()
 		{
 			//The vanilla alert added to AllAlerts will be constructed but never trigger
-			this.defaultPriority = AlertPriority.Medium;
+			defaultPriority = AlertPriority.Medium;
 		}
 
 		public Alert_Find(string label, FindDescription f) : this()
 		{
-			this.defaultLabel = label;
+			defaultLabel = label;
 			filter = f;
 		}
 
@@ -61,17 +62,25 @@ namespace List_Everything
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine("Your custom alert:");
 			stringBuilder.AppendLine("");
-			foreach (Thing thing in this.FoundThings())
+			var things = FoundThings();
+			foreach (Thing thing in things)
 				stringBuilder.AppendLine("   " + thing.Label);
+			if(things.Count() == maxItems)
+				stringBuilder.AppendLine($"(Maximum {maxItems} displayed)");
 
 			return stringBuilder.ToString().TrimEndNewlines();
 		}
 
 		private IEnumerable<Thing> FoundThings()
 		{
+			int i = 0;
 			foreach (Map map in Find.Maps.Where(m => m.IsPlayerHome))
 				foreach (Thing t in filter.Get(map))
+				{
 					yield return t;
+					if (++i == maxItems)
+						yield break;
+				}
 		}
 	}
 }
