@@ -78,5 +78,10 @@ namespace List_Everything
 				GetAlert(name, map)?.Rename(newName);
 			}
 		}
+
+		public static void SetPriority(string name, Map map, AlertPriority p)
+		{
+			GetAlert(name, map)?.SetPriority(p);
+		}
 	}
 }

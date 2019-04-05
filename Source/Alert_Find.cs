@@ -17,17 +17,41 @@ namespace List_Everything
 		public Alert_Find()
 		{
 			//The vanilla alert added to AllAlerts will be constructed but never be active with null filter
-			defaultPriority = AlertPriority.Medium;
 		}
 
-		public Alert_Find(Map m, FindDescription descNew) : this()
+		public Alert_Find(Map m, FindDescription d) : this()
 		{
-			defaultLabel = descNew.name;
-			desc = descNew;
+			defaultLabel = d.name;
+			defaultPriority = d.alertPriority;
+			desc = d;
 			map = m;
 		}
 
-		public void Rename(string label) => defaultLabel = label;
+
+		private const float PulseFreq = 0.5f;
+		private const float PulseAmpCritical = 0.6f;
+		private const float PulseAmpTutorial = 0.2f;
+
+		protected override Color BGColor
+		{
+			get
+			{
+				if (defaultPriority != AlertPriority.Critical) return base.BGColor;
+				float i = Pulser.PulseBrightness(PulseFreq, Pulser.PulseBrightness(PulseFreq, PulseAmpCritical));
+				return new Color(i, i, i) * Color.red;
+			}
+		}
+
+		public void Rename(string name)
+		{
+			defaultLabel = name;
+			desc.name = name;
+		}
+		public void SetPriority(AlertPriority p)
+		{
+			defaultPriority = p;
+			desc.alertPriority = p;
+		}
 
 		public override AlertReport GetReport()
 		{

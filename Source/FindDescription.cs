@@ -11,6 +11,7 @@ namespace List_Everything
 	{
 		public string name = "New List";
 		public BaseListType baseType;
+		public AlertPriority alertPriority;
 		public List<ListFilter> filters = new List<ListFilter>();
 
 		public virtual FindDescription Clone(Map map) =>
@@ -18,7 +19,8 @@ namespace List_Everything
 			{
 				filters = filters.Select(f => f.Clone(map)).ToList(),
 				baseType = baseType,
-				name = name
+				name = name,
+				alertPriority = alertPriority
 			};
 
 		public List<Thing> Get(Map map)
@@ -85,6 +87,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref name, "name");
 			Scribe_Values.Look(ref baseType, "baseType");
 			Scribe_Collections.Look(ref filters, "filters");
+			Scribe_Values.Look(ref alertPriority, "alertPriority");
 		}
 	}
 

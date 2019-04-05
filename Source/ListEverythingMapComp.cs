@@ -16,6 +16,8 @@ namespace List_Everything
 
 		public IEnumerable<string> AlertNames() => savedAlerts.Keys;
 
+		public FindDescription GetAlert(string name) => savedAlerts[name];
+
 		public void AddAlert(string name, FindDescription desc)
 		{
 			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
@@ -41,6 +43,12 @@ namespace List_Everything
 		{
 			AlertByFind.RemoveAlert(name, map);
 			savedAlerts.Remove(name);
+		}
+
+		public void SetPriority(string name, AlertPriority p)
+		{
+			AlertByFind.SetPriority(name, map, p);
+			savedAlerts[name].alertPriority = p;
 		}
 
 		public override void ExposeData()

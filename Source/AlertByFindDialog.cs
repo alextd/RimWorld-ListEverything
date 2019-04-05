@@ -42,8 +42,13 @@ namespace List_Everything
 			{
 				if (listing.ButtonTextLabeled(name, "Delete"))
 					remove = name;
+
 				if (listing.ButtonTextLabeled("", "Rename"))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
+				
+				bool crit = comp.GetAlert(name).alertPriority == AlertPriority.Critical;
+				listing.CheckboxLabeled("Critical Alert", ref crit);
+				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 			}
 
 			if (remove != null)
