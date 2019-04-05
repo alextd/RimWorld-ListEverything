@@ -57,6 +57,12 @@ namespace List_Everything
 			savedAlerts[name].ticksToShowAlert = t;
 		}
 
+		public void SetCount(string name, int c)
+		{
+			AlertByFind.SetCount(name, map, c);
+			savedAlerts[name].countToAlert = c;
+		}
+
 		public override void ExposeData()
 		{
 			Scribe_Collections.Look(ref savedAlerts, "alertsByFind");

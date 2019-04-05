@@ -79,14 +79,13 @@ namespace List_Everything
 			}
 		}
 
-		public static void SetPriority(string name, Map map, AlertPriority p)
-		{
+		public static void SetPriority(string name, Map map, AlertPriority p) =>
 			GetAlert(name, map)?.SetPriority(p);
-		}
 
-		public static void SetTicks(string name, Map map, int t)
-		{
+		public static void SetTicks(string name, Map map, int t) =>
 			GetAlert(name, map)?.SetTicks(t);
-		}
+
+		public static void SetCount(string name, Map map, int c) =>
+			GetAlert(name, map)?.SetCount(c);
 	}
 }

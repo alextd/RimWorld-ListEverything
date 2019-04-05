@@ -12,6 +12,7 @@ namespace List_Everything
 		public string name = "New List";
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
+		public int countToAlert = 1;
 
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();

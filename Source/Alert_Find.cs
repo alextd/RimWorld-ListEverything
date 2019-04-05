@@ -53,10 +53,8 @@ namespace List_Everything
 			defaultPriority = p;
 			desc.alertPriority = p;
 		}
-		public void SetTicks(int t)
-		{
-			desc.ticksToShowAlert = t;
-		}
+		public void SetTicks(int t) => desc.ticksToShowAlert = t;
+		public void SetCount(int c) => desc.countToAlert = c;
 		
 		public override AlertReport GetReport()
 		{
@@ -64,11 +62,10 @@ namespace List_Everything
 				return AlertReport.Inactive;
 
 			List<Thing> things = FoundThings().ToList();
-			if (things.NullOrEmpty())
+			if (things.Count() < desc.countToAlert)
 				tickStarted = Find.TickManager.TicksGame;
 			else if (Find.TickManager.TicksGame - tickStarted >= desc.ticksToShowAlert)
 				return AlertReport.CulpritsAre(FoundThings());
-			Log.Message($"{Find.TickManager.TicksGame} - {tickStarted} < {desc.ticksToShowAlert}");
 			return AlertReport.Inactive;
 		}
 

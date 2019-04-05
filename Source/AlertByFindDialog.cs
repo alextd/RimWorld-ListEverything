@@ -58,6 +58,11 @@ namespace List_Everything
 				string secStr = $"{sec}";
 				listing.TextFieldNumericLabeled("Seconds until shown", ref sec, ref secStr, 0, 600);
 				comp.SetTicks(name, sec * 60);
+
+				int count = alert.countToAlert;
+				string countStr = $"{count}";
+				listing.TextFieldNumericLabeled("# matching required to show alert", ref count, ref countStr, 1, 600);
+				comp.SetCount(name, count);
 			}
 
 			if (remove != null)
