@@ -15,7 +15,8 @@ namespace List_Everything
 		Trait,
 		Thought,
 		Need,
-		Health
+		Health,
+		Incapable
 	}
 	class ListFilterPawnProp : ListFilter
 	{
@@ -49,6 +50,8 @@ namespace List_Everything
 		HediffDef hediffDef;
 		FloatRange? severityRange = new FloatRange(0, 1);
 
+		WorkTags incapableWork;
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -68,6 +71,8 @@ namespace List_Everything
 
 			Scribe_Defs.Look(ref hediffDef, "hediffDef");
 			Scribe_Values.Look(ref severityRange, "severityRange");
+
+			Scribe_Values.Look(ref incapableWork, "incapableWork");
 		}
 		public override ListFilter Clone()
 		{
@@ -88,6 +93,8 @@ namespace List_Everything
 
 			clone.hediffDef = hediffDef;
 			clone.severityRange = severityRange;
+
+			clone.incapableWork = incapableWork;
 			return clone;
 		}
 
@@ -137,6 +144,11 @@ namespace List_Everything
 						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 						(pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef, !DebugSettings.godMode) is Hediff hediff &&
 						(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
+
+				case PawnFilterProp.Incapable:
+					return incapableWork == WorkTags.None ? 
+						pawn.story?.CombinedDisabledWorkTags == WorkTags.None:
+						pawn.story?.WorkTagIsDisabled(incapableWork) ?? false;
 			}
 			return false;
 		}
@@ -281,6 +293,17 @@ namespace List_Everything
 							severityRange = newRange;
 							return true;
 						}
+					}
+					break;
+				case PawnFilterProp.Incapable:
+					if (row.ButtonText(incapableWork.LabelTranslated().CapitalizeFirst()))
+					{
+						List<FloatMenuOption> options = new List<FloatMenuOption>();
+
+						foreach (WorkTags tag in Enum.GetValues(typeof(WorkTags)))
+							options.Add(new FloatMenuOption(tag.LabelTranslated().CapitalizeFirst(), () => incapableWork = tag));
+
+						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
 					}
 					break;
 			}
