@@ -202,6 +202,7 @@ namespace List_Everything
 			GUI.color = Color.white;
 
 			listRect = listRect.ContractedBy(1);
+			listRect.width -= 2; listRect.x += 1;
 			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
