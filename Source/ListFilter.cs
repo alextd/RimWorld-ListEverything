@@ -402,23 +402,23 @@ namespace List_Everything
 			thing.def.CanHaveFaction;
 	}*/
 
-	class ListFilterCategory : ListFilterDropDown<ThingCategoryDef>
+	class ListFilterItemCategory : ListFilterDropDown<ThingCategoryDef>
 	{
-		public ListFilterCategory() => sel = ThingCategoryDefOf.Root;
+		public ListFilterItemCategory() => sel = ThingCategoryDefOf.Root;
 
 		public override bool FilterApplies(Thing thing) =>
 			thing.def.IsWithinCategory(sel);
-		
+
 		public override IEnumerable Options() =>
 			ContentsUtility.onlyAvailable ?
-				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing).ToList() : 
+				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing).ToList() :
 				DefDatabase<ThingCategoryDef>.AllDefsListForReading;
 
 		public static IEnumerable<ThingCategoryDef> ThingCategoryDefsOfThing(Thing thing)
 		{
 			if (thing.def.thingCategories == null)
 				yield break;
-			foreach(var def in thing.def.thingCategories)
+			foreach (var def in thing.def.thingCategories)
 			{
 				yield return def;
 				foreach (var pDef in def.Parents)
@@ -426,6 +426,36 @@ namespace List_Everything
 			}
 		}
 		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
+	}
+
+	enum ListCategory
+	{
+		Person,
+		Animal,
+		Item,
+		Building,
+		Natural,
+		Plant,
+		Other
+	}
+	class ListFilterCategory : ListFilterDropDown<ListCategory>
+	{
+		public override bool FilterApplies(Thing thing)
+		{
+			switch(sel)
+			{
+				case ListCategory.Person: return thing is Pawn pawn && !pawn.NonHumanlikeOrWildMan();
+				case ListCategory.Animal: return thing is Pawn animal && animal.NonHumanlikeOrWildMan();
+				case ListCategory.Item: return thing.def.alwaysHaulable;
+				case ListCategory.Building: return thing is Building building && building.def.filthLeaving != ThingDefOf.Filth_RubbleRock;
+				case ListCategory.Natural: return thing is Building natural && natural.def.filthLeaving == ThingDefOf.Filth_RubbleRock;
+				case ListCategory.Plant: return thing is Plant;
+				case ListCategory.Other: return !(thing is Pawn) && !(thing is Building) && !(thing is Plant) && !thing.def.alwaysHaulable;
+			}
+			return false;
+		}
+
+		public override IEnumerable Options() => Enum.GetValues(typeof(ListCategory));
 	}
 
 	enum MineableType { Resource, Rock, All }
