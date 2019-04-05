@@ -9,14 +9,16 @@ namespace List_Everything
 {
 	public class FindDescription : IExposable
 	{
+		public string name = "New List";
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
 
-		public FindDescription Clone(Map map) =>
+		public virtual FindDescription Clone(Map map) =>
 			new FindDescription()
 			{
 				filters = filters.Select(f => f.Clone(map)).ToList(),
-				baseType = baseType
+				baseType = baseType,
+				name = name
 			};
 
 		public List<Thing> Get(Map map)
@@ -78,8 +80,9 @@ namespace List_Everything
 			return allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
 		}
 
-		public void ExposeData()
+		public virtual void ExposeData()
 		{
+			Scribe_Values.Look(ref name, "name");
 			Scribe_Values.Look(ref baseType, "baseType");
 			Scribe_Collections.Look(ref filters, "filters");
 		}

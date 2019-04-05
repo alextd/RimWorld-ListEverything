@@ -89,10 +89,8 @@ namespace List_Everything
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
 					types.Add(new FloatMenuOption(type.ToString(), () => findDesc.baseType = type));
-
-				FloatMenu floatMenu = new FloatMenu(types) { onCloseCallback = RemakeList };
-				floatMenu.vanishIfMouseDistant = true;
-				Find.WindowStack.Add(floatMenu);
+				
+				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
 			}
 
 			Listing_Standard listing = new Listing_Standard();
@@ -113,7 +111,7 @@ namespace List_Everything
 			buttonRect = buttonRect.LeftPart(0.25f);
 			
 			if (Widgets.ButtonText(buttonRect, "Make Alert"))
-				Find.WindowStack.Add(new Dialog_Name(
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
 					name => Find.CurrentMap.GetComponent<ListEverythingMapComp>().AddAlert(name, findDesc)));
 			
 			buttonRect.x += buttonRect.width;
@@ -122,21 +120,17 @@ namespace List_Everything
 
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Save"))
-				Find.WindowStack.Add(new Dialog_Name(name => Save(name)));
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
 
 			buttonRect.x += buttonRect.width;
-			if (Settings.Get().savedFilters.Count > 0 &&
+			if (Settings.Get().SavedNames().Count() > 0 &&
 				Widgets.ButtonText(buttonRect, "Load"))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (var kvp in Settings.Get().savedFilters)
-				{
-					options.Add(new FloatMenuOption(kvp.Key, () => findDesc = kvp.Value.Clone(Find.CurrentMap)));
-				}
+				foreach (string name in Settings.Get().SavedNames())
+					options.Add(new FloatMenuOption(name, () => findDesc = Settings.Get().Load(name)));
 
-				FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
-				floatMenu.vanishIfMouseDistant = true;
-				Find.WindowStack.Add(floatMenu);
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
 			}
 
 			//Global Options
@@ -163,21 +157,7 @@ namespace List_Everything
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => !exclude.Contains(d) && (Prefs.DevMode || !d.devOnly)))
 				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
-			FloatMenu floatMenu = new FloatMenu(options) { onCloseCallback = RemakeListPlease };
-			floatMenu.vanishIfMouseDistant = true;
-			Find.WindowStack.Add(floatMenu);
-		}
-
-		public void Save(string name)
-		{
-			if (Settings.Get().Has(name))
-			{
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Overwrite saved filter?",
-					 () => Settings.Get().Save(name, findDesc)));
-			}
-			else
-				Settings.Get().Save(name, findDesc);
+			Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
 		}
 
 

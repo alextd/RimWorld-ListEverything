@@ -34,23 +34,23 @@ namespace List_Everything
 			}
 		}
 
-		public static Alert_Find GetAlert(string name, Map map) =>
+		private static Alert_Find GetAlert(string name, Map map) =>
 			AllAlerts.FirstOrDefault(a => a is Alert_Find af && af.GetLabel() == name && af.map == map) as Alert_Find;
 
-		public static void AddAlert(string name, Map map, FindDescription desc, bool overwrite = false, Action okAction = null)
+		public static void AddAlert(Map map, FindDescription desc, bool overwrite = false, Action okAction = null)
 		{
-			if (!overwrite && GetAlert(name, map) != null)
+			if (!overwrite && GetAlert(desc.name, map) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
 					"Overwrite Alert?", () =>
 					{
-						RemoveAlert(name, map);
-						AddAlert(name, map, desc, true, okAction);
+						RemoveAlert(desc.name, map);
+						AddAlert(map, desc, true, okAction);
 					}));
 			}
 			else
 			{
-				AlertByFind.AllAlerts.Add(new Alert_Find(map, name, desc));
+				AllAlerts.Add(new Alert_Find(map, desc));
 				okAction?.Invoke();
 			}
 		}
@@ -66,7 +66,11 @@ namespace List_Everything
 			if (!overwrite && GetAlert(newName, map) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Overwrite Alert?", () => RenameAlert(name, map, newName, true, okAction)));
+					"Overwrite Alert?", () =>
+					{
+						RemoveAlert(newName, map);
+						RenameAlert(name, map, newName, true, okAction);
+					}));
 			}
 			else
 			{
@@ -88,9 +92,9 @@ namespace List_Everything
 			defaultPriority = AlertPriority.Medium;
 		}
 
-		public Alert_Find(Map m, string label, FindDescription descNew) : this()
+		public Alert_Find(Map m, FindDescription descNew) : this()
 		{
-			defaultLabel = label;
+			defaultLabel = descNew.name;
 			desc = descNew;
 			map = m;
 		}

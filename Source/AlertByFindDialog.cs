@@ -38,29 +38,16 @@ namespace List_Everything
 
 
 			ListEverythingMapComp comp = map.GetComponent<ListEverythingMapComp>();
-			foreach (string name in comp.savedAlerts.Keys)
+			foreach (string name in comp.AlertNames())
 			{
 				if (listing.ButtonTextLabeled(name, "Delete"))
 					remove = name;
 				if (listing.ButtonTextLabeled("", "Rename"))
-				{
-					Find.WindowStack.Add(new Dialog_Name(newName =>
-						AlertByFind.RenameAlert(name, map, newName, okAction: () =>
-						{
-							comp.savedAlerts[newName] = comp.savedAlerts[name];
-							comp.savedAlerts.Remove(name);
-						})));
-				}
+					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 			}
 
 			if (remove != null)
-			{
-				//Remove saved ref
-				comp.savedAlerts.Remove(remove);
-
-				//Remove in-game alerts
-				AlertByFind.RemoveAlert(remove, map);
-			}
+				comp.RemoveAlert(remove);
 
 			listing.End();
 		}

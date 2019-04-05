@@ -16,6 +16,13 @@ namespace List_Everything
 			setNameAction = act;
 		}
 
+		public Dialog_Name(string name, Action<string> act)
+		{
+			curName = name;
+			setNameAction = act;
+		}
+
+
 		protected override void SetName(string name)
 		{
 			setNameAction(name);
