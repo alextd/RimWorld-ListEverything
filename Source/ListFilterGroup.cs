@@ -19,7 +19,10 @@ namespace List_Everything
 	class ListFilterGroup : ListFilter
 	{
 		List<ListFilter> filters = new List<ListFilter>() { };
-		public override bool FilterApplies(Thing t) => filters.Any(f => f.AppliesTo(t));
+		bool any = true; // or all
+		public override bool FilterApplies(Thing t) => 
+			any ? filters.Any(f => f.AppliesTo(t)) : 
+			filters.All(f => f.AppliesTo(t));
 
 		public override void ExposeData()
 		{
@@ -35,8 +38,13 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			Widgets.Label(rect, "Matching any of:" );
-			return false;
+			bool beforeAny = any;
+			WidgetRow row = new WidgetRow(rect.x, rect.y);
+			row.Label("Include things that match");
+			if (row.ButtonText(any ? "Any" : "All"))
+				any = !any;
+			row.Label("of these filters:");
+			return any != beforeAny;
 		}
 
 		public override bool DrawMore(Listing_Standard outerListing)
