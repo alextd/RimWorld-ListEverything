@@ -21,7 +21,7 @@ namespace List_Everything
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref selected, "selected");
+			Scribe_Deep.Look(ref selected, "selected");
 		}
 		public override ListFilter Clone(Map map)
 		{
