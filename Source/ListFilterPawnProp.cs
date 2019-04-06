@@ -358,4 +358,40 @@ namespace List_Everything
 
 		public override IEnumerable Options() => Enum.GetValues(typeof(WorkTags));
 	}
+
+	enum TemperatureFilter { Cold, Cool, Okay, Warm, Hot }
+	class ListFilterTemp : ListFilterDropDown<TemperatureFilter>
+	{
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+			float temp = pawn.AmbientTemperature;
+			FloatRange safeRange = pawn.SafeTemperatureRange();
+			FloatRange comfRange = pawn.ComfortableTemperatureRange();
+			switch (sel)
+			{
+				case TemperatureFilter.Cold: return temp < safeRange.min;
+				case TemperatureFilter.Cool: return temp >= safeRange.min && temp < comfRange.min;
+				case TemperatureFilter.Okay: return comfRange.Includes(temp);
+				case TemperatureFilter.Warm: return temp <= safeRange.max && temp > comfRange.max;
+				case TemperatureFilter.Hot: return temp > safeRange.max;
+			}
+			return false;//???
+		}
+		public override string NameFor(TemperatureFilter o)
+		{
+			switch (o)
+			{
+				case TemperatureFilter.Cold: return "Cold";
+				case TemperatureFilter.Cool: return "A little cold";
+				case TemperatureFilter.Okay: return "Comfortable";
+				case TemperatureFilter.Warm: return "A little hot";
+				case TemperatureFilter.Hot: return "Hot";
+			}
+			return "???";
+		}
+
+		public override IEnumerable Options() => Enum.GetValues(typeof(TemperatureFilter));
+	}
 }
