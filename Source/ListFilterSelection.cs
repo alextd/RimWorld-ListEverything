@@ -16,6 +16,15 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			sel.FilterApplies(thing);
 
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterSelection clone = (ListFilterSelection)base.Clone(map);
+
+			clone.sel = sel.Clone(map);
+
+			return clone;
+		}
+
 		public override bool DrawOption(Rect rect)
 		{
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
