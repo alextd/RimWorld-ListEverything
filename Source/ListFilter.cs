@@ -142,23 +142,12 @@ namespace List_Everything
 		public virtual void PostMake() { }
 	}
 
-	class ListFilterName : ListFilter
+	class ListFilterName : ListFilterWithOption<string>
 	{
-		string name = "";
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref name, "name");
-		}
-		public override ListFilter Clone(Map map)
-		{
-			ListFilterName clone = (ListFilterName)base.Clone(map);
-			clone.name = name;
-			return clone;
-		}
+		public ListFilterName() => sel = "";
 
 		public override bool FilterApplies(Thing thing) =>
-			thing.Label.ToLower().Contains(name.ToLower());
+			thing.Label.ToLower().Contains(sel.ToLower());
 
 		public override bool DrawOption(Rect rect)
 		{
@@ -170,16 +159,16 @@ namespace List_Everything
 			}
 
 			GUI.SetNextControlName($"LIST_FILTER_NAME_INPUT{id}");
-			string newStr = Widgets.TextField(rect.LeftPart(0.9f), name);
-			if (newStr != name)
+			string newStr = Widgets.TextField(rect.LeftPart(0.9f), sel);
+			if (newStr != sel)
 			{
-				name = newStr;
+				sel = newStr;
 				return true;
 			}
 			if (Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
 			{
 				GUI.FocusControl("");
-				name = "";
+				sel = "";
 				return true;
 			}
 			return false;
@@ -210,12 +199,10 @@ namespace List_Everything
 		public override IEnumerable Options() => Enum.GetValues(typeof(ForbiddenType));
 	}
 
-	public enum DropDownDrawStyle {NameAndOptions, OptionsAndDrawSpecial}
-	abstract class ListFilterDropDown<T> : ListFilter
+	//automated ExposeData + Clone 
+	public abstract class ListFilterWithOption<T> : ListFilter
 	{
-		public T sel;
-		protected DropDownDrawStyle drawStyle;
-		public int extraOption; //0 being use T, 1+ defined in subclass
+		protected T sel;
 
 		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
 		//(probably could be in ListFilter)
@@ -225,14 +212,12 @@ namespace List_Everything
 		//Saving the list will generate refName from the current filter on Clone(null) via MakeRefName()
 		//Loading will use refName from the saved list to resolve references in Clone(map) via ResolveReference()
 		//Cloning between two reference types makes the ref from current map and resolves on the new map
-		string refName; 
+		string refName;
 
-		//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
 		public override void ExposeData()
 		{
 			base.ExposeData();
 
-			//Maybe don't save T sel if extraOption > 0 but that doesn't apply for loading so /shrug
 			if (typeof(Def).IsAssignableFrom(typeof(T)))
 			{
 				//From Scribe_Collections:
@@ -250,19 +235,25 @@ namespace List_Everything
 			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
 				//Of course between games you can't get references so just save by name should be good enough.
+				//objects saved here  need to be copies made with Clone(null)
 				Scribe_Values.Look(ref refName, "refName"); //And Clone will handle references
+			}
+			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
+			{
+				//Of course between games you can't get references so just save by name should be good enough.
+				//objects saved here  need to be copies made with Clone(null)
+				Scribe_Deep.Look(ref sel, "sel"); //And Clone will handle references
 			}
 			else
 				Scribe_Values.Look(ref sel, "sel");
-
-			Scribe_Values.Look(ref extraOption, "ex");
 		}
 		public override ListFilter Clone(Map map)
 		{
-			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map);
-			if (extraOption == 0 && typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map);
+
+			if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
-				if(map == null)//SAVING: I don't have refName, but I make it and tell saved clone
+				if (map == null)//SAVING: I don't have refName, but I make it and tell saved clone
 				{
 					clone.refName = sel == null ? "null" : MakeRefName();
 				}
@@ -270,7 +261,7 @@ namespace List_Everything
 				{
 					if (refName == "null")
 						clone.sel = default(T);
-					else if(refName == null)
+					else if (refName == null)
 						clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
 					else
 						clone.ResolveReference(refName, map);
@@ -278,11 +269,31 @@ namespace List_Everything
 			}
 			else
 				clone.sel = sel;
+
+			return clone;
+		}
+		public virtual string MakeRefName() => sel.ToString();
+		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
+	}
+
+	public enum DropDownDrawStyle {NameAndOptions, OptionsAndDrawSpecial}
+	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
+	{
+		protected DropDownDrawStyle drawStyle;
+		public int extraOption; //0 being use T, 1+ defined in subclass
+
+		//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref extraOption, "ex");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map);
 			clone.extraOption = extraOption;
 			return clone;
 		}
-		public virtual string MakeRefName() => NameFor(sel);
-		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 
 		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
 		public virtual string NullOption() => null;
@@ -372,31 +383,20 @@ namespace List_Everything
 			"Frozen";
 	}
 
-	class ListFilterGrowth : ListFilter
+	class ListFilterGrowth : ListFilterWithOption<FloatRange>
 	{
-		FloatRange range = FloatRange.ZeroToOne;
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref range, "range");
-		}
-		public override ListFilter Clone(Map map)
-		{
-			ListFilterGrowth clone = (ListFilterGrowth)base.Clone(map);
-			clone.range = range;
-			return clone;
-		}
+		public ListFilterGrowth() => sel = FloatRange.ZeroToOne;
 
 		public override bool FilterApplies(Thing thing) =>
-			thing is Plant p && range.Includes(p.Growth);
+			thing is Plant p && sel.Includes(p.Growth);
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			FloatRange newRange = range;
+			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (range != newRange)
+			if (sel != newRange)
 			{
-				range = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
@@ -517,20 +517,9 @@ namespace List_Everything
 		public override IEnumerable Options() => Enum.GetValues(typeof(MineableType));
 	}
 
-	class ListFilterHP : ListFilter
+	class ListFilterHP : ListFilterWithOption<FloatRange>
 	{
-		FloatRange range = FloatRange.ZeroToOne;
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref range, "range");
-		}
-		public override ListFilter Clone(Map map)
-		{
-			ListFilterHP clone = (ListFilterHP)base.Clone(map);
-			clone.range = range;
-			return clone;
-		}
+		public ListFilterHP() => sel = FloatRange.ZeroToOne;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -539,50 +528,39 @@ namespace List_Everything
 				pct = pawn.health.summaryHealth.SummaryHealthPercent;
 			if (thing.def.useHitPoints)
 				pct = (float)thing.HitPoints / thing.MaxHitPoints;
-			return pct != null && range.Includes(pct.Value);
+			return pct != null && sel.Includes(pct.Value);
 		}
 
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			FloatRange newRange = range;
+			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (range != newRange)
+			if (sel != newRange)
 			{
-				range = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
 		}
 	}
 
-	class ListFilterQuality : ListFilter
+	class ListFilterQuality : ListFilterWithOption<QualityRange>
 	{
-		QualityRange range = QualityRange.All;
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref range, "range");
-		}
-		public override ListFilter Clone(Map map)
-		{
-			ListFilterQuality clone = (ListFilterQuality)base.Clone(map);
-			clone.range = range;
-			return clone;
-		}
+		public ListFilterQuality() => sel = QualityRange.All;
 
 		public override bool FilterApplies(Thing thing) =>
 			thing.TryGetQuality(out QualityCategory qc) &&
-			range.Includes(qc);
+			sel.Includes(qc);
 
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			QualityRange newRange = range;
+			QualityRange newRange = sel;
 			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
-			if (range != newRange)
+			if (sel != newRange)
 			{
-				range = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
