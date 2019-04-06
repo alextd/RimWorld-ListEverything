@@ -10,24 +10,32 @@ namespace List_Everything
 	public class Listing_StandardIndent : Listing_Standard
 	{
 		float totalIndent;
-		private Stack<float> tabSizes = new Stack<float>();
+		private Stack<float> indentSizes = new Stack<float>();
+		private Stack<float> indentHeights = new Stack<float>();
 
 		public void Indent(float size)
 		{
 			curX += size;
 			totalIndent += size;
 			SetWidthForIndent();
-			tabSizes.Push(size);
+			indentSizes.Push(size);
+			indentHeights.Push(curY);
 		}
 
 		public void EndIndent()
 		{
-			if (tabSizes.Count > 0)
+			if (indentSizes.Count > 0)
 			{
-				float size = tabSizes.Pop();
+				float size = indentSizes.Pop();
 				curX -= size;
 				totalIndent -= size;
 				SetWidthForIndent();
+
+				//Draw vertical line marking indention
+				float startHeight = indentHeights.Pop();
+				GUI.color = Color.grey;
+				Widgets.DrawLineVertical(curX, startHeight, curY - startHeight - verticalSpacing);//TODO columns?
+				GUI.color = Color.white;
 			}
 		}
 
