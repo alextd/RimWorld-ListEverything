@@ -412,4 +412,20 @@ namespace List_Everything
 		public override string NameFor(Area o) => o.Label;
 	}
 
+	class ListFilterMentalState : ListFilterDropDown<MentalStateDef>
+	{
+		public override string NameFor(MentalStateDef def) => def.LabelCap;
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn &&
+				(sel == null
+				? pawn.MentalState == null
+				: pawn.MentalState?.def is MentalStateDef def && def == sel);
+
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
+				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
+		public override string NullOption() => "None";
+	}
 }
