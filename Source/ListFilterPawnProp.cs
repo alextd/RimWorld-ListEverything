@@ -198,7 +198,7 @@ namespace List_Everything
 			Pawn pawn = t as Pawn;
 			if (pawn == null) yield break;
 
-			IEnumerable<ThoughtDef> memories = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Select(th => th.def);
+			IEnumerable<ThoughtDef> memories = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.CurStage.visible).Select(th => th.def);
 			if (memories != null)
 				foreach (ThoughtDef def in memories)
 					yield return def;
@@ -214,7 +214,7 @@ namespace List_Everything
 			Pawn pawn = t as Pawn;
 			if (pawn == null) yield break;
 
-			IEnumerable<int> stages = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.def == def).Select(th => th.CurStageIndex);
+			IEnumerable<int> stages = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.def == def && th.CurStage.visible).Select(th => th.CurStageIndex);
 			if (stages != null)
 				foreach (int stage in stages)
 					yield return stage;
