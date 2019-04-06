@@ -155,7 +155,7 @@ namespace List_Everything
 				if (thoughts.Any(t => t.def == sel && t.CurStageIndex == thoughtStage))
 					return true;
 			}
-			return sel == null;
+			return false;
 		}
 
 		public override IEnumerable Options() =>
