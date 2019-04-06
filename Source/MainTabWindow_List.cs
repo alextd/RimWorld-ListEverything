@@ -44,6 +44,8 @@ namespace List_Everything
 
 
 		List<Thing> listedThings;
+		public static void DoFloatMenu(List<FloatMenuOption> options) =>
+			Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
 		public void RemakeList() =>
@@ -127,7 +129,7 @@ namespace List_Everything
 				foreach (string name in Settings.Get().SavedNames())
 					options.Add(new FloatMenuOption(name, () => findDesc = Settings.Get().Load(name)));
 
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
+				DoFloatMenu(options);
 			}
 
 			//Global Options
@@ -154,7 +156,7 @@ namespace List_Everything
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => (Prefs.DevMode || !d.devOnly)))
 				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
-			Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
+			DoFloatMenu(options);
 		}
 
 

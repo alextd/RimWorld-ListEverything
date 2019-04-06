@@ -291,7 +291,7 @@ namespace List_Everything
 					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
 				foreach (int ex in ExtraOptions())
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+				MainTabWindow_List.DoFloatMenu(options);
 
 				return true;
 			}

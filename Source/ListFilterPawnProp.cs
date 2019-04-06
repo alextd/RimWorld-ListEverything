@@ -163,7 +163,7 @@ namespace List_Everything
 				{
 					options.Add(new FloatMenuOption(p.ToString(), () => prop = p));
 				}
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+				MainTabWindow_List.DoFloatMenu(options); 
 			}
 			switch (prop)
 			{
@@ -175,7 +175,7 @@ namespace List_Everything
 						{
 							options.Add(new FloatMenuOption(sDef.LabelCap, () => skillDef = sDef));
 						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options); 
 					}
 					{
 						Rect rangeRect = rect;
@@ -206,7 +206,7 @@ namespace List_Everything
 								traitDegree = tDef.degreeDatas.First().degree;
 							}));
 						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options); 
 					}
 					if (traitDef.degreeDatas.Count > 1 &&
 						row.ButtonText(traitDef.DataAtDegree(traitDegree).label.CapitalizeFirst()))
@@ -216,7 +216,7 @@ namespace List_Everything
 						{
 							options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
 						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options); 
 					}
 					break;
 				case PawnFilterProp.Thought:
@@ -236,7 +236,7 @@ namespace List_Everything
 								thoughtStage = 0;
 							}));
 						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options); 
 					}
 					break;
 				case PawnFilterProp.Need:
@@ -248,7 +248,7 @@ namespace List_Everything
 						{
 							options.Add(new FloatMenuOption(nDef.LabelCap, () => needDef = nDef));
 						}
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options);
 					}
 					{
 						Rect rangeRect = rect;
@@ -279,7 +279,7 @@ namespace List_Everything
 								severityRange = SeverityRangeFor(hediffDef);
 							}));
 
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options);
 					}
 					if (hediffDef != null && severityRange.HasValue)
 					{
@@ -303,7 +303,7 @@ namespace List_Everything
 						foreach (WorkTags tag in Enum.GetValues(typeof(WorkTags)))
 							options.Add(new FloatMenuOption(tag.LabelTranslated().CapitalizeFirst(), () => incapableWork = tag));
 
-						Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+						MainTabWindow_List.DoFloatMenu(options);
 					}
 					break;
 			}
@@ -329,7 +329,7 @@ namespace List_Everything
 					int localI = i;
 					options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
 				}
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = MainTabWindow_List.RemakeListPlease });
+				MainTabWindow_List.DoFloatMenu(options);
 			}
 			return false;
 		}
