@@ -220,8 +220,9 @@ namespace List_Everything
 		//ExposeData saves refName instead of sel
 		//Only saved lists get ExposeData called, so only saved lists have refName set
 		//(The in-game list will NOT have this set; The saved lists will have this set)
-		//Saving the list will generate refName from the current filter on Clone() via MakeRefName()
-		//Loading will use refName from the saved list to resolve references in Clone() via ResolveReference()
+		//Saving the list will generate refName from the current filter on Clone(null) via MakeRefName()
+		//Loading will use refName from the saved list to resolve references in Clone(map) via ResolveReference()
+		//Cloning between two reference types makes the ref from current map and resolves on the new map
 		string refName; 
 
 		//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
