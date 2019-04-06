@@ -155,7 +155,7 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			WidgetRow row = new WidgetRow(rect.xMin, rect.yMin);
+			WidgetRow row = new WidgetRow(rect.x, rect.y);
 			if (row.ButtonText(prop.ToString()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
@@ -317,7 +317,7 @@ namespace List_Everything
 			Rect nextRect = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
 
-			WidgetRow row = new WidgetRow(nextRect.xMin, nextRect.yMin);
+			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
 			if (row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();

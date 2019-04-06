@@ -60,7 +60,7 @@ namespace List_Everything
 		public bool Listing(Listing_StandardIndent listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
-			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.yMin, UIDirection.LeftThenDown, rowRect.width);
+			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
 
 			bool changed = false;
 			//Clear button
