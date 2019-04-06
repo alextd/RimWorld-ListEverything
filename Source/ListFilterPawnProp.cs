@@ -123,10 +123,10 @@ namespace List_Everything
 		{
 			string label =
 				def.label?.CapitalizeFirst() ??
-				def.stages?.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
-				def.stages?.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
+				def.stages.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
+				def.stages.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
 
-			return def.stages?.Count > 1 ? label + "*" : label;
+			return def.stages.Count > 1 ? label + "*" : label;
 		}
 		public override void ExposeData()
 		{
@@ -177,16 +177,16 @@ namespace List_Everything
 			listing.Gap(listing.verticalSpacing);
 
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
-			if (row.ButtonText(sel.stages[thoughtStage].label.CapitalizeFirst()))
+			if (row.ButtonText(sel.stages[thoughtStage]?.label.CapitalizeFirst() ?? "(invisible)"))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				IEnumerable<int> stages = ContentsUtility.onlyAvailable ?
+				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
 					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, sel)) :
 					Enumerable.Range(0, sel.stages.Count);
-				foreach (int i in stages)
+				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
 				{
 					int localI = i;
-					options.Add(new FloatMenuOption(sel.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
+					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "(invisible)", () => thoughtStage = localI));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
