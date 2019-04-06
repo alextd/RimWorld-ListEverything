@@ -476,6 +476,17 @@ namespace List_Everything
 		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
 	}
 
+	class ListFilterSpecialFilter : ListFilterDropDown<SpecialThingFilterDef>
+	{
+		public ListFilterSpecialFilter() => sel = SpecialThingFilterDefOf.AllowFresh;
+
+		public override bool FilterApplies(Thing thing) =>
+			sel.Worker.Matches(thing);
+
+		public override IEnumerable Options() => DefDatabase<SpecialThingFilterDef>.AllDefs;
+		public override string NameFor(SpecialThingFilterDef o) => o.LabelCap;
+	}
+
 	enum ListCategory
 	{
 		Person,
