@@ -154,7 +154,7 @@ namespace List_Everything
 		public static void AddFilterFloat(List<ListFilter> filters)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => (Prefs.DevMode || !d.devOnly)))
+			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => d.parent == null && (Prefs.DevMode || !d.devOnly)))
 				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
 			DoFloatMenu(options);
 		}

@@ -11,8 +11,18 @@ namespace List_Everything
 {
 	public class ListFilterDef : Def
 	{
+		public ListFilterDef parent;
 		public Type filterClass;
 		public bool devOnly;
+		public List<ListFilterDef> subFilters = new List<ListFilterDef>();
+
+		public override void ResolveReferences()
+		{
+			base.ResolveReferences();
+			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs)
+				if (def.subFilters?.Contains(this) ?? false)
+					parent = def;
+		}
 	}
 
 	[DefOf]
@@ -25,6 +35,7 @@ namespace List_Everything
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
+			filter.PostMake();
 			return filter;
 		}
 		public static ListFilter NameFilter => ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
@@ -127,6 +138,8 @@ namespace List_Everything
 
 			return clone;
 		}
+
+		public virtual void PostMake() { }
 	}
 
 	class ListFilterName : ListFilter
