@@ -18,6 +18,7 @@ namespace List_Everything
 			sel = SkillDefOf.Animals;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
+		public override string NameFor(SkillDef def) => def.LabelCap;
 
 		public override void ExposeData()
 		{
@@ -32,13 +33,13 @@ namespace List_Everything
 		}
 
 		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn && 
+			thing is Pawn pawn &&
 				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
-				!rec.TotallyDisabled && 
+				!rec.TotallyDisabled &&
 				rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 
 		public override IEnumerable Options() => DefDatabase<SkillDef>.AllDefs;
-		public override bool DrawSpecial(Rect rect)
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
 			IntRange newRange = skillRange;
 			Widgets.IntRange(rect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
@@ -51,27 +52,73 @@ namespace List_Everything
 		}
 	}
 
-	//Pawn properties is a big one
-	public enum PawnFilterProp
+	class ListFilterTrait : ListFilterDropDown<TraitDef>
 	{
-		Trait,
-		Thought,
-		Need,
-		Health,
-		Incapable
-	}
-	class ListFilterPawnProp : ListFilter
-	{
-		PawnFilterProp prop;
-
-		TraitDef traitDef = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
 		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
+		public ListFilterTrait()
+		{
+			sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+		public override string NameFor(TraitDef def) => TraitName(def);
 		public static string TraitName(TraitDef def) =>
-			def.degreeDatas.Count == 1 ?
-				def.degreeDatas.First().label.CapitalizeFirst() :
-				def.defName + "*";//TraitDefs don't have labels
+			def.degreeDatas.Count == 1
+				? def.degreeDatas.First().label.CapitalizeFirst()
+				: def.defName + "*";//TraitDefs don't have labels
 
-		ThoughtDef thoughtDef = ThoughtDefOf.AteWithoutTable;
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref traitDegree, "traitDegree");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterTrait clone = (ListFilterTrait)base.Clone(map);
+			clone.traitDegree = traitDegree;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn ?
+				pawn.story?.traits.GetTrait(sel) is Trait trait &&
+				trait.Degree == traitDegree :
+				sel == null;
+
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>()).OrderBy(TraitName)
+				: DefDatabase<TraitDef>.AllDefs.OrderBy(NameFor);
+		protected override void Callback(TraitDef o)
+		{
+			sel = o;
+			traitDegree = sel.degreeDatas.First().degree;
+		}
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			if (sel.degreeDatas.Count > 1 &&
+				row.ButtonText(sel.DataAtDegree(traitDegree).label.CapitalizeFirst()))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (TraitDegreeData deg in sel.degreeDatas)
+				{
+					options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
+				}
+				MainTabWindow_List.DoFloatMenu(options);
+			}
+			return false;
+		}
+	}
+
+	class ListFilterThought: ListFilterDropDown<ThoughtDef>
+	{
+		int thoughtStage = 0;
+		public ListFilterThought()
+		{
+			sel = ThoughtDefOf.AteWithoutTable;  //Todo: beauty shows even if it's not on map
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+		public override string NameFor(ThoughtDef def) => ThoughtName(def);
 		public static string ThoughtName(ThoughtDef def)
 		{
 			string label =
@@ -81,261 +128,65 @@ namespace List_Everything
 
 			return def.stages?.Count > 1 ? label + "*" : label;
 		}
-		int thoughtStage = 0;
-
-		NeedDef needDef = NeedDefOf.Food;
-		FloatRange needRange = new FloatRange(0, 0.5f);
-
-		HediffDef hediffDef;
-		FloatRange? severityRange = new FloatRange(0, 1);
-
-		WorkTags incapableWork;
-
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref prop, "prop");
-
-			Scribe_Defs.Look(ref traitDef, "traitDef");
-			Scribe_Values.Look(ref traitDegree, "traitDegree");
-
-			Scribe_Defs.Look(ref thoughtDef, "thoughtDef");
-			Scribe_Values.Look(ref thoughtStage, "thoughtDegree");
-
-			Scribe_Defs.Look(ref needDef, "needDef");
-			Scribe_Values.Look(ref needRange, "needRange");
-
-			Scribe_Defs.Look(ref hediffDef, "hediffDef");
-			Scribe_Values.Look(ref severityRange, "severityRange");
-
-			Scribe_Values.Look(ref incapableWork, "incapableWork");
+			Scribe_Values.Look(ref thoughtStage, "thoughtStage");
 		}
 		public override ListFilter Clone(Map map)
 		{
-			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone(map);
-			clone.prop = prop;
-
-			clone.traitDef = traitDef;
-			clone.traitDegree = traitDegree;
-
-			clone.thoughtDef = thoughtDef;
+			ListFilterThought clone = (ListFilterThought)base.Clone(map);
 			clone.thoughtStage = thoughtStage;
-
-			clone.needDef = needDef;
-			clone.needRange = needRange;
-
-			clone.hediffDef = hediffDef;
-			clone.severityRange = severityRange;
-
-			clone.incapableWork = incapableWork;
 			return clone;
 		}
 
 		public override bool FilterApplies(Thing thing)
 		{
-			Pawn pawn = thing as Pawn;
-			if (pawn == null)
+			if(thing is Pawn pawn && 
+				pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
 			{
-				switch (prop)
-				{
-					case PawnFilterProp.Trait: return traitDef == null;
-					case PawnFilterProp.Thought: return thoughtDef == null;
-					case PawnFilterProp.Health: return hediffDef == null;
-				}
-				return false;
+				//memories
+				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && t.CurStageIndex == thoughtStage))
+					return true;
+
+				//situational
+				List<Thought> thoughts = new List<Thought>();
+				mood.thoughts.situational.AppendMoodThoughts(thoughts);
+				if (thoughts.Any(t => t.def == sel && t.CurStageIndex == thoughtStage))
+					return true;
 			}
-			switch (prop)
-			{
-
-				case PawnFilterProp.Trait:
-					return pawn.story?.traits.GetTrait(traitDef) is Trait trait &&
-						trait.Degree == traitDegree;
-
-				case PawnFilterProp.Thought:
-					if (pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
-					{
-						//memories
-						if (mood.thoughts.memories.Memories.Any(t => t.def == thoughtDef && t.CurStageIndex == thoughtStage))
-							return true;
-
-						//situational
-						List<Thought> thoughts = new List<Thought>();
-						mood.thoughts.situational.AppendMoodThoughts(thoughts);
-						if (thoughts.Any(t => t.def == thoughtDef && t.CurStageIndex == thoughtStage))
-							return true;
-					}
-					return false;
-				case PawnFilterProp.Need:
-					return (!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
-						pawn.needs?.TryGetNeed(needDef) is Need need && needRange.Includes(need.CurLevelPercentage);
-
-				case PawnFilterProp.Health:
-					return hediffDef == null ?
-						!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
-						(pawn.health.hediffSet.GetFirstHediffOfDef(hediffDef, !DebugSettings.godMode) is Hediff hediff &&
-						(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
-
-				case PawnFilterProp.Incapable:
-					return incapableWork == WorkTags.None ? 
-						pawn.story?.CombinedDisabledWorkTags == WorkTags.None:
-						pawn.story?.WorkTagIsDisabled(incapableWork) ?? false;
-			}
-			return false;
+			return sel == null;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(ThoughtsForThing).OrderBy(tDef => ThoughtName(tDef))
+				: DefDatabase<ThoughtDef>.AllDefs.OrderBy(NameFor);
+		protected override void Callback(ThoughtDef o)
 		{
-			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			if (row.ButtonText(prop.ToString()))
-			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (PawnFilterProp p in Enum.GetValues(typeof(PawnFilterProp)))
-				{
-					options.Add(new FloatMenuOption(p.ToString(), () => prop = p));
-				}
-				MainTabWindow_List.DoFloatMenu(options); 
-			}
-			switch (prop)
-			{
-				case PawnFilterProp.Trait:
-					if (row.ButtonText(TraitName(traitDef)))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-						IEnumerable<TraitDef> traitsOnMap = ContentsUtility.onlyAvailable
-							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
-							: DefDatabase<TraitDef>.AllDefs;
-
-						foreach (TraitDef tDef in traitsOnMap.OrderBy(TraitName))
-						{
-							options.Add(new FloatMenuOption(TraitName(tDef), () =>
-							{
-								traitDef = tDef;
-								traitDegree = tDef.degreeDatas.First().degree;
-							}));
-						}
-						MainTabWindow_List.DoFloatMenu(options); 
-					}
-					if (traitDef.degreeDatas.Count > 1 &&
-						row.ButtonText(traitDef.DataAtDegree(traitDegree).label.CapitalizeFirst()))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						foreach (TraitDegreeData deg in traitDef.degreeDatas)
-						{
-							options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
-						}
-						MainTabWindow_List.DoFloatMenu(options); 
-					}
-					break;
-				case PawnFilterProp.Thought:
-					if (row.ButtonText(ThoughtName(thoughtDef)))  //ThoughtDef defines its own Label instead of LabelCap, and it sometimes fails
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-						IEnumerable<ThoughtDef> thoughtsOnMap = ContentsUtility.onlyAvailable ?
-							thoughtsOnMap = ContentsUtility.AvailableOnMap(ThoughtsForThing) :
-							thoughtsOnMap = DefDatabase<ThoughtDef>.AllDefs;
-
-						foreach (ThoughtDef tDef in thoughtsOnMap.OrderBy(tDef => ThoughtName(tDef)))
-						{
-							options.Add(new FloatMenuOption(ThoughtName(tDef), () =>
-							{
-								thoughtDef = tDef;
-								thoughtStage = 0;
-							}));
-						}
-						MainTabWindow_List.DoFloatMenu(options); 
-					}
-					break;
-				case PawnFilterProp.Need:
-					if (row.ButtonText(needDef.LabelCap))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-						foreach (NeedDef nDef in DefDatabase<NeedDef>.AllDefs)
-						{
-							options.Add(new FloatMenuOption(nDef.LabelCap, () => needDef = nDef));
-						}
-						MainTabWindow_List.DoFloatMenu(options);
-					}
-					{
-						Rect rangeRect = rect;
-						rangeRect.xMin = row.FinalX;
-						FloatRange newRange = needRange;
-						Widgets.FloatRange(rangeRect, id, ref newRange, valueStyle: ToStringStyle.PercentOne);
-						if (newRange != needRange)
-						{
-							needRange = newRange;
-							return true;
-						}
-					}
-					break;
-				case PawnFilterProp.Health:
-					if (row.ButtonText(hediffDef?.LabelCap ?? "None"))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						options.Add(new FloatMenuOption("None", () => hediffDef = null));
-
-						IEnumerable<HediffDef> hediffsOnMap = ContentsUtility.onlyAvailable
-							? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
-							: DefDatabase<HediffDef>.AllDefs;
-
-						foreach (HediffDef hDef in hediffsOnMap.OrderBy(h => h.label))
-							options.Add(new FloatMenuOption(hDef.LabelCap, () =>
-							{
-								hediffDef = hDef;
-								severityRange = SeverityRangeFor(hediffDef);
-							}));
-
-						MainTabWindow_List.DoFloatMenu(options);
-					}
-					if (hediffDef != null && severityRange.HasValue)
-					{
-						Rect rangeRect = rect;
-						rangeRect.xMin = row.FinalX;
-						FloatRange newRange = severityRange.Value;
-						FloatRange boundRange = SeverityRangeFor(hediffDef).Value;
-						Widgets.FloatRange(rangeRect, id, ref newRange, boundRange.min, boundRange.max, valueStyle: ToStringStyle.FloatOne);
-						if (newRange != severityRange.Value)
-						{
-							severityRange = newRange;
-							return true;
-						}
-					}
-					break;
-				case PawnFilterProp.Incapable:
-					if (row.ButtonText(incapableWork.LabelTranslated().CapitalizeFirst()))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-
-						foreach (WorkTags tag in Enum.GetValues(typeof(WorkTags)))
-							options.Add(new FloatMenuOption(tag.LabelTranslated().CapitalizeFirst(), () => incapableWork = tag));
-
-						MainTabWindow_List.DoFloatMenu(options);
-					}
-					break;
-			}
-			return false;
+			sel = o;
+			thoughtStage = 0;
 		}
+		public override bool DrawSpecial(Rect rect, WidgetRow row) => false;//Too big for one line
 
 		public override bool DrawMore(Listing_StandardIndent listing)
 		{
-			if (prop != PawnFilterProp.Thought || thoughtDef.stages.Count <= 1) return false;
+			if (sel.stages.Count <= 1) return false;
 
 			Rect nextRect = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
 
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
-			if (row.ButtonText(thoughtDef.stages[thoughtStage].label.CapitalizeFirst()))
+			if (row.ButtonText(sel.stages[thoughtStage].label.CapitalizeFirst()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				IEnumerable<int> stages = ContentsUtility.onlyAvailable ?
-					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, thoughtDef)) :
-					Enumerable.Range(0, thoughtDef.stages.Count);
+					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, sel)) :
+					Enumerable.Range(0, sel.stages.Count);
 				foreach (int i in stages)
 				{
 					int localI = i;
-					options.Add(new FloatMenuOption(thoughtDef.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
+					options.Add(new FloatMenuOption(sel.stages[i].label.CapitalizeFirst(), () => thoughtStage = localI));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
@@ -374,9 +225,116 @@ namespace List_Everything
 				if (thought.def == def)
 					yield return thought.CurStageIndex;
 		}
+	}
+
+	class ListFilterNeed : ListFilterDropDown<NeedDef>
+	{
+		FloatRange needRange = new FloatRange(0, 0.5f);
+		public ListFilterNeed()
+		{
+			sel = NeedDefOf.Food;  //Todo: beauty shows even if it's not on map
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+		public override string NameFor(NeedDef def) => def.LabelCap;
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref needRange, "needRange");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterNeed clone = (ListFilterNeed)base.Clone(map);
+			clone.needRange = needRange;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn &&
+			(!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
+				pawn.needs?.TryGetNeed(sel) is Need need && needRange.Includes(need.CurLevelPercentage);
+
+		public override IEnumerable Options() => DefDatabase<NeedDef>.AllDefs;
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			FloatRange newRange = needRange;
+			Widgets.FloatRange(rect, id, ref newRange, valueStyle: ToStringStyle.PercentOne);
+			if (newRange != needRange)
+			{
+				needRange = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
+
+	class ListFilterHealth : ListFilterDropDown<HediffDef>
+	{
+		FloatRange? severityRange;
+
+		public ListFilterHealth()
+		{
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+		public override string NameFor(HediffDef def) => def.LabelCap;
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref severityRange, "severityRange");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterHealth clone = (ListFilterHealth)base.Clone(map);
+			clone.severityRange = severityRange;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing)
+		{
+			if (thing is Pawn pawn)
+			{
+				return sel == null ?
+				!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
+				(pawn.health.hediffSet.GetFirstHediffOfDef(sel, !DebugSettings.godMode) is Hediff hediff &&
+				(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
+			}
+			return sel == null;
+		}
+
+		public override string NullOption() => "None";
+		public override IEnumerable Options() =>
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>()).OrderBy(h => h.label)
+				: DefDatabase<HediffDef>.AllDefs.OrderBy(h => h.label);
+		protected override void Callback(HediffDef o)
+		{
+			sel = o;
+			severityRange = SeverityRangeFor(sel);
+		}
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			if (sel != null && severityRange.HasValue)
+			{
+				Rect rangeRect = rect;
+				rangeRect.xMin = row.FinalX;
+				FloatRange newRange = severityRange.Value;
+				FloatRange boundRange = SeverityRangeFor(sel).Value;
+				Widgets.FloatRange(rangeRect, id, ref newRange, boundRange.min, boundRange.max, valueStyle: ToStringStyle.FloatOne);
+				if (newRange != severityRange.Value)
+				{
+					severityRange = newRange;
+					return true;
+				}
+			}
+			return false;
+		}
 
 		public static FloatRange? SeverityRangeFor(HediffDef hediffDef)
 		{
+			if (hediffDef == null) return null;
 			float min = hediffDef.minSeverity;
 			float max = hediffDef.maxSeverity;
 			if (hediffDef.lethalSeverity != -1f)
@@ -385,5 +343,19 @@ namespace List_Everything
 			if (max == float.MaxValue) return null;
 			return new FloatRange(min, max);
 		}
+	}
+
+	class ListFilterIncapable : ListFilterDropDown<WorkTags>
+	{
+		public override string NameFor(WorkTags tags) =>
+			tags.LabelTranslated().CapitalizeFirst();
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && 
+			(sel == WorkTags.None
+				? pawn.story?.CombinedDisabledWorkTags == WorkTags.None
+				: pawn.story?.WorkTagIsDisabled(sel) ?? false);
+
+		public override IEnumerable Options() => Enum.GetValues(typeof(WorkTags));
 	}
 }

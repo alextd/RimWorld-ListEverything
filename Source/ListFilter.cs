@@ -299,7 +299,7 @@ namespace List_Everything
 		public virtual string NullOption() => null;
 		public abstract IEnumerable Options();
 		public virtual string NameFor(T o) => o.ToString();
-		private void Callback(T o) { sel = o; extraOption = 0; }
+		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
@@ -321,7 +321,7 @@ namespace List_Everything
 					changeSelection = row.ButtonText(GetLabel());
 
 					rect.xMin = row.FinalX;
-					changed = DrawSpecial(rect);
+					changed = DrawSpecial(rect, row);
 					break;
 			}
 			if (changeSelection)
@@ -340,8 +340,8 @@ namespace List_Everything
 			return changed;
 		}
 
-
-		public virtual bool DrawSpecial(Rect rect) => throw new NotImplementedException();
+		//Use either rect or WidgetRow
+		public virtual bool DrawSpecial(Rect rect, WidgetRow row) => throw new NotImplementedException();
 	}
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
