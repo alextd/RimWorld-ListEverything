@@ -310,7 +310,7 @@ namespace List_Everything
 			return false;
 		}
 
-		public override bool DrawMore(Listing_Standard listing)
+		public override bool DrawMore(Listing_StandardIndent listing)
 		{
 			if (prop != PawnFilterProp.Thought || thoughtDef.stages.Count <= 1) return false;
 

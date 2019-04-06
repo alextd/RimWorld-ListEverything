@@ -57,7 +57,7 @@ namespace List_Everything
 
 		public abstract bool FilterApplies(Thing thing);
 
-		public bool Listing(Listing_Standard listing)
+		public bool Listing(Listing_StandardIndent listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.yMin, UIDirection.LeftThenDown, rowRect.width);
@@ -86,7 +86,7 @@ namespace List_Everything
 
 
 			//Draw option row
-			rowRect.width = row.FinalX;
+			rowRect.width -= (rowRect.xMax - row.FinalX);
 			changed |= DrawOption(rowRect);
 			changed |= DrawMore(listing);
 			if(shouldFocus)
@@ -105,7 +105,7 @@ namespace List_Everything
 			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
-		public virtual bool DrawMore(Listing_Standard listing) => false;
+		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
 
 		private bool shouldFocus;
 		public void Focus() => shouldFocus = true;

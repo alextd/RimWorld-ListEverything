@@ -90,7 +90,7 @@ namespace List_Everything
 				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
 			}
 
-			Listing_Standard listing = new Listing_Standard();
+			Listing_StandardIndent listing = new Listing_StandardIndent();
 			listing.Begin(filterRect);
 
 			//Filters
@@ -139,7 +139,7 @@ namespace List_Everything
 			listing.End();
 		}
 
-		public static bool DoFilters(Listing_Standard listing, List<ListFilter> filters)
+		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters)
 		{
 			bool changed = false;
 			foreach (ListFilter filter in filters)
@@ -149,10 +149,10 @@ namespace List_Everything
 			return changed;
 		}
 
-		public static void AddFilterFloat(List<ListFilter> filters, params ListFilterDef[] exclude)
+		public static void AddFilterFloat(List<ListFilter> filters)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => !exclude.Contains(d) && (Prefs.DevMode || !d.devOnly)))
+			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => (Prefs.DevMode || !d.devOnly)))
 				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
 			Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
 		}
