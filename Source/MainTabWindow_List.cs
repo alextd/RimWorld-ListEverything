@@ -56,10 +56,10 @@ namespace List_Everything
 
 		public static void OpenWith(FindDescription desc)
 		{
-			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 			MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 			tab.findDesc = desc;
 			tab.RemakeList();
+			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
 
 		//Draw Filters
