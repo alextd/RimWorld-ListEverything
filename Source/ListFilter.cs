@@ -429,12 +429,18 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing) =>
 			extraOption == 1 ? thing.Faction == Faction.OfPlayer :
-			extraOption == 2 ? thing.Faction == null || thing.Faction.def.hidden :
+			extraOption == 2 ? thing.Faction == Faction.OfMechanoids :
+			extraOption == 3 ? thing.Faction == Faction.OfInsects :
+			extraOption == 4 ? thing.Faction == null || thing.Faction.def.hidden :
 			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
 
 		public override IEnumerable Options() => Enum.GetValues(typeof(FactionRelationKind));
-		public override int ExtraOptionsCount => 2; 
-		public override string NameForExtra(int ex) => ex == 1 ? "Player" : "No Faction";
+		public override int ExtraOptionsCount => 4;
+		public override string NameForExtra(int ex) => // or FleshTypeDef but this works
+			ex == 1 ? "Player" :
+			ex == 2 ? "Mechanoid" :
+			ex == 3 ? "Insectoid" :
+			"No Faction";
 	}
 
 	/* This is no good, CanHaveFaction includes rock walls.
