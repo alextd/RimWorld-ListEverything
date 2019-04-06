@@ -394,4 +394,22 @@ namespace List_Everything
 
 		public override IEnumerable Options() => Enum.GetValues(typeof(TemperatureFilter));
 	}
+
+	class ListFilterRestricted : ListFilterDropDown<Area>
+	{
+		public override void ResolveReference(string refName, Map map)
+		{
+			sel = map.areaManager.GetLabeled(refName);
+			if (sel == null)
+				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
+		}
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == sel;
+
+		public override string NullOption() => "Unrestricted";
+		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a.AssignableAsAllowed());
+		public override string NameFor(Area o) => o.Label;
+	}
+
 }
