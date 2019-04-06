@@ -428,4 +428,30 @@ namespace List_Everything
 				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
 		public override string NullOption() => "None";
 	}
+	
+	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
+	{
+		public ListFilterPrisoner() => sel = PrisonerInteractionModeDefOf.NoInteraction;
+
+		public override bool FilterApplies(Thing thing)
+		{
+			if (extraOption == 2)
+				return thing.GetRoom()?.isPrisonCell ?? false;
+
+			Pawn pawn = thing as Pawn;
+			//Default setting for interactionMode is NoInteraction so fail early if not prisoner
+			//this also covers extraOption == 1, isPrisoner
+			if (!pawn?.IsPrisoner ?? true)
+				return false;
+
+			return pawn.guest?.interactionMode == sel;
+		}
+
+		public override IEnumerable Options() => DefDatabase<PrisonerInteractionModeDef>.AllDefs;
+		public override string NameFor(PrisonerInteractionModeDef o) => o.LabelCap;
+
+		public override int ExtraOptionsCount => 2;
+		public override string NameForExtra(int ex) =>
+			ex == 1 ? "Is Prisoner" : "In Cell";
+	}
 }
