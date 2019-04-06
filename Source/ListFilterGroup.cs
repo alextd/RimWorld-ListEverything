@@ -62,7 +62,6 @@ namespace List_Everything
 			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
 				MainTabWindow_List.AddFilterFloat(filters);
 
-			listing.GapLine();
 			listing.EndIndent();
 			return changed;
 		}
