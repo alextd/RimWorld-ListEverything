@@ -120,4 +120,51 @@ namespace List_Everything
 			return changed;
 		}
 	}
+
+	public class ListFilterNearby: ListFilterGroup
+	{
+		int range;
+
+		public override bool FilterApplies(Thing t)
+		{
+			IntVec3 pos = t.PositionHeld;
+			Map map = t.MapHeld;
+
+			CellRect cells = new CellRect(pos.x - range, pos.z - range, range * 2 + 1, range * 2 + 1);
+			foreach (IntVec3 p in cells)
+				if (map.thingGrid.ThingsAt(p).Any(child => base.FilterApplies(child)))
+					return true;
+			return false;
+		}
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref range, "range");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterNearby clone = (ListFilterNearby)base.Clone(map);
+			clone.range = range;
+			return clone;
+		}
+
+		public override bool DrawOption(Rect rect)
+		{
+			WidgetRow row = new WidgetRow(rect.x, rect.y);
+
+			row.Label("Anything X steps nearby matches");
+			if (row.ButtonText(any ? "Any" : "All"))
+				any = !any;
+
+			IntRange slider = new IntRange(0, range);
+			rect.xMin = row.FinalX;
+			Widgets.IntRange(rect, id, ref slider, max: 10);
+			if(range != slider.max)
+			{
+				range = slider.max;
+				return true;
+			}
+			return false;
+		}
+	}
 }
