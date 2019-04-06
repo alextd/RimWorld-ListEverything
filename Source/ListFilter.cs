@@ -689,7 +689,7 @@ namespace List_Everything
 		{
 			Building_Door door = thing as Building_Door;
 			if (door == null) return false;
-			switch(sel)
+			switch (sel)
 			{
 				case DoorOpenFilter.Open: return door.Open;
 				case DoorOpenFilter.Close: return !door.Open;
@@ -709,7 +709,7 @@ namespace List_Everything
 			}
 			return "???";
 		}
-		
+
 		public override IEnumerable Options() => Enum.GetValues(typeof(DoorOpenFilter));
 	}
 }
