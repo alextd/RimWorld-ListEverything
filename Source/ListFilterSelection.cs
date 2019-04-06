@@ -10,8 +10,13 @@ namespace List_Everything
 {
 	public class ListFilterSelection : ListFilterWithOption<ListFilter>
 	{
-		public override void PostMake() =>
-			sel = ListFilterMaker.MakeFilter(def.subFilters.First());
+		public override void PostMake() => SetFilter(def.subFilters.First());
+
+		public void SetFilter(ListFilterDef def)
+		{
+			sel = ListFilterMaker.MakeFilter(def);
+			sel.topLevel = false;
+		}
 
 		public override bool FilterApplies(Thing thing) =>
 			sel.FilterApplies(thing);
@@ -32,7 +37,7 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (ListFilterDef def in def.subFilters)
-					options.Add(new FloatMenuOption(def.LabelCap, () => sel = ListFilterMaker.MakeFilter(def)));
+					options.Add(new FloatMenuOption(def.LabelCap, () => SetFilter(def)));
 				MainTabWindow_List.DoFloatMenu(options);
 
 				return true;

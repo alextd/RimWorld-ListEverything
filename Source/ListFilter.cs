@@ -54,7 +54,8 @@ namespace List_Everything
 		}
 
 		public bool enabled = true; //simply turn off but keep in list
-		public bool include = true;	//or exclude
+		public bool include = true; //or exclude
+		public bool topLevel = true;
 		public bool delete;
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
@@ -113,7 +114,7 @@ namespace List_Everything
 
 		public virtual bool DrawOption(Rect rect)
 		{
-			Widgets.Label(rect, def.LabelCap);
+			if(topLevel)	Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
 		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
@@ -127,6 +128,7 @@ namespace List_Everything
 			Scribe_Defs.Look(ref def, "def");
 			Scribe_Values.Look(ref enabled, "enabled", true);
 			Scribe_Values.Look(ref include, "include", true);
+			Scribe_Values.Look(ref topLevel, "topLevel", true);
 		}
 
 		//Clone, and resolve references if map specified
@@ -135,6 +137,7 @@ namespace List_Everything
 			ListFilter clone = ListFilterMaker.MakeFilter(def);
 			clone.enabled = enabled;
 			clone.include = include;
+			clone.topLevel = topLevel;
 
 			return clone;
 		}
