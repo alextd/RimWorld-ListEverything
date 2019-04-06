@@ -36,7 +36,7 @@ namespace List_Everything
 			thing is Pawn pawn &&
 				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
-				rec.Level >= skillRange.min && rec.Level <= skillRange.max;
+				skillRange.Includes(rec.Level);
 
 		public override IEnumerable Options() => DefDatabase<SkillDef>.AllDefs;
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
@@ -112,7 +112,7 @@ namespace List_Everything
 
 	class ListFilterThought: ListFilterDropDown<ThoughtDef>
 	{
-		int thoughtStage = 0;
+		IntRange stageRange;
 		public ListFilterThought()
 		{
 			sel = ThoughtDefOf.AteWithoutTable;  //Todo: beauty shows even if it's not on map
@@ -131,12 +131,12 @@ namespace List_Everything
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref thoughtStage, "thoughtStage");
+			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
 		public override ListFilter Clone(Map map)
 		{
 			ListFilterThought clone = (ListFilterThought)base.Clone(map);
-			clone.thoughtStage = thoughtStage;
+			clone.stageRange = stageRange;
 			return clone;
 		}
 
@@ -146,13 +146,13 @@ namespace List_Everything
 				pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
 			{
 				//memories
-				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && t.CurStageIndex == thoughtStage))
+				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
 					return true;
 
 				//situational
 				List<Thought> thoughts = new List<Thought>();
 				mood.thoughts.situational.AppendMoodThoughts(thoughts);
-				if (thoughts.Any(t => t.def == sel && t.CurStageIndex == thoughtStage))
+				if (thoughts.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
 					return true;
 			}
 			return false;
@@ -165,7 +165,7 @@ namespace List_Everything
 		protected override void Callback(ThoughtDef o)
 		{
 			sel = o;
-			thoughtStage = 0;
+			stageRange = new IntRange(0, 0);
 		}
 		public override bool DrawSpecial(Rect rect, WidgetRow row) => false;//Too big for one line
 
@@ -177,7 +177,21 @@ namespace List_Everything
 			listing.Gap(listing.verticalSpacing);
 
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
-			if (row.ButtonText(sel.stages[thoughtStage]?.label.CapitalizeFirst() ?? "(invisible)"))
+			if(sel.stages.Count == 2)
+				DoStageDropdown(row, stageRange.min, i => { stageRange.min = i; stageRange.max = i; });
+			else
+			{
+				row.Label("From");
+				DoStageDropdown(row, stageRange.min, i => stageRange.min = i);
+				row.Label("to");
+				DoStageDropdown(row, stageRange.max, i => stageRange.max = i);
+			}
+			return false;
+		}
+
+		private void DoStageDropdown(WidgetRow row, int setI, Action<int> selectedAction)
+		{
+			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "(invisible)"))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
@@ -186,11 +200,10 @@ namespace List_Everything
 				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
 				{
 					int localI = i;
-					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "(invisible)", () => thoughtStage = localI));
+					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "(invisible)", () => selectedAction(localI)));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
-			return false;
 		}
 
 		public static IEnumerable<ThoughtDef> ThoughtsForThing(Thing t)
