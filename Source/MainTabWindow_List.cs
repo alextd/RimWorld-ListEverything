@@ -145,7 +145,16 @@ namespace List_Everything
 		{
 			bool changed = false;
 			foreach (ListFilter filter in filters)
+			{
+				Rect highlightRect = listing.GetRect(0);
+				float heightBefore = listing.CurHeight;
 				changed |= filter.Listing(listing);
+				if (!(filter is ListFilterGroup) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
+				{
+					highlightRect.height = listing.CurHeight - heightBefore;
+					Widgets.DrawHighlight(highlightRect);
+				}
+			}
 
 			filters.RemoveAll(f => f.delete);
 			return changed;
