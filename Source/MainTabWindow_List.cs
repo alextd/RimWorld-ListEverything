@@ -136,7 +136,7 @@ namespace List_Everything
 			listing.CheckboxLabeled(
 				"Only show filter options for available things",
 				ref ContentsUtility.onlyAvailable,
-				"For example, don't show the option 'Made from Plasteel' if nothing is made form plasteel");
+				"For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel");
 
 			listing.End();
 		}
