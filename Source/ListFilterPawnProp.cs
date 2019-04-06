@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,51 @@ using UnityEngine;
 
 namespace List_Everything
 {
+	class ListFilterSkill : ListFilterDropDown<SkillDef>
+	{
+		IntRange skillRange = new IntRange(10, 20);
+
+		public ListFilterSkill()
+		{
+			sel = SkillDefOf.Animals;
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref skillRange, "skillRange");
+		}
+		public override ListFilter Clone(Map map)
+		{
+			ListFilterSkill clone = (ListFilterSkill)base.Clone(map);
+			clone.skillRange = skillRange;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && 
+				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
+				!rec.TotallyDisabled && 
+				rec.Level >= skillRange.min && rec.Level <= skillRange.max;
+
+		public override IEnumerable Options() => DefDatabase<SkillDef>.AllDefs;
+		public override bool DrawSpecial(Rect rect)
+		{
+			IntRange newRange = skillRange;
+			Widgets.IntRange(rect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
+			if (newRange != skillRange)
+			{
+				skillRange = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
+
 	//Pawn properties is a big one
 	public enum PawnFilterProp
 	{
-		Skill,
 		Trait,
 		Thought,
 		Need,
@@ -20,10 +62,7 @@ namespace List_Everything
 	}
 	class ListFilterPawnProp : ListFilter
 	{
-		PawnFilterProp prop = PawnFilterProp.Skill;
-
-		SkillDef skillDef = SkillDefOf.Animals;
-		IntRange skillRange = new IntRange(10, 20);
+		PawnFilterProp prop;
 
 		TraitDef traitDef = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
 		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
@@ -57,9 +96,6 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref prop, "prop");
 
-			Scribe_Defs.Look(ref skillDef, "skillDef");
-			Scribe_Values.Look(ref skillRange, "skillRange");
-
 			Scribe_Defs.Look(ref traitDef, "traitDef");
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
 
@@ -78,9 +114,6 @@ namespace List_Everything
 		{
 			ListFilterPawnProp clone = (ListFilterPawnProp)base.Clone(map);
 			clone.prop = prop;
-
-			clone.skillDef = skillDef;
-			clone.skillRange = skillRange;
 
 			clone.traitDef = traitDef;
 			clone.traitDegree = traitDegree;
@@ -113,9 +146,6 @@ namespace List_Everything
 			}
 			switch (prop)
 			{
-				case PawnFilterProp.Skill:
-					return pawn.skills?.GetSkill(skillDef) is SkillRecord rec &&
-						!rec.TotallyDisabled && rec.Level >= skillRange.min && rec.Level <= skillRange.max;
 
 				case PawnFilterProp.Trait:
 					return pawn.story?.traits.GetTrait(traitDef) is Trait trait &&
@@ -167,28 +197,6 @@ namespace List_Everything
 			}
 			switch (prop)
 			{
-				case PawnFilterProp.Skill:
-					if (row.ButtonText(skillDef.LabelCap))
-					{
-						List<FloatMenuOption> options = new List<FloatMenuOption>();
-						foreach (SkillDef sDef in DefDatabase<SkillDef>.AllDefs)
-						{
-							options.Add(new FloatMenuOption(sDef.LabelCap, () => skillDef = sDef));
-						}
-						MainTabWindow_List.DoFloatMenu(options); 
-					}
-					{
-						Rect rangeRect = rect;
-						rangeRect.xMin = row.FinalX;
-						IntRange newRange = skillRange;
-						Widgets.IntRange(rangeRect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
-						if (newRange != skillRange)
-						{
-							skillRange = newRange;
-							return true;
-						}
-					}
-					break;
 				case PawnFilterProp.Trait:
 					if (row.ButtonText(TraitName(traitDef)))
 					{

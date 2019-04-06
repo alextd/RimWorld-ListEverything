@@ -210,9 +210,11 @@ namespace List_Everything
 		public override IEnumerable Options() => Enum.GetValues(typeof(ForbiddenType));
 	}
 
+	public enum DropDownDrawStyle {NameAndOptions, OptionsAndDrawSpecial}
 	abstract class ListFilterDropDown<T> : ListFilter
 	{
 		public T sel;
+		protected DropDownDrawStyle drawStyle;
 		public int extraOption; //0 being use T, 1+ defined in subclass
 
 		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
@@ -295,8 +297,23 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			base.DrawOption(rect);
-			if (Widgets.ButtonText(rect.RightPart(0.4f), GetLabel()))
+			bool changeSelection = false;
+			bool changed = false;
+			switch(drawStyle)
+			{
+				case DropDownDrawStyle.NameAndOptions:
+					base.DrawOption(rect);
+					changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
+					break;
+				case DropDownDrawStyle.OptionsAndDrawSpecial:
+					WidgetRow row = new WidgetRow(rect.x, rect.y);
+					changeSelection = row.ButtonText(GetLabel());
+
+					rect.xMin = row.FinalX;
+					changed = DrawSpecial(rect);
+					break;
+			}
+			if (changeSelection)
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				if (NullOption() is string nullOption)
@@ -307,10 +324,13 @@ namespace List_Everything
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
 				MainTabWindow_List.DoFloatMenu(options);
 
-				return true;
+				changed = true;
 			}
-			return false;
+			return changed;
 		}
+
+
+		public virtual bool DrawSpecial(Rect rect) => throw new NotImplementedException();
 	}
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
