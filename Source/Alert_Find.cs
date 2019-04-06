@@ -72,8 +72,7 @@ namespace List_Everything
 		public override string GetExplanation()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("Your custom alert:");
-			stringBuilder.AppendLine(map.Parent.LabelCap + " (" + defaultLabel + ")");
+			stringBuilder.AppendLine(defaultLabel + " (" + map.Parent.LabelCap + ")");
 			stringBuilder.AppendLine("");
 			var things = FoundThings();
 			foreach (Thing thing in things)
