@@ -113,14 +113,67 @@ namespace List_Everything
 			Listing_StandardIndent listing = new Listing_StandardIndent();
 			listing.Begin(filterRect);
 
-			//Find Name
+			//Filter Name
 			Rect nameRect = listing.GetRect(Text.LineHeight);
 			WidgetRow nameRow = new WidgetRow(nameRect.x, nameRect.y);
 			nameRow.Label("Name:");
 			nameRect.xMin = nameRow.FinalX;
 			findDesc.name = Widgets.TextField(nameRect, findDesc.name);
+			listing.Gap();
 
-			//Filters
+
+			//Manage/Save/Load Buttons
+			Rect savedRect = listing.GetRect(Text.LineHeight);
+			savedRect = savedRect.LeftPart(0.25f);
+
+			//Saved Filters
+			if (Widgets.ButtonText(savedRect, "Save"))
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
+
+			savedRect.x += savedRect.width;
+			if (Settings.Get().SavedNames().Count() > 0 &&
+				Widgets.ButtonText(savedRect, "Load"))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (string name in Settings.Get().SavedNames())
+					options.Add(new FloatMenuOption(name, () => findDesc = Settings.Get().Load(name)));
+
+				DoFloatMenu(options);
+			}
+
+			savedRect.x += savedRect.width * 2;
+			if (Widgets.ButtonText(savedRect, "Manage Saved"))
+				Find.WindowStack.Add(new Dialog_ManageSavedLists());
+
+			//Alerts
+			Rect alertsRect = listing.GetRect(Text.LineHeight);
+			alertsRect = alertsRect.LeftPart(0.25f);
+
+			var comp = Current.Game.GetComponent<ListEverythingGameComp>();
+
+			if (Widgets.ButtonText(alertsRect, "Make Alert"))
+			{
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
+					name => comp.AddAlert(name, findDesc)));
+			}
+
+			alertsRect.x += alertsRect.width;
+			if (comp.AlertNames().Count() > 0 &&
+				Widgets.ButtonText(alertsRect, "Load Alert"))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (string name in comp.AlertNames())
+					options.Add(new FloatMenuOption(name, () => findDesc = comp.LoadAlert(name)));
+
+				DoFloatMenu(options);
+			}
+
+			alertsRect.x += alertsRect.width * 2;
+			if (Widgets.ButtonText(alertsRect, "Manage Alerts"))
+				Find.WindowStack.Add(new AlertByFindDialog());
+
+
+			//Draw Filters!!!
 			listing.GapLine();
 			if (DoFilters(listing, findDesc.filters))
 				changed = true;
@@ -142,55 +195,6 @@ namespace List_Everything
 
 			listing.GapLine();
 
-			//Bottom Buttons
-			Rect savedRect = listing.GetRect(Text.LineHeight);
-			savedRect = savedRect.LeftPart(0.25f);
-
-			//Saved Filters
-			if (Widgets.ButtonText(savedRect, "Manage Lists"))
-				Find.WindowStack.Add(new Dialog_ManageSavedLists());
-
-			savedRect.x += savedRect.width * 2;
-			if (Widgets.ButtonText(savedRect, "Save"))
-				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
-
-			savedRect.x += savedRect.width;
-			if (Settings.Get().SavedNames().Count() > 0 &&
-				Widgets.ButtonText(savedRect, "Load"))
-			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (string name in Settings.Get().SavedNames())
-					options.Add(new FloatMenuOption(name, () => findDesc = Settings.Get().Load(name)));
-
-				DoFloatMenu(options);
-			}
-			
-			//Alerts
-			Rect alertsRect = listing.GetRect(Text.LineHeight);
-			alertsRect = alertsRect.LeftPart(0.25f);
-
-			var comp = Current.Game.GetComponent<ListEverythingGameComp>();
-
-			if (Widgets.ButtonText(alertsRect, "Manage Alerts"))
-				Find.WindowStack.Add(new AlertByFindDialog());
-
-			alertsRect.x += alertsRect.width * 2;
-			if (Widgets.ButtonText(alertsRect, "Make Alert"))
-			{
-				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
-					name => comp.AddAlert(name, findDesc)));
-			}
-
-			alertsRect.x += alertsRect.width;
-			if (comp.AlertNames().Count() > 0 &&
-				Widgets.ButtonText(alertsRect, "Load Alert"))
-			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (string name in comp.AlertNames())
-					options.Add(new FloatMenuOption(name, () => findDesc = comp.LoadAlert(name)));
-
-				DoFloatMenu(options);
-			}
 
 			//Global Options
 			listing.CheckboxLabeled(
