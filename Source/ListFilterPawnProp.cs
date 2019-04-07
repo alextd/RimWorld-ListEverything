@@ -507,7 +507,7 @@ namespace List_Everything
 			switch(sel)
 			{
 				case DraftFilter.Drafted: return pawn.Drafted;
-				case DraftFilter.Undrafted: return !pawn.Drafted;
+				case DraftFilter.Undrafted: return pawn.drafter != null && !pawn.Drafted;
 				case DraftFilter.Controllable: return pawn.drafter != null;
 			}
 			return false;
