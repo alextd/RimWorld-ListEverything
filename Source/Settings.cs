@@ -46,16 +46,62 @@ namespace List_Everything
 			return savedFilters[name].Clone(Find.CurrentMap);
 		}
 
-		public void DoWindowContents(Rect wrect)
+		public void Rename(string name, string newName)
+		{
+			FindDescription desc = savedFilters[name];
+			desc.name = newName;
+			savedFilters[newName] = desc;
+			savedFilters.Remove(name);
+		}
+
+
+		private const float RowHeight = WidgetRow.IconSize + 6;
+
+		private Vector2 scrollPosition = Vector2.zero;
+		private float scrollViewHeight;
+		public void DoWindowContents(Rect inRect)
 		{
 			var listing = new Listing_Standard();
-			listing.Begin(wrect);
+			listing.Begin(inRect);
 
-			listing.Label("Saved list filters:");
+			Text.Font = GameFont.Medium;
+			listing.Label($"Saved Find Filters:");
+			Text.Font = GameFont.Small;
+			listing.GapLine();
+			listing.End();
+
+			inRect.yMin += listing.CurHeight;
+			
+
+			//Scrolling!
+			Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, scrollViewHeight);
+			Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
+
+			Rect rowRect = viewRect; rowRect.height = RowHeight;
 			string remove = null;
-			foreach(string name in SavedNames())
-				if (listing.ButtonTextLabeled(name, "Delete"))
+			foreach (var kvp in savedFilters)
+			{
+				string name = kvp.Key;
+				FindDescription desc = kvp.Value;
+
+				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
+				rowRect.y += RowHeight;
+
+				row.Label(name, rowRect.width / 4);
+
+				if (row.ButtonText("Rename"))
+					Find.WindowStack.Add(new Dialog_Name(newName => Rename(name, newName)));
+
+				if (row.ButtonText("Load"))
+					MainTabWindow_List.OpenWith(desc.Clone(Find.CurrentMap));
+
+				if (row.ButtonText("Delete"))
 					remove = name;
+
+				row.CheckboxLabeled("All maps?", ref desc.allMaps);
+			}
+			scrollViewHeight = RowHeight * savedFilters.Count();
+			Widgets.EndScrollView();
 
 			if (remove != null)
 				savedFilters.Remove(remove);

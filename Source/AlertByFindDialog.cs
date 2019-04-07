@@ -85,14 +85,14 @@ namespace List_Everything
 				row.Label("Seconds until shown:");
 				int sec = alert.desc.ticksToShowAlert / 60;
 				string secStr = $"{sec}";
-				Rect textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
+				Rect textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 600);
 				comp.SetTicks(name, sec * 60);
 
 				row.Label("# matching required to show alert:");
 				int count = alert.desc.countToAlert;
 				string countStr = $"{count}";
-				textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
+				textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 1, 600);
 				comp.SetCount(name, count);
 			}
@@ -103,16 +103,6 @@ namespace List_Everything
 
 			if (remove != null)
 				comp.RemoveAlert(remove);
-		}
-	}
-
-	public static class WidgetRowEx
-	{
-		public static Rect GapRect(this WidgetRow row, float width, float gap = WidgetRow.DefaultGap)
-		{
-			Rect result = new Rect(row.FinalX, row.FinalY, width, WidgetRow.IconSize + gap);
-			row.Gap(width);
-			return result;
 		}
 	}
 }
