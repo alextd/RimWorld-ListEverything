@@ -115,6 +115,12 @@ namespace List_Everything
 			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
 				AddFilterFloat(findDesc.filters);
 
+			//Extra options:
+			listing.CheckboxLabeled(
+				"All maps",
+				ref findDesc.allMaps,
+				"Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map");
+
 			listing.GapLine();
 
 			//Bottom Buttons

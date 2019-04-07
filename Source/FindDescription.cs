@@ -13,6 +13,7 @@ namespace List_Everything
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
 		public int countToAlert = 1;
+		public bool allMaps = false;
 
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
@@ -25,7 +26,8 @@ namespace List_Everything
 				name = name,
 				alertPriority = alertPriority,
 				ticksToShowAlert = ticksToShowAlert,
-				countToAlert = countToAlert
+				countToAlert = countToAlert,
+				allMaps = allMaps
 			};
 
 		public List<Thing> Get(Map map)
@@ -95,6 +97,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
+			Scribe_Values.Look(ref allMaps, "allMaps");
 		}
 	}
 
