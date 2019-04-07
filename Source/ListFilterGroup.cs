@@ -44,13 +44,16 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
-			bool beforeAny = any;
+			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 			row.Label("Include things that match");
 			if (row.ButtonText(any ? "Any" : "All"))
+			{
 				any = !any;
+				changed = true;
+			}
 			row.Label("of these filters:");
-			return any != beforeAny;
+			return changed;
 		}
 
 		public override bool DrawMore(Listing_StandardIndent listing)
@@ -151,11 +154,15 @@ namespace List_Everything
 
 		public override bool DrawOption(Rect rect)
 		{
+			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 
 			row.Label("Anything X steps nearby matches");
 			if (row.ButtonText(any ? "Any" : "All"))
+			{
 				any = !any;
+				changed = true;
+			}
 
 			IntRange slider = new IntRange(0, range);
 			rect.xMin = row.FinalX;
@@ -163,9 +170,9 @@ namespace List_Everything
 			if(range != slider.max)
 			{
 				range = slider.max;
-				return true;
+				changed = true;
 			}
-			return false;
+			return changed;
 		}
 	}
 }
