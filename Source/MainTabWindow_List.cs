@@ -70,6 +70,8 @@ namespace List_Everything
 		//Draw Filters
 		public void DoFilter(Rect rect)
 		{
+			bool changed = false;
+
 			Text.Font = GameFont.Medium;
 			Rect headerRect = rect.TopPartPixels(Text.LineHeight);
 			Rect filterRect = rect.BottomPartPixels(rect.height - Text.LineHeight);
@@ -81,7 +83,7 @@ namespace List_Everything
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 			{
 				findDesc = new FindDescription();
-				RemakeList();
+				changed = true;
 			}
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
@@ -110,16 +112,22 @@ namespace List_Everything
 			//Filters
 			listing.GapLine();
 			if (DoFilters(listing, findDesc.filters))
-				RemakeList();
+				changed = true;
 
 			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
 				AddFilterFloat(findDesc.filters);
 
 			//Extra options:
+			bool newMaps = findDesc.allMaps;
 			listing.CheckboxLabeled(
 				"All maps",
-				ref findDesc.allMaps,
+				ref newMaps,
 				"Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map");
+			if (findDesc.allMaps != newMaps)
+			{
+				findDesc.allMaps = newMaps;
+				changed = true;
+			}
 
 			listing.GapLine();
 
@@ -157,6 +165,10 @@ namespace List_Everything
 				"For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel");
 
 			listing.End();
+
+			//Update if needed
+			if (changed)
+				RemakeList();
 		}
 
 		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters)
