@@ -61,6 +61,7 @@ namespace List_Everything
 			Map map = desc.allMaps ? null : Find.CurrentMap;
 
 			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
+			//This was a good idea at one point but now I don't care to consolidate them into one ist
 			FindDescription refDesc = desc.Clone(null); //This one has ref string
 			refDesc.name = name;
 			FindDescription alertDesc = refDesc.Clone(map); //This one re-resolves reference for this map.
@@ -107,6 +108,12 @@ namespace List_Everything
 		{
 			AlertByFind.SetCount(name, c);
 			savedAlerts[name].desc.countToAlert = c;
+		}
+
+		public void SetComp(string name, CompareType c)
+		{
+			AlertByFind.SetComp(name, c);
+			savedAlerts[name].desc.countComp = c;
 		}
 
 		public override void ExposeData()

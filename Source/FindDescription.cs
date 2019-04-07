@@ -12,7 +12,8 @@ namespace List_Everything
 		public string name = "New Find Filters";
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
-		public int countToAlert = 1;
+		public int countToAlert;
+		public CompareType countComp;
 		public bool allMaps = false;
 		public bool locked = false;
 
@@ -28,6 +29,7 @@ namespace List_Everything
 				alertPriority = alertPriority,
 				ticksToShowAlert = ticksToShowAlert,
 				countToAlert = countToAlert,
+				countComp = countComp,
 				allMaps = allMaps,
 				locked = locked
 			};
@@ -105,6 +107,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
+			Scribe_Values.Look(ref countComp, "countComp");
 			Scribe_Values.Look(ref allMaps, "allMaps");
 			Scribe_Values.Look(ref locked, "locked");
 

@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace List_Everything
 {
+	public enum CompareType { Greater,Equal,Less}
 	public class FindAlertData : IExposable
 	{
 		public Map map;
@@ -76,6 +77,7 @@ namespace List_Everything
 		}
 		public void SetTicks(int t) => alertData.desc.ticksToShowAlert = t;
 		public void SetCount(int c) => alertData.desc.countToAlert = c;
+		public void SetComp(CompareType c) => alertData.desc.countComp = c;
 		
 		public override AlertReport GetReport()
 		{
@@ -83,10 +85,18 @@ namespace List_Everything
 				return AlertReport.Inactive;
 
 			List<Thing> things = FoundThings().ToList();
-			if (things.Count() < alertData.desc.countToAlert)
+			int count = things.Count();
+			bool active = false;
+			switch(alertData.desc.countComp)
+			{
+				case CompareType.Greater: active = count > alertData.desc.countToAlert;	break;
+				case CompareType.Equal:		active = count == alertData.desc.countToAlert;	break;
+				case CompareType.Less:		active = count < alertData.desc.countToAlert;	break;
+			}
+			if (!active)
 				tickStarted = Find.TickManager.TicksGame;
 			else if (Find.TickManager.TicksGame - tickStarted >= alertData.desc.ticksToShowAlert)
-				return AlertReport.CulpritsAre(FoundThings());
+				return AlertReport.CulpritsAre(things);
 			return AlertReport.Inactive;
 		}
 

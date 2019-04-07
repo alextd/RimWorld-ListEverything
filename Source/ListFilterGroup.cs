@@ -20,7 +20,10 @@ namespace List_Everything
 
 		//Mine!
 		public static readonly Texture2D LockOn = ContentFinder<Texture2D>.Get("Locked", true);
-		public static readonly Texture2D LockOff= ContentFinder<Texture2D>.Get("Unlocked", true);
+		public static readonly Texture2D LockOff = ContentFinder<Texture2D>.Get("Unlocked", true);
+		public static new readonly Texture2D Equals = ContentFinder<Texture2D>.Get("Equals", true);
+		public static readonly Texture2D LessThan = ContentFinder<Texture2D>.Get("LessThan", true);
+		public static readonly Texture2D GreaterThan = ContentFinder<Texture2D>.Get("GreaterThan", true);
 	}
 	public class ListFilterGroup : ListFilter
 	{

@@ -87,5 +87,8 @@ namespace List_Everything
 
 		public static void SetCount(string name, int c) =>
 			GetAlert(name)?.SetCount(c);
+
+		public static void SetComp(string name, CompareType c) =>
+			GetAlert(name)?.SetComp(c);
 	}
 }

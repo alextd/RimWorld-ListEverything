@@ -64,6 +64,7 @@ namespace List_Everything
 			foreach (string name in comp.AlertNames())
 			{
 				FindAlertData alert = comp.GetAlert(name);
+				FindDescription desc = alert.desc;
 				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
 				rowRect.y += RowHeight;
 
@@ -73,27 +74,31 @@ namespace List_Everything
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
 				if (row.ButtonText("Load"))
-					MainTabWindow_List.OpenWith(alert.desc.Clone(map));
+					MainTabWindow_List.OpenWith(desc.Clone(map));
 				
 				if (row.ButtonText("Delete"))
 					remove = name;
 
-				bool crit = alert.desc.alertPriority == AlertPriority.Critical;
+				bool crit = desc.alertPriority == AlertPriority.Critical;
 				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "Critical Alert");
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 
 				row.Label("Seconds until shown:");
-				int sec = alert.desc.ticksToShowAlert / 60;
+				int sec = desc.ticksToShowAlert / 60;
 				string secStr = $"{sec}";
-				Rect textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
-				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 600);
+				Rect textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
+				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 10000);
+				TooltipHandler.TipRegion(textRect, "1000 seconds in a RimWorld day");
 				comp.SetTicks(name, sec * 60);
 
-				row.Label("# matching required to show alert:");
-				int count = alert.desc.countToAlert;
+				row.Label("Show when");
+				if (row.ButtonIcon(TexFor(desc.countComp)))
+					comp.SetComp(name, (CompareType)((int)(desc.countComp + 1) % 3));
+
+				int count = desc.countToAlert;
 				string countStr = $"{count}";
 				textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
-				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 1, 600);
+				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 0, 100);
 				comp.SetCount(name, count);
 			}
 			
@@ -110,5 +115,13 @@ namespace List_Everything
 						$"Delete {remove}?", () => comp.RemoveAlert(remove)));
 			}
 		}
+
+		public static Texture2D TexFor(CompareType comp) =>
+			comp == CompareType.Equal ? TexButton.Equals :
+			comp == CompareType.Greater ? TexButton.GreaterThan :
+			TexButton.LessThan;
+				
+
+
 	}
 }
