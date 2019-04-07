@@ -676,7 +676,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
-		public override bool ValidForAllMaps => false;
+		public override bool ValidForAllMaps => extraOption == 1 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -703,7 +703,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load zone Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
-		public override bool ValidForAllMaps => false;
+		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{

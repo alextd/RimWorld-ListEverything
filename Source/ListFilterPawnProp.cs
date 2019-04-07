@@ -435,7 +435,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
-		public override bool ValidForAllMaps => false;
+		public override bool ValidForAllMaps => sel == null;
 
 		public override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == sel;
