@@ -59,6 +59,7 @@
 			<li>Filter_AreaRestriction</li>
 			<li>Filter_Drafted</li>
 			<li>Filter_Prisoner</li>
+			<li>Filter_MissingBodyPart</li>
 			<!-- Seems like it should be here but it also includes "holder has" which is an item detail - shrug. <li>Filter_Inventory</li>-->
 		</subFilters>
 	</List_Everything.ListFilterDef>
@@ -127,6 +128,12 @@
 		<defName>Filter_Prisoner</defName>
 		<label>prisoner</label>
 		<filterClass>List_Everything.ListFilterPrisoner</filterClass>
+	</List_Everything.ListFilterDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_MissingBodyPart</defName>
+		<label>missing Body Part</label>
+		<filterClass>List_Everything.ListFilterMissingBodyPart</filterClass>
 	</List_Everything.ListFilterDef>
 
 	
@@ -250,12 +257,6 @@
 		<defName>Filter_Door</defName>
 		<label>Door Status</label>
 		<filterClass>List_Everything.ListFilterDoorOpen</filterClass>
-	</List_Everything.ListFilterDef>
-
-	<List_Everything.ListFilterDef>
-		<defName>Filter_MissingBodyPart</defName>
-		<label>missing Body Part</label>
-		<filterClass>List_Everything.ListFilterMissingBodyPart</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
