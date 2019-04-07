@@ -21,7 +21,8 @@ namespace List_Everything
 
 		public static bool CanPeekInventory(this IThingHolder holder) =>
 			DebugSettings.godMode ||
-			(holder is Building_Casket c ? c.get_contentsKnown() : true);
+			(holder is Building_Casket c ? c.get_contentsKnown() : true) &&
+			!(holder is TradeShip);
 
 		public static List<Thing> AllKnownThings(IThingHolder holder)
 		{
