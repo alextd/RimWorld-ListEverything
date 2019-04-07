@@ -29,10 +29,6 @@ namespace List_Everything
 			RemakeList();
 		}
 
-		private Vector2 scrollPosition = Vector2.zero;
-
-		private float scrollViewHeight;
-
 		public override void DoWindowContents(Rect fillRect)
 		{
 			base.DoWindowContents(fillRect);
@@ -83,6 +79,8 @@ namespace List_Everything
 			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
 
+		private Vector2 scrollPositionFilt = Vector2.zero;
+		private float scrollViewHeightFilt;
 		//Draw Filters
 		public void DoFilter(Rect rect)
 		{
@@ -115,7 +113,8 @@ namespace List_Everything
 				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
 			}
 
-			Listing_StandardIndent listing = new Listing_StandardIndent();
+			Listing_StandardIndent listing = new Listing_StandardIndent()
+			{ maxOneColumn = true };
 			listing.Begin(filterRect);
 
 			/* maybe don't show name box
@@ -127,6 +126,44 @@ namespace List_Everything
 			findDesc.name = Widgets.TextField(nameRect, findDesc.name);
 			listing.Gap();
 			*/
+			listing.GapLine();
+
+
+			//Draw Filters!!!
+			Rect listRect = listing.GetRect(500);
+			Listing_StandardIndent filterListing = new Listing_StandardIndent()
+			{maxOneColumn = true };
+			
+			float viewWidth = listRect.width;
+			if (scrollViewHeightFilt > listRect.height)
+				viewWidth -= 16f;
+
+			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
+			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
+
+			//Draw Scrolling list:
+			if (DoFilters(filterListing, findDesc.filters))
+				changed = true;
+
+			if (filterListing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
+				AddFilterFloat(findDesc);
+			filterListing.EndScrollView(ref viewRect);
+			scrollViewHeightFilt = viewRect.height;
+
+
+			//Extra options:
+			bool newMaps = findDesc.allMaps;
+			listing.CheckboxLabeled(
+				"All maps",
+				ref newMaps,
+				"Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map");
+			if (findDesc.allMaps != newMaps)
+			{
+				findDesc.allMaps = newMaps;
+				changed = true;
+			}
+
+			listing.GapLine();
 
 			//Manage/Save/Load Buttons
 			Rect savedRect = listing.GetRect(Text.LineHeight);
@@ -179,28 +216,6 @@ namespace List_Everything
 				Find.WindowStack.Add(new AlertByFindDialog());
 
 
-			//Draw Filters!!!
-			listing.GapLine();
-			if (DoFilters(listing, findDesc.filters))
-				changed = true;
-
-			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
-				AddFilterFloat(findDesc);
-
-			//Extra options:
-			bool newMaps = findDesc.allMaps;
-			listing.CheckboxLabeled(
-				"All maps",
-				ref newMaps,
-				"Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map");
-			if (findDesc.allMaps != newMaps)
-			{
-				findDesc.allMaps = newMaps;
-				changed = true;
-			}
-
-			listing.GapLine();
-
 
 			//Global Options
 			listing.CheckboxLabeled(
@@ -242,6 +257,9 @@ namespace List_Everything
 			DoFloatMenu(options);
 		}
 
+
+		private Vector2 scrollPositionList = Vector2.zero;
+		private float scrollViewHeightList;
 
 		ThingDef selectAllDef;
 		bool selectAll;
@@ -292,28 +310,28 @@ namespace List_Everything
 
 			//Keep full width if nothing to scroll:
 			float viewWidth = listRect.width;
-			if (scrollViewHeight > listRect.height)
+			if (scrollViewHeightList > listRect.height)
 				viewWidth -= 16f;
 
 			//Draw Scrolling list:
-			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeight);
-			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
+			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightList);
+			Widgets.BeginScrollView(listRect, ref scrollPositionList, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
 
 			foreach (Thing thing in listedThings)
 			{
 				//Be smart about drawing only what's shown.
-				if (thingRect.y + 32 >= scrollPosition.y)
+				if (thingRect.y + 32 >= scrollPositionList.y)
 					DrawThingRow(thing, ref thingRect);
 
 				thingRect.y += 34;
 
-				if (thingRect.y > scrollPosition.y + listRect.height)
+				if (thingRect.y > scrollPositionList.y + listRect.height)
 					break;
 			}
 
 			if (Event.current.type == EventType.Layout)
-				scrollViewHeight = listedThings.Count() * 34f;
+				scrollViewHeightList = listedThings.Count() * 34f;
 
 			//Select all 
 			if (selectAll)

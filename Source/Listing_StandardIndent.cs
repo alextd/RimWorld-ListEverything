@@ -43,5 +43,29 @@ namespace List_Everything
 		{
 			ColumnWidth = listingRect.width - totalIndent;
 		}
+		
+		public void BeginScrollView(Rect rect, ref Vector2 scrollPosition, Rect viewRect, GameFont font = GameFont.Small)
+		{
+			//Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
+			//rect.height = 100000f;
+			//rect.width -= 20f;
+			//this.Begin(rect.AtZero());
+
+			//Need BeginGroup before ScrollView, listingRect needs rect.width-=20 but the group doesn't
+
+			GUI.BeginGroup(rect);
+			Widgets.BeginScrollView(rect.AtZero(), ref scrollPosition, viewRect, true);
+			
+			maxOneColumn = true;
+
+			rect.width -= 20f;
+			listingRect = rect;
+			ColumnWidth = listingRect.width;
+
+			curX = 0f;
+			curY = 0f;
+
+			Text.Font = font;
+		}
 	}
 }
