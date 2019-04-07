@@ -33,6 +33,7 @@ namespace List_Everything
 			return knownThings;
 		}
 
+		//This could be all maps, but you can just check off the limitation
 		public static bool onlyAvailable = true;
 		public static HashSet<T> AvailableOnMap<T>(Func<Thing, IEnumerable<T>> validGetter)
 		{
