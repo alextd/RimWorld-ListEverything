@@ -162,9 +162,23 @@ namespace List_Everything
 			if (DoFilters(filterListing, findDesc.filters))
 				changed = true;
 
-			if (!findDesc.locked && 
-				filterListing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
-				AddFilterFloat(findDesc);
+			if (!findDesc.locked)
+			{
+				Rect addRow = filterListing.GetRect(Text.LineHeight);
+				filterListing.Gap(filterListing.verticalSpacing);
+
+				Rect butRect = addRow;	butRect.width = Text.LineHeight;
+				Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
+
+				Rect textRect = addRow; textRect.xMin += Text.LineHeight + WidgetRow.DefaultGap;
+				Widgets.Label(textRect, "Add new filter...");
+
+				Widgets.DrawHighlightIfMouseover(addRow);
+
+				if (Widgets.ButtonInvisible(addRow))
+					AddFilterFloat(findDesc);
+			}
+
 			filterListing.EndScrollView(ref viewRect);
 			scrollViewHeightFilt = viewRect.height;
 
