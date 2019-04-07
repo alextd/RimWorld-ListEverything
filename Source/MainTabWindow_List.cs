@@ -208,13 +208,23 @@ namespace List_Everything
 			Map map = Find.CurrentMap;
 
 			//Draw Scrolling List:
+
+			//Draw box:
 			GUI.color = Color.gray;
 			Widgets.DrawBox(listRect);
 			GUI.color = Color.white;
 
+			//Nudge in so it's not touching box
 			listRect = listRect.ContractedBy(1);
 			listRect.width -= 2; listRect.x += 1;
-			Rect viewRect = new Rect(0f, 0f, listRect.width - 16f, scrollViewHeight);
+
+			//Keep full width if nothing to scroll:
+			float viewWidth = listRect.width;
+			if (scrollViewHeight > listRect.height)
+				viewWidth -= 16f;
+
+			//Draw Scrolling list:
+			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeight);
 			Widgets.BeginScrollView(listRect, ref scrollPosition, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
 
