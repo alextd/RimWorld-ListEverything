@@ -27,7 +27,7 @@ namespace List_Everything
 			Scribe_Deep.Look(ref desc, "desc");
 		}
 
-		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "All") + ")";
+		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "All maps") + ")";
 	}
 
 
