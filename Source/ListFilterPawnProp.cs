@@ -435,14 +435,20 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
-		public override bool ValidForAllMaps => sel == null;
+		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
-		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == sel;
+		public override bool FilterApplies(Thing thing)
+		{
+			Area selectedArea = extraOption == 1 ? thing.MapHeld.areaManager.Home : sel;
+			return thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == selectedArea;
+		}
 
 		public override string NullOption() => "Unrestricted";
-		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a.AssignableAsAllowed());
+		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a is Area_Allowed);//a.AssignableAsAllowed());
 		public override string NameFor(Area o) => o.Label;
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "Home";
 	}
 
 	class ListFilterMentalState : ListFilterDropDown<MentalStateDef>
