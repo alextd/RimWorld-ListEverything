@@ -8,10 +8,12 @@ using UnityEngine;
 
 namespace List_Everything
 {
-	public struct FindAlertData : IExposable
+	public class FindAlertData : IExposable
 	{
 		public Map map;
 		public FindDescription desc;
+
+		public FindAlertData() { }
 
 		public FindAlertData(Map m, FindDescription d)
 		{
@@ -77,7 +79,7 @@ namespace List_Everything
 		
 		public override AlertReport GetReport()
 		{
-			if (alertData.desc == null)
+			if (alertData == null)	//Alert_Find auto-added as an Alert subclass, exists but never displays anything
 				return AlertReport.Inactive;
 
 			List<Thing> things = FoundThings().ToList();
