@@ -469,7 +469,7 @@ namespace List_Everything
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "Any";
 	}
-	
+
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
 	{
 		public ListFilterPrisoner() => sel = PrisonerInteractionModeDefOf.NoInteraction;
@@ -494,5 +494,23 @@ namespace List_Everything
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "Is Prisoner" : "In Cell";
+	}
+
+	enum DraftFilter { Drafted, Undrafted, Controllable}
+	class ListFilterDrafted : ListFilterDropDown<DraftFilter>
+	{
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			switch(sel)
+			{
+				case DraftFilter.Drafted: return pawn.Drafted;
+				case DraftFilter.Undrafted: return !pawn.Drafted;
+				case DraftFilter.Controllable: return pawn.drafter != null;
+			}
+			return false;
+		}
 	}
 }
