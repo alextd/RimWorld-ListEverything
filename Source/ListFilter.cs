@@ -86,8 +86,6 @@ namespace List_Everything
 			if (owner.locked)
 			{
 				row.Label(include ? "Inc" : "Exc");
-
-				//mouseover use?
 			}
 			else
 			{

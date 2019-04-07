@@ -146,6 +146,16 @@ namespace List_Everything
 				viewWidth -= 16f;
 
 			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
+
+			//Lock out input to filters.
+			if (findDesc.locked && 
+				Event.current.type != EventType.Repaint &&
+				Event.current.type != EventType.Layout &&
+				Event.current.type != EventType.Ignore &&
+				Event.current.type != EventType.Used &&
+				Mouse.IsOver(viewRect))
+				Event.current.Use();
+
 			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
 
 			//Draw Scrolling list:
