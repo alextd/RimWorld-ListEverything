@@ -176,7 +176,7 @@ namespace List_Everything
 		public ListFilterName() => sel = "";
 
 		public override bool FilterApplies(Thing thing) =>
-			thing.Label.ToLower().Contains(sel.ToLower());
+			thing.Label.Contains(sel);
 
 		public override bool DrawOption(Rect rect)
 		{
