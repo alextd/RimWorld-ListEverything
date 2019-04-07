@@ -118,7 +118,7 @@ namespace List_Everything
 		IntRange stageRange;
 		public ListFilterThought()
 		{
-			sel = ThoughtDefOf.AteWithoutTable;  //Todo: beauty shows even if it's not on map
+			sel = ThoughtDefOf.AteWithoutTable;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 		public override string NameFor(ThoughtDef def) => ThoughtName(def);
@@ -250,7 +250,7 @@ namespace List_Everything
 		FloatRange needRange = new FloatRange(0, 0.5f);
 		public ListFilterNeed()
 		{
-			sel = NeedDefOf.Food;  //Todo: beauty shows even if it's not on map
+			sel = NeedDefOf.Food;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 		public override string NameFor(NeedDef def) => def.LabelCap;
