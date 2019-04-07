@@ -329,6 +329,7 @@ namespace List_Everything
 		}
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o.ToString();
+		public override string MakeRefName() => NameFor(sel);
 		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
 
 		public virtual int ExtraOptionsCount => 0;
