@@ -116,26 +116,36 @@ namespace List_Everything
 			return stringBuilder.ToString().TrimEndNewlines();
 		}
 
+		int currentTick;
+		List<Thing> foundThingsCache;
 		private IEnumerable<Thing> FoundThings()
 		{
+			if (Find.TickManager.TicksGame == currentTick && this.foundThingsCache != null)
+				return this.foundThingsCache;
+
+			foundThingsCache = new List<Thing>();
+			currentTick = Find.TickManager.TicksGame;
+
 			int i = 0;
 			//Single map
 			if (alertData.map != null)
 				foreach (Thing t in alertData.desc.Get(alertData.map))
 				{
-					yield return t;
+					foundThingsCache.Add(t);
 					if (++i == maxItems)
-						yield break;
+						break;
 				}
 			//All maps
 			else
 				foreach(Map m in Find.Maps)
 					foreach (Thing t in alertData.desc.Get(m))
 					{
-						yield return t;
+						foundThingsCache.Add(t);
 						if (++i == maxItems)
-							yield break;
+							break;
 					}
+
+			return foundThingsCache;
 		}
 
 		public override Rect DrawAt(float topY, bool minimized)
