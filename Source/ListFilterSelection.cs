@@ -48,5 +48,8 @@ namespace List_Everything
 		}
 		public override bool DrawMore(Listing_StandardIndent listing) =>
 			sel.DrawMore(listing);
+
+		public override bool ValidForAllMaps => 
+			sel.ValidForAllMaps;
 	}
 }
