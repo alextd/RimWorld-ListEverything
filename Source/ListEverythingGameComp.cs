@@ -68,6 +68,11 @@ namespace List_Everything
 			AlertByFind.AddAlert(new FindAlertData(map, alertDesc), okAction: () => savedAlerts[name] = new FindAlertData(map, refDesc));
 		}
 
+		public FindDescription LoadAlert(string name)
+		{
+			return savedAlerts[name].desc.Clone(Find.CurrentMap);
+		}
+
 		public void RenameAlert(string name, string newName)
 		{
 			FindAlertData findAlert = savedAlerts[name];

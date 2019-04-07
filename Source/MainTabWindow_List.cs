@@ -99,14 +99,14 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
 
 			//Header Title
-			Widgets.Label(labelRect, "Listing: "+ findDesc.baseType);
+			Widgets.Label(labelRect, "Listing: " + findDesc.baseType);
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
 					types.Add(new FloatMenuOption(type.ToString(), () => findDesc.baseType = type));
-				
+
 				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
 			}
 
@@ -143,26 +143,20 @@ namespace List_Everything
 			listing.GapLine();
 
 			//Bottom Buttons
-			Rect buttonRect = listing.GetRect(Text.LineHeight);
-			buttonRect = buttonRect.LeftPart(0.25f);
+			Rect savedRect = listing.GetRect(Text.LineHeight);
+			savedRect = savedRect.LeftPart(0.25f);
 
-			if (Widgets.ButtonText(buttonRect, "Make Alert"))
-			{
-				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
-					name => Current.Game.GetComponent<ListEverythingGameComp>().AddAlert(name, findDesc)));
-			}
-			
-			buttonRect.x += buttonRect.width;
-			if (Widgets.ButtonText(buttonRect, "Manage Alerts"))
-				Find.WindowStack.Add(new AlertByFindDialog());
+			//Saved Filters
+			if (Widgets.ButtonText(savedRect, "Manage Lists"))
+				Find.WindowStack.Add(new Dialog_ManageSavedLists());
 
-			buttonRect.x += buttonRect.width;
-			if (Widgets.ButtonText(buttonRect, "Save"))
+			savedRect.x += savedRect.width * 2;
+			if (Widgets.ButtonText(savedRect, "Save"))
 				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
 
-			buttonRect.x += buttonRect.width;
+			savedRect.x += savedRect.width;
 			if (Settings.Get().SavedNames().Count() > 0 &&
-				Widgets.ButtonText(buttonRect, "Load"))
+				Widgets.ButtonText(savedRect, "Load"))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (string name in Settings.Get().SavedNames())
@@ -170,12 +164,39 @@ namespace List_Everything
 
 				DoFloatMenu(options);
 			}
+			
+			//Alerts
+			Rect alertsRect = listing.GetRect(Text.LineHeight);
+			alertsRect = alertsRect.LeftPart(0.25f);
+
+			var comp = Current.Game.GetComponent<ListEverythingGameComp>();
+
+			if (Widgets.ButtonText(alertsRect, "Manage Alerts"))
+				Find.WindowStack.Add(new AlertByFindDialog());
+
+			alertsRect.x += alertsRect.width * 2;
+			if (Widgets.ButtonText(alertsRect, "Make Alert"))
+			{
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
+					name => comp.AddAlert(name, findDesc)));
+			}
+
+			alertsRect.x += alertsRect.width;
+			if (comp.AlertNames().Count() > 0 &&
+				Widgets.ButtonText(alertsRect, "Load Alert"))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (string name in comp.AlertNames())
+					options.Add(new FloatMenuOption(name, () => findDesc = comp.LoadAlert(name)));
+
+				DoFloatMenu(options);
+			}
 
 			//Global Options
 			listing.CheckboxLabeled(
-				"Only show filter options for available things",
-				ref ContentsUtility.onlyAvailable,
-				"For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel");
+			"Only show filter options for available things",
+			ref ContentsUtility.onlyAvailable,
+			"For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel");
 
 			listing.End();
 
