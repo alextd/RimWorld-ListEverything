@@ -10,22 +10,23 @@ namespace List_Everything
 {
 	public class ListFilterSelection : ListFilterWithOption<ListFilter>
 	{
-		public override void PostMake() => SetFilter(def.subFilters.First());
+		public override void PostMake() => SetSelectedFilter(def.subFilters.First());
 
-		public void SetFilter(ListFilterDef def)
+		public void SetSelectedFilter(ListFilterDef def)
 		{
-			sel = ListFilterMaker.MakeFilter(def);
+			sel = ListFilterMaker.MakeFilter(def, owner);
 			sel.topLevel = false;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
 			sel.FilterApplies(thing);
 
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterSelection clone = (ListFilterSelection)base.Clone(map);
+			ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
 
-			clone.sel = sel.Clone(map);
+			clone.sel = sel.Clone(map, newOwner);
+			clone.owner = newOwner;
 
 			return clone;
 		}
@@ -37,7 +38,7 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (ListFilterDef def in def.subFilters)
-					options.Add(new FloatMenuOption(def.LabelCap, () => SetFilter(def)));
+					options.Add(new FloatMenuOption(def.LabelCap, () => SetSelectedFilter(def)));
 				MainTabWindow_List.DoFloatMenu(options);
 
 				return true;

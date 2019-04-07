@@ -31,14 +31,16 @@ namespace List_Everything
 		public static ListFilterDef Filter_Name;
 		public static ListFilterDef Filter_Group;
 
-		public static ListFilter MakeFilter(ListFilterDef def)
+		public static ListFilter MakeFilter(ListFilterDef def, FindDescription owner)
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
+			filter.owner = owner;
 			filter.PostMake();
 			return filter;
 		}
-		public static ListFilter NameFilter => ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
+		public static ListFilter NameFilter(FindDescription owner) =>
+			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
 	}
 
 	[StaticConstructorOnStartup]
@@ -47,20 +49,25 @@ namespace List_Everything
 		public int id;//For window focus purposes
 		public static int nextID = 1;
 		public ListFilterDef def;
+		public FindDescription owner;
 
 		protected ListFilter()	// Of course protected here doesn't make subclasses protected sooo ?
 		{
 			id = nextID++;
 		}
 
-		public bool enabled = true; //simply turn off but keep in list
+		private bool enabled = true; //simply turn off but keep in list
+		public bool Enabled
+		{
+			get => enabled && !ForceDisable();
+		}
 		public bool include = true; //or exclude
 		public bool topLevel = true;
 		public bool delete;
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
-			return enabled ? list.Where(t => AppliesTo(t)) : list;
+			return Enabled ? list.Where(t => AppliesTo(t)) : list;
 		}
 
 		//This can be problematic for minified things: We want the qualities of the inner things,
@@ -106,6 +113,12 @@ namespace List_Everything
 				DoFocus();
 				shouldFocus = false;
 			}
+			if (ForceDisable())
+			{
+				Widgets.DrawBoxSolid(rowRect, new Color(0.5f, 0, 0, 0.25f));
+
+				TooltipHandler.TipRegion(rowRect, "This filter doesn't work with all maps");
+			}
 
 			listing.Gap(listing.verticalSpacing);
 			return changed;
@@ -132,17 +145,22 @@ namespace List_Everything
 		}
 
 		//Clone, and resolve references if map specified
-		public virtual ListFilter Clone(Map map)
+		public virtual ListFilter Clone(Map map, FindDescription newOwner) =>
+			BaseClone(map, newOwner);
+
+		protected ListFilter BaseClone(Map map, FindDescription newOwner)
 		{
-			ListFilter clone = ListFilterMaker.MakeFilter(def);
+			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
 			clone.enabled = enabled;
 			clone.include = include;
 			clone.topLevel = topLevel;
-
+			//clone.owner = newOwner; //No - MakeFilter sets it.
 			return clone;
 		}
 
 		public virtual void PostMake() { }
+		public virtual bool ValidForAllMaps => true;
+		public bool ForceDisable() => !ValidForAllMaps && owner.allMaps;
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
@@ -248,9 +266,9 @@ namespace List_Everything
 			else
 				Scribe_Values.Look(ref sel, "sel");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map);
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map, newOwner);
 
 			if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
@@ -289,9 +307,12 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref extraOption, "ex");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map);
+			ListFilterDropDown<T> clone =
+				extraOption == 0 ?
+				(ListFilterDropDown<T>)base.Clone(map, newOwner) ://ListFilterwithOption handles sel, and refName for sel if needed
+				(ListFilterDropDown<T>)BaseClone(map, newOwner);  //This is not needed with extraOption, so bypass ListFilterWithOption<T> to ListFilter
 			clone.extraOption = extraOption;
 			return clone;
 		}
@@ -654,6 +675,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
+		public override bool ValidForAllMaps => false;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -680,6 +702,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load zone Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
+		public override bool ValidForAllMaps => false;
 
 		public override bool FilterApplies(Thing thing)
 		{

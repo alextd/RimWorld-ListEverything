@@ -126,7 +126,7 @@ namespace List_Everything
 				changed = true;
 
 			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
-				AddFilterFloat(findDesc.filters);
+				AddFilterFloat(findDesc);
 
 			//Extra options:
 			bool newMaps = findDesc.allMaps;
@@ -201,11 +201,11 @@ namespace List_Everything
 			return changed;
 		}
 
-		public static void AddFilterFloat(List<ListFilter> filters)
+		public static void AddFilterFloat(FindDescription desc, List<ListFilter> filters = null)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => d.parent == null && (Prefs.DevMode || !d.devOnly)))
-				options.Add(new FloatMenuOption(def.LabelCap, () => filters.Add(ListFilterMaker.MakeFilter(def))));
+				options.Add(new FloatMenuOption(def.LabelCap, () => (filters ?? desc.filters).Add(ListFilterMaker.MakeFilter(def, desc))));
 			DoFloatMenu(options);
 		}
 

@@ -72,7 +72,7 @@ namespace List_Everything
 					savedAlerts = new Dictionary<string, FindDescription>();
 				foreach (var kvp in savedAlerts)
 				{
-					AlertByFind.AddAlert(map, kvp.Value, overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
+					AlertByFind.AddAlert(map, kvp.Value.Clone(map), overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
 				}
 			}
 		}

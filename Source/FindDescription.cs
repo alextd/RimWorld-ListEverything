@@ -18,10 +18,10 @@ namespace List_Everything
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
 
-		public virtual FindDescription Clone(Map map) =>
-			new FindDescription()
+		public virtual FindDescription Clone(Map map)
+		{
+			FindDescription newDesc = new FindDescription()
 			{
-				filters = filters.Select(f => f.Clone(map)).ToList(),
 				baseType = baseType,
 				name = name,
 				alertPriority = alertPriority,
@@ -29,6 +29,9 @@ namespace List_Everything
 				countToAlert = countToAlert,
 				allMaps = allMaps
 			};
+			newDesc.filters = filters.Select(f => f.Clone(map, newDesc)).ToList();
+			return newDesc;
+		}
 
 		public List<Thing> Get(Map map)
 		{
@@ -98,6 +101,8 @@ namespace List_Everything
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
 			Scribe_Values.Look(ref allMaps, "allMaps");
+
+			//Should we set filters owner to this? Only map clones that are copied need it, and they get it in the clone.
 		}
 	}
 

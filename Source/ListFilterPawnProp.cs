@@ -25,9 +25,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref skillRange, "skillRange");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterSkill clone = (ListFilterSkill)base.Clone(map);
+			ListFilterSkill clone = (ListFilterSkill)base.Clone(map, newOwner);
 			clone.skillRange = skillRange;
 			return clone;
 		}
@@ -70,9 +70,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterTrait clone = (ListFilterTrait)base.Clone(map);
+			ListFilterTrait clone = (ListFilterTrait)base.Clone(map, newOwner);
 			clone.traitDegree = traitDegree;
 			return clone;
 		}
@@ -137,9 +137,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterThought clone = (ListFilterThought)base.Clone(map);
+			ListFilterThought clone = (ListFilterThought)base.Clone(map, newOwner);
 			clone.stageRange = stageRange;
 			return clone;
 		}
@@ -265,9 +265,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref needRange, "needRange");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterNeed clone = (ListFilterNeed)base.Clone(map);
+			ListFilterNeed clone = (ListFilterNeed)base.Clone(map, newOwner);
 			clone.needRange = needRange;
 			return clone;
 		}
@@ -305,9 +305,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref severityRange, "severityRange");
 		}
-		public override ListFilter Clone(Map map)
+		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterHealth clone = (ListFilterHealth)base.Clone(map);
+			ListFilterHealth clone = (ListFilterHealth)base.Clone(map, newOwner);
 			clone.severityRange = severityRange;
 			return clone;
 		}
@@ -435,6 +435,7 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
+		public override bool ValidForAllMaps => false;
 
 		public override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == sel;

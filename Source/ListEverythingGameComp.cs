@@ -27,7 +27,7 @@ namespace List_Everything
 			if (ListDefOf.OpenFindTab.IsDownEvent && Event.current.control)
 			{
 				FindDescription desc = new FindDescription();
-				ListFilter filter = ListFilterMaker.NameFilter;
+				ListFilter filter = ListFilterMaker.NameFilter(desc);
 				desc.filters.Add(filter);
 				filter.Focus();
 				MainTabWindow_List.OpenWith(desc);
