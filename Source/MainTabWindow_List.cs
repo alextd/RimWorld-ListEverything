@@ -152,7 +152,8 @@ namespace List_Everything
 			if (DoFilters(filterListing, findDesc.filters))
 				changed = true;
 
-			if (filterListing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
+			if (!findDesc.locked && 
+				filterListing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
 				AddFilterFloat(findDesc);
 			filterListing.EndScrollView(ref viewRect);
 			scrollViewHeightFilt = viewRect.height;

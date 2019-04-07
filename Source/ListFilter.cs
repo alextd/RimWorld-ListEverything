@@ -82,25 +82,35 @@ namespace List_Everything
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
 
 			bool changed = false;
-			//Clear button
-			if (row.ButtonIcon(TexButton.CancelTex, "Delete this filter"))
-			{
-				delete = true;
-				changed = true;
-			}
 
-			//Toggle button
-			if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Enable this filter"))
+			if (owner.locked)
 			{
-				enabled = !enabled;
-				changed = true;
-			}
+				row.Label(include ? "Inc" : "Exc");
 
-			//Include/Exclude
-			if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude things matching this filter"))
+				//mouseover use?
+			}
+			else
 			{
-				include = !include;
-				changed = true;
+				//Clear button
+				if (row.ButtonIcon(TexButton.CancelTex, "Delete this filter"))
+				{
+					delete = true;
+					changed = true;
+				}
+
+				//Toggle button
+				if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Enable this filter"))
+				{
+					enabled = !enabled;
+					changed = true;
+				}
+
+				//Include/Exclude
+				if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude things matching this filter"))
+				{
+					include = !include;
+					changed = true;
+				}
 			}
 
 

@@ -67,7 +67,8 @@ namespace List_Everything
 
 			//Draw filters
 			bool changed = MainTabWindow_List.DoFilters(listing, filters);
-			if (listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
+			if (!owner.locked && 
+				listing.ButtonImage(TexButton.Plus, Text.LineHeight, Text.LineHeight))
 				MainTabWindow_List.AddFilterFloat(owner, filters);
 
 			listing.EndIndent();
