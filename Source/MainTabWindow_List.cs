@@ -35,7 +35,7 @@ namespace List_Everything
 			Rect listRect = fillRect.RightPart(0.39f);
 
 			GUI.color = Color.grey;
-			Widgets.DrawLineVertical(listRect.x-3, 0, listRect.height);
+			Widgets.DrawLineVertical(listRect.x - 3, 0, listRect.height);
 			GUI.color = Color.white;
 
 			DoFilter(filterRect);
@@ -44,8 +44,13 @@ namespace List_Everything
 
 
 		List<Thing> listedThings;
-		public static void DoFloatMenu(List<FloatMenuOption> options) =>
-			Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
+		public static void DoFloatMenu(List<FloatMenuOption> options)
+		{
+			if (options.NullOrEmpty())
+				Messages.Message($"There are no options available (Perhaps you should uncheck 'Only available things')", MessageTypeDefOf.RejectInput);
+			else
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
+		}
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
 		public void RemakeList() =>
