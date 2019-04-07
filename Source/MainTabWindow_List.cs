@@ -223,8 +223,6 @@ namespace List_Everything
 
 			selectAllDef = null;
 
-			Map map = Find.CurrentMap;
-
 			//Draw Scrolling List:
 
 			//Draw box:

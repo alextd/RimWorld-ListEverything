@@ -357,10 +357,10 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing) =>
 			sel != null ?
-			(sel.targetType == TargetType.Thing ? Find.CurrentMap.designationManager.DesignationOn(thing, sel) != null :
-			Find.CurrentMap.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
-			(Find.CurrentMap.designationManager.DesignationOn(thing) != null ||
-			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
+			(sel.targetType == TargetType.Thing ? thing.MapHeld.designationManager.DesignationOn(thing, sel) != null :
+			thing.MapHeld.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
+			(thing.MapHeld.designationManager.DesignationOn(thing) != null ||
+			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
 		public override string NullOption() => "Any";
 		public override IEnumerable<DesignationDef> Options() =>
@@ -659,9 +659,9 @@ namespace List_Everything
 		{
 			IntVec3 pos = thing.PositionHeld;
 			return
-				extraOption == 1 ? Find.CurrentMap.roofGrid.Roofed(pos) :
+				extraOption == 1 ? thing.MapHeld.roofGrid.Roofed(pos) :
 				sel != null ? sel[pos] :
-				Find.CurrentMap.areaManager.AllAreas.Any(a => a[pos]);
+				thing.MapHeld.areaManager.AllAreas.Any(a => a[pos]);
 		}
 
 		public override string NullOption() => "Any";
@@ -684,7 +684,7 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
-			Zone zoneAtPos = Find.CurrentMap.zoneManager.ZoneAt(pos);
+			Zone zoneAtPos = thing.MapHeld.zoneManager.ZoneAt(pos);
 			return 
 				extraOption == 1 ? zoneAtPos is Zone_Stockpile :
 				extraOption == 2 ? zoneAtPos is Zone_Growing :
