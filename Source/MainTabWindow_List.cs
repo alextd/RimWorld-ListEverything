@@ -100,6 +100,13 @@ namespace List_Everything
 			Listing_StandardIndent listing = new Listing_StandardIndent();
 			listing.Begin(filterRect);
 
+			//Find Name
+			Rect nameRect = listing.GetRect(Text.LineHeight);
+			WidgetRow nameRow = new WidgetRow(nameRect.x, nameRect.y);
+			nameRow.Label("Name:");
+			nameRect.xMin = nameRow.FinalX;
+			findDesc.name = Widgets.TextField(nameRect, findDesc.name);
+
 			//Filters
 			listing.GapLine();
 			if (DoFilters(listing, findDesc.filters))
