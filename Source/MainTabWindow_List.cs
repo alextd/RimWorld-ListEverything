@@ -113,6 +113,7 @@ namespace List_Everything
 			Listing_StandardIndent listing = new Listing_StandardIndent();
 			listing.Begin(filterRect);
 
+			/* maybe don't show name box
 			//Filter Name
 			Rect nameRect = listing.GetRect(Text.LineHeight);
 			WidgetRow nameRow = new WidgetRow(nameRect.x, nameRect.y);
@@ -120,7 +121,7 @@ namespace List_Everything
 			nameRect.xMin = nameRow.FinalX;
 			findDesc.name = Widgets.TextField(nameRect, findDesc.name);
 			listing.Gap();
-
+			*/
 
 			//Manage/Save/Load Buttons
 			Rect savedRect = listing.GetRect(Text.LineHeight);
