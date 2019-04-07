@@ -21,6 +21,11 @@ namespace List_Everything
 		public override void PreOpen()
 		{
 			base.PreOpen();
+			if (findDesc == null)
+			{
+				findDesc = new FindDescription();
+				findDesc.filters.Add(ListFilterMaker.NameFilter(findDesc));
+			}
 			RemakeList();
 		}
 
@@ -68,7 +73,7 @@ namespace List_Everything
 		}
 
 		//Filters:
-		public FindDescription findDesc = new FindDescription();
+		public FindDescription findDesc;
 
 		public static void OpenWith(FindDescription desc)
 		{
