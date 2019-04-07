@@ -105,8 +105,6 @@ namespace List_Everything
 
 			if (remove != null)
 				savedFilters.Remove(remove);
-
-			listing.End();
 		}
 
 
