@@ -35,6 +35,18 @@ namespace List_Everything
 		}
 		public override void DoWindowContents(Rect inRect)
 		{
+			var listing = new Listing_Standard();
+			listing.Begin(inRect);
+
+			Text.Font = GameFont.Medium;
+			listing.Label($"Saved Find Filters:");
+			Text.Font = GameFont.Small;
+			listing.GapLine();
+			listing.End();
+
+			inRect.yMin += listing.CurHeight;
+
+
 			LoadedModManager.GetMod<Mod>().DoSettingsWindowContents(inRect);
 		}
 		public override void PreClose()

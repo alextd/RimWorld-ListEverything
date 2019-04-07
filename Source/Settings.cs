@@ -61,18 +61,6 @@ namespace List_Everything
 		private float scrollViewHeight;
 		public void DoWindowContents(Rect inRect)
 		{
-			var listing = new Listing_Standard();
-			listing.Begin(inRect);
-
-			Text.Font = GameFont.Medium;
-			listing.Label($"Saved Find Filters:");
-			Text.Font = GameFont.Small;
-			listing.GapLine();
-			listing.End();
-
-			inRect.yMin += listing.CurHeight;
-			
-
 			//Scrolling!
 			Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, scrollViewHeight);
 			Widgets.BeginScrollView(inRect, ref scrollPosition, viewRect);
