@@ -78,11 +78,14 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn ?
-				pawn.story?.traits.GetTrait(sel) is Trait trait &&
-				trait.Degree == traitDegree :
-				sel == null;
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return pawn.story?.traits.GetTrait(sel) is Trait trait &&
+				trait.Degree == traitDegree;
+		}
 
 		public override IEnumerable Options() =>
 			ContentsUtility.onlyAvailable
@@ -142,8 +145,10 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing)
 		{
-			if(thing is Pawn pawn && 
-				pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			if (pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
 			{
 				//memories
 				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
@@ -306,14 +311,14 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing)
 		{
-			if (thing is Pawn pawn)
-			{
-				return sel == null ?
-				!pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return
+				extraOption == 1 ? pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
+				sel == null ? !pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
 				(pawn.health.hediffSet.GetFirstHediffOfDef(sel, !DebugSettings.godMode) is Hediff hediff &&
 				(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
-			}
-			return sel == null;
 		}
 
 		public override string NullOption() => "None";
@@ -326,6 +331,9 @@ namespace List_Everything
 			sel = o;
 			severityRange = SeverityRangeFor(sel);
 		}
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "Any";
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
@@ -363,11 +371,15 @@ namespace List_Everything
 		public override string NameFor(WorkTags tags) =>
 			tags.LabelTranslated().CapitalizeFirst();
 
-		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn && 
-			(sel == WorkTags.None
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return sel == WorkTags.None
 				? pawn.story?.CombinedDisabledWorkTags == WorkTags.None
-				: pawn.story?.WorkTagIsDisabled(sel) ?? false);
+				: pawn.story?.WorkTagIsDisabled(sel) ?? false;
+		}
 
 		public override IEnumerable Options() => Enum.GetValues(typeof(WorkTags));
 	}
@@ -429,11 +441,15 @@ namespace List_Everything
 	{
 		public override string NameFor(MentalStateDef def) => def.LabelCap;
 
-		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn &&
-				(sel == null
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return sel == null
 				? pawn.MentalState == null
-				: pawn.MentalState?.def is MentalStateDef def && def == sel);
+				: pawn.MentalState?.def is MentalStateDef def && def == sel;
+		}
 
 		public override IEnumerable Options() =>
 			ContentsUtility.onlyAvailable

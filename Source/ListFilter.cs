@@ -592,10 +592,11 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			ThingDef stuff = thing is IConstructible c ? c.UIStuff() : thing.Stuff;
-			return extraOption > 0 ?
-			stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 1]) ?? false :
-			sel == null ? stuff != null :
-			stuff == sel;
+			return 
+				extraOption == 1 ? !thing.def.MadeFromStuff :
+				extraOption > 1 ?	stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 2]) ?? false :
+				sel == null ? stuff != null :
+				stuff == sel;
 		}
 
 		public override string NullOption() => "Any";
@@ -606,8 +607,10 @@ namespace List_Everything
 
 		public override string NameFor(ThingDef o) => o.LabelCap;
 		
-		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount;
-		public override string NameForExtra(int ex) => DefDatabase<StuffCategoryDef>.AllDefsListForReading[ex-1].LabelCap;
+		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount + 1;
+		public override string NameForExtra(int ex) =>
+			ex == 1 ? "Not made from stuff" : 
+			DefDatabase<StuffCategoryDef>.AllDefsListForReading[ex-2]?.LabelCap;
 	}
 
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
@@ -625,10 +628,10 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return sel == null
-				? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty()
-				: pawn.RaceProps.body.GetPartsWithDef(sel)
-					.Any(r => pawn.health.hediffSet.PartIsMissing(r));
+			return
+				extraOption == 1 ? pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
+				sel == null ? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
+				pawn.RaceProps.body.GetPartsWithDef(sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
 		public override string NullOption() => "Any";
@@ -639,6 +642,9 @@ namespace List_Everything
 				: DefDatabase<BodyPartDef>.AllDefs;
 		
 		public override string NameFor(BodyPartDef o) => o.LabelCap;
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "None";
 	}
 
 	class ListFilterArea : ListFilterDropDown<Area>
