@@ -666,6 +666,8 @@ namespace List_Everything
 		public override string NameForExtra(int ex) => "None";
 	}
 
+
+	enum BaseAreas { Home, BuildRoof, NoRoof, SnowClear };
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
 		public ListFilterArea() => sel = Find.CurrentMap?.areaManager.Home;
@@ -676,23 +678,47 @@ namespace List_Everything
 			if (sel == null)
 				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
 		}
-		public override bool ValidForAllMaps => extraOption == 1 || sel == null;
+		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{
+			Map map = thing.MapHeld;
 			IntVec3 pos = thing.PositionHeld;
-			return
-				extraOption == 1 ? thing.MapHeld.roofGrid.Roofed(pos) :
-				sel != null ? sel[pos] :
-				thing.MapHeld.areaManager.AllAreas.Any(a => a[pos]);
+
+			if (extraOption == 5)
+				return pos.Roofed(map);
+
+			if(extraOption == 0)
+				return sel != null ? sel[pos] :
+				map.areaManager.AllAreas.Any(a => a[pos]);
+
+			switch((BaseAreas)(extraOption - 1))
+			{
+				case BaseAreas.Home:			return map.areaManager.Home[pos];
+				case BaseAreas.BuildRoof: return map.areaManager.BuildRoof[pos];
+				case BaseAreas.NoRoof:		return map.areaManager.NoRoof[pos];
+				case BaseAreas.SnowClear: return map.areaManager.SnowClear[pos];
+			}
+			return false;
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas;
+		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a is Area_Allowed);
 		public override string NameFor(Area o) => o.Label;
 
-		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "Roofed";
+		public override int ExtraOptionsCount => 5;
+		public override string NameForExtra(int ex)
+		{
+			if (ex == 5) return "Roofed";
+			switch((BaseAreas)(ex - 1))
+			{
+				case BaseAreas.Home: return "Home";
+				case BaseAreas.BuildRoof: return "Build Roof";
+				case BaseAreas.NoRoof: return "No Roof";
+				case BaseAreas.SnowClear: return "Snow Clear";
+			}
+			return "???";
+		}
 	}
 
 	class ListFilterZone : ListFilterDropDown<Zone>
