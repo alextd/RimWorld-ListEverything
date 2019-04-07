@@ -18,6 +18,13 @@ namespace List_Everything
 			}
 		}
 
+		protected override void SetInitialSizeAndPosition()
+		{
+			base.SetInitialSizeAndPosition();
+			windowRect.x = UI.screenWidth - windowRect.width;
+			windowRect.y = UI.screenHeight - MainButtonDef.ButtonHeight - this.windowRect.height;
+		}
+
 		public AlertByFindDialog()
 		{
 			this.forcePause = true;
