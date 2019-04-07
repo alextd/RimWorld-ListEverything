@@ -37,8 +37,7 @@ namespace List_Everything
 				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
 				skillRange.Includes(rec.Level);
-
-		public override IEnumerable Options() => DefDatabase<SkillDef>.AllDefs;
+		
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
 			IntRange newRange = skillRange;
@@ -87,10 +86,12 @@ namespace List_Everything
 				trait.Degree == traitDegree;
 		}
 
-		public override IEnumerable Options() =>
+		public override IEnumerable<TraitDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>()).OrderBy(TraitName)
-				: DefDatabase<TraitDef>.AllDefs.OrderBy(NameFor);
+				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
+				: base.Options();
+
+		public override bool Ordered => true;
 		protected override void Callback(TraitDef o)
 		{
 			sel = o;
@@ -163,10 +164,11 @@ namespace List_Everything
 			return false;
 		}
 
-		public override IEnumerable Options() =>
+		public override IEnumerable<ThoughtDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableOnMap(ThoughtsForThing).OrderBy(tDef => ThoughtName(tDef))
-				: DefDatabase<ThoughtDef>.AllDefs.OrderBy(NameFor);
+				: base.Options();
+		public override bool Ordered => true;
 		protected override void Callback(ThoughtDef o)
 		{
 			sel = o;
@@ -272,8 +274,6 @@ namespace List_Everything
 			(!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
 				pawn.needs?.TryGetNeed(sel) is Need need && needRange.Includes(need.CurLevelPercentage);
 
-		public override IEnumerable Options() => DefDatabase<NeedDef>.AllDefs;
-
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
 			FloatRange newRange = needRange;
@@ -322,10 +322,11 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "None";
-		public override IEnumerable Options() =>
+		public override IEnumerable<HediffDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>()).OrderBy(h => h.label)
-				: DefDatabase<HediffDef>.AllDefs.OrderBy(h => h.label);
+				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
+				: base.Options();
+		public override bool Ordered => true;
 		protected override void Callback(HediffDef o)
 		{
 			sel = o;
@@ -385,8 +386,6 @@ namespace List_Everything
 				story.WorkTagIsDisabled(sel);
 		}
 
-		public override IEnumerable Options() => Enum.GetValues(typeof(WorkTags));
-
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "Any";
 	}
@@ -423,8 +422,6 @@ namespace List_Everything
 			}
 			return "???";
 		}
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(TemperatureFilter));
 	}
 
 	class ListFilterRestricted : ListFilterDropDown<Area>
@@ -440,7 +437,7 @@ namespace List_Everything
 			thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == sel;
 
 		public override string NullOption() => "Unrestricted";
-		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a.AssignableAsAllowed());
+		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a.AssignableAsAllowed());
 		public override string NameFor(Area o) => o.Label;
 	}
 
@@ -459,10 +456,11 @@ namespace List_Everything
 				pawn.MentalState?.def is MentalStateDef def && def == sel;
 		}
 
-		public override IEnumerable Options() =>
+		public override IEnumerable<MentalStateDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
 				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
+		public override bool Ordered => true;
 		public override string NullOption() => "None";
 
 		public override int ExtraOptionsCount => 1;
@@ -487,7 +485,7 @@ namespace List_Everything
 			return pawn.guest?.interactionMode == sel;
 		}
 
-		public override IEnumerable Options() => DefDatabase<PrisonerInteractionModeDef>.AllDefs;
+		public override IEnumerable<PrisonerInteractionModeDef> Options() => DefDatabase<PrisonerInteractionModeDef>.AllDefs;
 		public override string NameFor(PrisonerInteractionModeDef o) => o.LabelCap;
 
 		public override int ExtraOptionsCount => 2;

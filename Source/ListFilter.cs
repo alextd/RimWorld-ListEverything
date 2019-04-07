@@ -198,8 +198,6 @@ namespace List_Everything
 			}
 			return true;  //forbiddable
 		}
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(ForbiddenType));
 	}
 
 	//automated ExposeData + Clone 
@@ -300,7 +298,15 @@ namespace List_Everything
 
 		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
 		public virtual string NullOption() => null;
-		public abstract IEnumerable Options();
+		public virtual IEnumerable<T> Options()
+		{
+			if (typeof(T).IsEnum)
+				return Enum.GetValues(typeof(T)).OfType<T>();
+			if (typeof(Def).IsAssignableFrom(typeof(T)))
+				return GenDefDatabase.GetAllDefsInDatabaseForDef(typeof(T)).Cast<T>();
+			throw new NotImplementedException();
+		}
+		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o.ToString();
 		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
 
@@ -332,7 +338,7 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				if (NullOption() is string nullOption)
 					options.Add(new FloatMenuOption(nullOption, () => Callback(default(T))));
-				foreach (T o in Options())
+				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
 					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
 				foreach (int ex in ExtraOptions())
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
@@ -357,12 +363,13 @@ namespace List_Everything
 			Find.CurrentMap.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() =>
+		public override IEnumerable<DesignationDef> Options() =>
 			ContentsUtility.onlyAvailable ?
-				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct():
-				DefDatabase<DesignationDef>.AllDefs.OrderBy(d => d.defName);
+				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct() :
+				base.Options();
 
-		public override string NameFor(DesignationDef o) => o.defName;
+		public override bool Ordered => true;
+		public override string NameFor(DesignationDef o) => o.defName; // no labels on Designation def
 	}
 
 	class ListFilterFreshness : ListFilterDropDown<RotStage>
@@ -377,8 +384,6 @@ namespace List_Everything
 				rot?.Stage == sel;
 		}
 		
-		public override IEnumerable Options() => Enum.GetValues(typeof(RotStage));
-
 		public override int ExtraOptionsCount => 3;
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "Spoils" :
@@ -420,9 +425,9 @@ namespace List_Everything
 			sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
-		public override IEnumerable Options() =>
+		public override IEnumerable<Type> Options() =>
 			ContentsUtility.onlyAvailable ?
-				ContentsUtility.AvailableOnMap(t => t.GetType()).ToList() : 
+				ContentsUtility.AvailableOnMap(t => t.GetType()).OrderBy(NameFor).ToList() : 
 				types;
 	}
 
@@ -437,7 +442,6 @@ namespace List_Everything
 			extraOption == 4 ? thing.Faction == null || thing.Faction.def.hidden :
 			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
 
-		public override IEnumerable Options() => Enum.GetValues(typeof(FactionRelationKind));
 		public override int ExtraOptionsCount => 4;
 		public override string NameForExtra(int ex) => // or FleshTypeDef but this works
 			ex == 1 ? "Player" :
@@ -460,10 +464,10 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			thing.def.IsWithinCategory(sel);
 
-		public override IEnumerable Options() =>
+		public override IEnumerable<ThingCategoryDef> Options() =>
 			ContentsUtility.onlyAvailable ?
-				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing).ToList() :
-				DefDatabase<ThingCategoryDef>.AllDefsListForReading;
+				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing) :
+				base.Options();
 
 		public static IEnumerable<ThingCategoryDef> ThingCategoryDefsOfThing(Thing thing)
 		{
@@ -486,7 +490,6 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			sel.Worker.Matches(thing);
 
-		public override IEnumerable Options() => DefDatabase<SpecialThingFilterDef>.AllDefs;
 		public override string NameFor(SpecialThingFilterDef o) => o.LabelCap;
 	}
 
@@ -516,8 +519,6 @@ namespace List_Everything
 			}
 			return false;
 		}
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(ListCategory));
 	}
 
 	enum MineableType { Resource, Rock, All }
@@ -533,8 +534,6 @@ namespace List_Everything
 			}
 			return false;
 		}
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(MineableType));
 	}
 
 	class ListFilterHP : ListFilterWithOption<FloatRange>
@@ -600,7 +599,7 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() => 
+		public override IEnumerable<ThingDef> Options() => 
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableOnMap(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
@@ -617,8 +616,6 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing) =>
 			thing.def.drawerType == sel;
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(DrawerType));
 	}
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
@@ -635,11 +632,11 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() =>
+		public override IEnumerable<BodyPartDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableOnMap(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
-				: DefDatabase<BodyPartDef>.AllDefs;
+				: base.Options();
 		
 		public override string NameFor(BodyPartDef o) => o.LabelCap;
 
@@ -668,7 +665,7 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() => Find.CurrentMap.areaManager.AllAreas;
+		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas;
 		public override string NameFor(Area o) => o.Label;
 
 		public override int ExtraOptionsCount => 1;
@@ -696,7 +693,7 @@ namespace List_Everything
 		}
 
 		public override string NullOption() => "Any";
-		public override IEnumerable Options() => Find.CurrentMap.zoneManager.AllZones;
+		public override IEnumerable<Zone> Options() => Find.CurrentMap.zoneManager.AllZones;
 
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) => ex == 1 ? "Any Stockpile" : "Any Growing Zone";
@@ -735,7 +732,5 @@ namespace List_Everything
 			}
 			return "???";
 		}
-
-		public override IEnumerable Options() => Enum.GetValues(typeof(DoorOpenFilter));
 	}
 }
