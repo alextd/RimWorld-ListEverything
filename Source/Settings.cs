@@ -92,7 +92,13 @@ namespace List_Everything
 			Widgets.EndScrollView();
 
 			if (remove != null)
-				savedFilters.Remove(remove);
+			{
+				if (Event.current.shift)
+					savedFilters.Remove(remove);
+				else
+					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+						$"Delete {remove}?", () => savedFilters.Remove(remove)));
+			}
 		}
 
 

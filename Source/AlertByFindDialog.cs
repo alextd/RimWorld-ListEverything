@@ -102,7 +102,13 @@ namespace List_Everything
 			Widgets.EndScrollView();
 
 			if (remove != null)
-				comp.RemoveAlert(remove);
+			{
+				if (Event.current.shift)
+					comp.RemoveAlert(remove);
+				else
+					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
+						$"Delete {remove}?", () => comp.RemoveAlert(remove)));
+			}
 		}
 	}
 }
