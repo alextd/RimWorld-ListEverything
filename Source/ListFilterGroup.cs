@@ -17,6 +17,10 @@ namespace List_Everything
 		public static readonly Texture2D SelectAll = ContentFinder<Texture2D>.Get("UI/Commands/SelectNextTransporter", true);
 		public static readonly Texture2D CancelTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
 		public static readonly Texture2D PassionMajorIcon = ContentFinder<Texture2D>.Get("UI/Icons/PassionMajor", true);
+
+		//Mine!
+		public static readonly Texture2D LockOn = ContentFinder<Texture2D>.Get("Locked", true);
+		public static readonly Texture2D LockOff= ContentFinder<Texture2D>.Get("Unlocked", true);
 	}
 	public class ListFilterGroup : ListFilter
 	{

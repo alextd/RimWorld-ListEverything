@@ -92,7 +92,7 @@ namespace List_Everything
 
 			//Header
 			Rect headerButRect = headerRect.RightPartPixels(Text.LineHeight).ContractedBy(2f);
-			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight, headerRect.height);
+			Rect labelRect = new Rect(headerRect.x, headerRect.y, headerRect.width - Text.LineHeight * 2, headerRect.height);
 
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 			{
@@ -100,6 +100,13 @@ namespace List_Everything
 				changed = true;
 			}
 			TooltipHandler.TipRegion(headerButRect, "Clear All");
+
+			headerButRect.x -= Text.LineHeight;
+			if (Widgets.ButtonImage(headerButRect, findDesc.locked ? TexButton.LockOn : TexButton.LockOff))
+			{
+				findDesc.locked = !findDesc.locked;
+			}
+			TooltipHandler.TipRegion(headerButRect, "Lock Editing");
 
 			//Header Title
 			Widgets.Label(labelRect, "Listing: " + findDesc.baseType);
