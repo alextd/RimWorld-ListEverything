@@ -180,13 +180,16 @@ namespace List_Everything
 		{
 			if (sel.stages.Count <= 1) return false;
 
-			Rect nextRect = listing.GetRect(Text.LineHeight);
+			//Buttons apparently are too tall for the line height?
 			listing.Gap(listing.verticalSpacing);
 
+			Rect nextRect = listing.GetRect(Text.LineHeight);
+
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
-			if(sel.stages.Count == 2)
-				DoStageDropdown(row, stageRange.min, i => { stageRange.min = i; stageRange.max = i; });
-			else
+			//Actually Range from 1 to 2 is fine cause it can match both 
+			//if(sel.stages.Count == 2)
+			//	DoStageDropdown(row, stageRange.min, i => { stageRange.min = i; stageRange.max = i; });
+			//else
 			{
 				row.Label("From");
 				DoStageDropdown(row, stageRange.min, i => stageRange.min = i);
