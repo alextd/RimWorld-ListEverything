@@ -341,7 +341,7 @@ namespace List_Everything
 			throw new NotImplementedException();
 		}
 		public virtual bool Ordered => false;
-		public virtual string NameFor(T o) => o.ToString();
+		public virtual string NameFor(T o) => o is Def def ? def.LabelCap : o.ToString();
 		public override string MakeRefName() => NameFor(sel);
 		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
 
@@ -515,7 +515,6 @@ namespace List_Everything
 					yield return pDef;
 			}
 		}
-		public override string NameFor(ThingCategoryDef o) => o.LabelCap;
 	}
 
 	class ListFilterSpecialFilter : ListFilterDropDown<SpecialThingFilterDef>
@@ -524,8 +523,6 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing) =>
 			sel.Worker.Matches(thing);
-
-		public override string NameFor(SpecialThingFilterDef o) => o.LabelCap;
 	}
 
 	enum ListCategory
@@ -638,8 +635,6 @@ namespace List_Everything
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
-
-		public override string NameFor(ThingDef o) => o.LabelCap;
 		
 		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount + 1;
 		public override string NameForExtra(int ex) =>
@@ -672,8 +667,6 @@ namespace List_Everything
 				? ContentsUtility.AvailableInGame(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
 				: base.Options();
-		
-		public override string NameFor(BodyPartDef o) => o.LabelCap;
 
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "None";

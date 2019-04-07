@@ -18,7 +18,6 @@ namespace List_Everything
 			sel = SkillDefOf.Animals;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
-		public override string NameFor(SkillDef def) => def.LabelCap;
 
 		public override void ExposeData()
 		{
@@ -258,7 +257,6 @@ namespace List_Everything
 			sel = NeedDefOf.Food;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
-		public override string NameFor(NeedDef def) => def.LabelCap;
 
 		public override void ExposeData()
 		{
@@ -298,7 +296,6 @@ namespace List_Everything
 		{
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
-		public override string NameFor(HediffDef def) => def.LabelCap;
 
 		public override void ExposeData()
 		{
@@ -450,8 +447,6 @@ namespace List_Everything
 
 	class ListFilterMentalState : ListFilterDropDown<MentalStateDef>
 	{
-		public override string NameFor(MentalStateDef def) => def.LabelCap;
-
 		public override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
@@ -493,7 +488,6 @@ namespace List_Everything
 		}
 
 		public override IEnumerable<PrisonerInteractionModeDef> Options() => DefDatabase<PrisonerInteractionModeDef>.AllDefs;
-		public override string NameFor(PrisonerInteractionModeDef o) => o.LabelCap;
 
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) =>
