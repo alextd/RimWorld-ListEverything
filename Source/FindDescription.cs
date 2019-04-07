@@ -24,7 +24,8 @@ namespace List_Everything
 				baseType = baseType,
 				name = name,
 				alertPriority = alertPriority,
-				ticksToShowAlert = ticksToShowAlert
+				ticksToShowAlert = ticksToShowAlert,
+				countToAlert = countToAlert
 			};
 
 		public List<Thing> Get(Map map)
@@ -93,6 +94,7 @@ namespace List_Everything
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
+			Scribe_Values.Look(ref countToAlert, "countToAlert");
 		}
 	}
 
