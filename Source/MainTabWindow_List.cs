@@ -145,10 +145,12 @@ namespace List_Everything
 			//Bottom Buttons
 			Rect buttonRect = listing.GetRect(Text.LineHeight);
 			buttonRect = buttonRect.LeftPart(0.25f);
-			
+
 			if (Widgets.ButtonText(buttonRect, "Make Alert"))
+			{
 				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
-					name => Find.CurrentMap.GetComponent<ListEverythingMapComp>().AddAlert(name, findDesc)));
+					name => Current.Game.GetComponent<ListEverythingGameComp>().AddAlert(name, findDesc)));
+			}
 			
 			buttonRect.x += buttonRect.width;
 			if (Widgets.ButtonText(buttonRect, "Manage Alerts"))

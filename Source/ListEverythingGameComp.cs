@@ -14,14 +14,12 @@ namespace List_Everything
 		public static KeyBindingDef OpenFindTab;
 		public static MainButtonDef TD_List;
 	}
-
-	//GameComponent to handle keypress and contiuous refreshing list
+	//GameComponent to handle keypress, contiuous refreshing list, and alerts
 	class ListEverythingGameComp : GameComponent
 	{
-		public bool continuousRefresh = false;
-
 		public ListEverythingGameComp(Game g):base() { }
 		
+		//Ctrl-F handler
 		public override void GameComponentOnGUI()
 		{
 			if (ListDefOf.OpenFindTab.IsDownEvent && Event.current.control)
@@ -34,6 +32,8 @@ namespace List_Everything
 			}
 		}
 
+		//continuousRefresh
+		public bool continuousRefresh = false;
 		public override void GameComponentTick()
 		{
 			if (Find.TickManager.TicksGame % 60 != 0) return; //every second I guess?
@@ -42,6 +42,79 @@ namespace List_Everything
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				tab.RemakeList();
+			}
+		}
+
+		//Alerts:
+		private Dictionary<string, FindAlertData> savedAlerts = new Dictionary<string, FindAlertData>();
+
+		public IEnumerable<string> AlertNames() => savedAlerts.Keys;
+
+
+		//NEW THINGS
+
+		public FindAlertData GetAlert(string name) => savedAlerts[name];
+		public Map GetMapFor(string name) => savedAlerts[name].map;
+
+		public void AddAlert(string name, FindDescription desc)
+		{
+			Map map = desc.allMaps ? null : Find.CurrentMap;
+
+			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
+			FindDescription refDesc = desc.Clone(null); //This one has ref string
+			refDesc.name = name;
+			FindDescription alertDesc = refDesc.Clone(map); //This one re-resolves reference for this map.
+
+			AlertByFind.AddAlert(new FindAlertData(map, alertDesc), okAction: () => savedAlerts[name] = new FindAlertData(map, refDesc));
+		}
+
+		public void RenameAlert(string name, string newName)
+		{
+			FindAlertData findAlert = savedAlerts[name];
+			AlertByFind.RenameAlert(name, newName, okAction:
+				() =>
+				{
+					findAlert.desc.name = newName;
+					savedAlerts[newName] = findAlert;
+					savedAlerts.Remove(name);
+				});
+		}
+
+		public void RemoveAlert(string name)
+		{
+			AlertByFind.RemoveAlert(name);
+			savedAlerts.Remove(name);
+		}
+
+		public void SetPriority(string name, AlertPriority p)
+		{
+			AlertByFind.SetPriority(name, p);
+			savedAlerts[name].desc.alertPriority = p;
+		}
+
+		public void SetTicks(string name, int t)
+		{
+			AlertByFind.SetTicks(name, t);
+			savedAlerts[name].desc.ticksToShowAlert = t;
+		}
+
+		public void SetCount(string name, int c)
+		{
+			AlertByFind.SetCount(name, c);
+			savedAlerts[name].desc.countToAlert = c;
+		}
+
+		public override void ExposeData()
+		{
+			Scribe_Collections.Look(ref savedAlerts, "alertsByFind");
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (savedAlerts == null)	
+					savedAlerts = new Dictionary<string, FindAlertData>();
+				foreach (var kvp in savedAlerts)
+				{
+					AlertByFind.AddAlert(new FindAlertData(kvp.Value.map, kvp.Value.desc.Clone(kvp.Value.map)), overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
+				}
 			}
 		}
 	}

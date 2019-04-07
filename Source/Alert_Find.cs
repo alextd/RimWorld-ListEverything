@@ -8,11 +8,31 @@ using UnityEngine;
 
 namespace List_Everything
 {
+	public struct FindAlertData : IExposable
+	{
+		public Map map;
+		public FindDescription desc;
+
+		public FindAlertData(Map m, FindDescription d)
+		{
+			map = m;
+			desc = d;
+		}
+
+		public void ExposeData()
+		{
+			Scribe_References.Look(ref map, "map");
+			Scribe_Deep.Look(ref desc, "desc");
+		}
+
+		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "All") + ")";
+	}
+
+
 	public class Alert_Find : Alert
 	{
-		public FindDescription desc;
+		public FindAlertData alertData;
 		public int maxItems = 16;
-		public Map map;
 		int tickStarted;
 
 		public Alert_Find()
@@ -20,15 +40,14 @@ namespace List_Everything
 			//The vanilla alert added to AllAlerts will be constructed but never be active with null filter
 		}
 
-		public Alert_Find(Map m, FindDescription d) : this()
+		public Alert_Find(FindAlertData d) : this()
 		{
-			defaultLabel = d.name;
-			defaultPriority = d.alertPriority;
-			desc = d;
-			map = m;
+			defaultLabel = d.desc.name;
+			defaultPriority = d.desc.alertPriority;
+			alertData = d;
 		}
 
-
+		//copied from Alert_Critical
 		private const float PulseFreq = 0.5f;
 		private const float PulseAmpCritical = 0.6f;
 		private const float PulseAmpTutorial = 0.2f;
@@ -46,25 +65,25 @@ namespace List_Everything
 		public void Rename(string name)
 		{
 			defaultLabel = name;
-			desc.name = name;
+			alertData.desc.name = name;
 		}
 		public void SetPriority(AlertPriority p)
 		{
 			defaultPriority = p;
-			desc.alertPriority = p;
+			alertData.desc.alertPriority = p;
 		}
-		public void SetTicks(int t) => desc.ticksToShowAlert = t;
-		public void SetCount(int c) => desc.countToAlert = c;
+		public void SetTicks(int t) => alertData.desc.ticksToShowAlert = t;
+		public void SetCount(int c) => alertData.desc.countToAlert = c;
 		
 		public override AlertReport GetReport()
 		{
-			if (desc == null)
+			if (alertData.desc == null)
 				return AlertReport.Inactive;
 
 			List<Thing> things = FoundThings().ToList();
-			if (things.Count() < desc.countToAlert)
+			if (things.Count() < alertData.desc.countToAlert)
 				tickStarted = Find.TickManager.TicksGame;
-			else if (Find.TickManager.TicksGame - tickStarted >= desc.ticksToShowAlert)
+			else if (Find.TickManager.TicksGame - tickStarted >= alertData.desc.ticksToShowAlert)
 				return AlertReport.CulpritsAre(FoundThings());
 			return AlertReport.Inactive;
 		}
@@ -72,7 +91,7 @@ namespace List_Everything
 		public override string GetExplanation()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine(defaultLabel + " (" + map.Parent.LabelCap + ")");
+			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "All") + ")");
 			stringBuilder.AppendLine("");
 			var things = FoundThings();
 			foreach (Thing thing in things)
@@ -88,12 +107,23 @@ namespace List_Everything
 		private IEnumerable<Thing> FoundThings()
 		{
 			int i = 0;
-			foreach (Thing t in desc.Get(map))
-			{
-				yield return t;
-				if (++i == maxItems)
-					yield break;
-			}
+			//Single map
+			if (alertData.map != null)
+				foreach (Thing t in alertData.desc.Get(alertData.map))
+				{
+					yield return t;
+					if (++i == maxItems)
+						yield break;
+				}
+			//All maps
+			else
+				foreach(Map m in Find.Maps)
+					foreach (Thing t in alertData.desc.Get(m))
+					{
+						yield return t;
+						if (++i == maxItems)
+							yield break;
+					}
 		}
 
 		public override Rect DrawAt(float topY, bool minimized)
@@ -106,7 +136,7 @@ namespace List_Everything
 			//rect.x -= this.alertBounce.CalculateHorizontalOffset();
 			if (Event.current.button == 1 && Widgets.ButtonInvisible(rect, false))
 			{
-				MainTabWindow_List.OpenWith(desc.Clone(map));
+				MainTabWindow_List.OpenWith(alertData.desc.Clone(alertData.map));
 
 				Event.current.Use();
 			}

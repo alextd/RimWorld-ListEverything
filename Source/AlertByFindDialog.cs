@@ -38,7 +38,7 @@ namespace List_Everything
 
 			Map map = Find.CurrentMap;
 			Text.Font = GameFont.Medium;
-			listing.Label($"Alerts for {map.Parent.LabelCap}:");
+			listing.Label($"Custom Alerts:");
 			Text.Font = GameFont.Small;
 			listing.GapLine();
 			listing.End();
@@ -46,7 +46,7 @@ namespace List_Everything
 			inRect.yMin += listing.CurHeight;
 
 			//Useful things:
-			ListEverythingMapComp comp = map.GetComponent<ListEverythingMapComp>();
+			ListEverythingGameComp comp = Current.Game.GetComponent<ListEverythingGameComp>();
 			string remove = null;
 
 			//Scrolling!
@@ -56,34 +56,34 @@ namespace List_Everything
 			Rect rowRect = viewRect; rowRect.height = RowHeight;
 			foreach (string name in comp.AlertNames())
 			{
-				FindDescription alert = comp.GetAlert(name);
+				FindAlertData alert = comp.GetAlert(name);
 				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
 				rowRect.y += RowHeight;
 
-				row.Label(name, rowRect.width / 4);
+				row.Label(alert.Label, rowRect.width / 4);
 
 				if(row.ButtonText("Rename"))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
 				if (row.ButtonText("Load"))
-					MainTabWindow_List.OpenWith(alert.Clone(map));
+					MainTabWindow_List.OpenWith(alert.desc.Clone(map));
 				
 				if (row.ButtonText("Delete"))
 					remove = name;
 
-				bool crit = alert.alertPriority == AlertPriority.Critical;
+				bool crit = alert.desc.alertPriority == AlertPriority.Critical;
 				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "Critical Alert");
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 
 				row.Label("Seconds until shown:");
-				int sec = alert.ticksToShowAlert / 60;
+				int sec = alert.desc.ticksToShowAlert / 60;
 				string secStr = $"{sec}";
 				Rect textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 600);
 				comp.SetTicks(name, sec * 60);
 
 				row.Label("# matching required to show alert:");
-				int count = alert.countToAlert;
+				int count = alert.desc.countToAlert;
 				string countStr = $"{count}";
 				textRect = row.GapRect(32); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 1, 600);

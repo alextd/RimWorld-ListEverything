@@ -34,58 +34,58 @@ namespace List_Everything
 			}
 		}
 
-		private static Alert_Find GetAlert(string name, Map map) =>
-			AllAlerts.FirstOrDefault(a => a is Alert_Find af && af.GetLabel() == name && af.map == map) as Alert_Find;
+		private static Alert_Find GetAlert(string name) =>
+			AllAlerts.FirstOrDefault(a => a is Alert_Find af && af.GetLabel() == name) as Alert_Find;
 
-		public static void AddAlert(Map map, FindDescription desc, bool overwrite = false, Action okAction = null)
+		public static void AddAlert(FindAlertData alert, bool overwrite = false, Action okAction = null)
 		{
-			if (!overwrite && GetAlert(desc.name, map) != null)
+			if (!overwrite && GetAlert(alert.desc.name) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
 					"Overwrite Alert?", () =>
 					{
-						RemoveAlert(desc.name, map);
-						AddAlert(map, desc, true, okAction);
+						RemoveAlert(alert.desc.name);
+						AddAlert(alert, true, okAction);
 					}));
 			}
 			else
 			{
-				AllAlerts.Add(new Alert_Find(map, desc));
+				AllAlerts.Add(new Alert_Find(alert));
 				okAction?.Invoke();
 			}
 		}
 
-		public static void RemoveAlert(string name, Map map)
+		public static void RemoveAlert(string name)
 		{
-			AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
-			activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name && af.map == map);
+			AllAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name);
+			activeAlerts.RemoveAll(a => a is Alert_Find af && af.GetLabel() == name);
 		}
 
-		public static void RenameAlert(string name, Map map, string newName, bool overwrite = false, Action okAction = null)
+		public static void RenameAlert(string name, string newName, bool overwrite = false, Action okAction = null)
 		{
-			if (!overwrite && GetAlert(newName, map) != null)
+			if (!overwrite && GetAlert(newName) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
 					"Overwrite Alert?", () =>
 					{
-						RemoveAlert(newName, map);
-						RenameAlert(name, map, newName, true, okAction);
+						RemoveAlert(newName);
+						RenameAlert(name, newName, true, okAction);
 					}));
 			}
 			else
 			{
 				okAction?.Invoke();
-				GetAlert(name, map)?.Rename(newName);
+				GetAlert(name)?.Rename(newName);
 			}
 		}
 
-		public static void SetPriority(string name, Map map, AlertPriority p) =>
-			GetAlert(name, map)?.SetPriority(p);
+		public static void SetPriority(string name, AlertPriority p) =>
+			GetAlert(name)?.SetPriority(p);
 
-		public static void SetTicks(string name, Map map, int t) =>
-			GetAlert(name, map)?.SetTicks(t);
+		public static void SetTicks(string name, int t) =>
+			GetAlert(name)?.SetTicks(t);
 
-		public static void SetCount(string name, Map map, int c) =>
-			GetAlert(name, map)?.SetCount(c);
+		public static void SetCount(string name, int c) =>
+			GetAlert(name)?.SetCount(c);
 	}
 }
