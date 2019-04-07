@@ -53,8 +53,19 @@ namespace List_Everything
 		}
 		public static void RemakeListPlease() =>
 			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
-		public void RemakeList() =>
-			listedThings = findDesc.Get(Find.CurrentMap);
+		public void RemakeList()
+		{
+			if (findDesc.allMaps)
+			{
+				listedThings.Clear();
+				foreach(Map map in Find.Maps)
+					listedThings.AddRange(findDesc.Get(map));
+			}
+			else
+			{
+				listedThings = findDesc.Get(Find.CurrentMap);
+			}
+		}
 
 		//Filters:
 		public FindDescription findDesc = new FindDescription();
