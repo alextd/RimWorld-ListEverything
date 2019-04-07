@@ -26,7 +26,7 @@ namespace List_Everything
 			ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
 
 			clone.sel = sel.Clone(map, newOwner);
-			clone.owner = newOwner;
+			//clone.owner = newOwner; //No - MakeFilter sets it.
 
 			return clone;
 		}

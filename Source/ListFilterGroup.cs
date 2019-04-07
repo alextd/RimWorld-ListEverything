@@ -38,6 +38,7 @@ namespace List_Everything
 			ListFilterGroup clone = (ListFilterGroup)base.Clone(map, newOwner);
 			clone.filters = filters.Select(f => f.Clone(map, newOwner)).ToList();
 			clone.any = any;
+			//clone.owner = newOwner; //No - MakeFilter sets it.
 			return clone;
 		}
 
