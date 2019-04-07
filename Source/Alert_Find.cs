@@ -136,7 +136,7 @@ namespace List_Everything
 			//rect.x -= this.alertBounce.CalculateHorizontalOffset();
 			if (Event.current.button == 1 && Widgets.ButtonInvisible(rect, false))
 			{
-				MainTabWindow_List.OpenWith(alertData.desc.Clone(alertData.map));
+				MainTabWindow_List.OpenWith(alertData.desc.Clone(Find.CurrentMap));
 
 				Event.current.Use();
 			}
