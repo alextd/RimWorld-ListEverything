@@ -429,12 +429,9 @@ namespace List_Everything
 
 	class ListFilterRestricted : ListFilterDropDown<Area>
 	{
-		public override void ResolveReference(string refName, Map map)
-		{
+		public override void ResolveReference(string refName, Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
-			if (sel == null)
-				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
-		}
+
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)

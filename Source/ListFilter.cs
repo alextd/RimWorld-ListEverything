@@ -288,10 +288,15 @@ namespace List_Everything
 				{
 					if (refName == "null")
 						clone.sel = default(T);
-					else if (refName == null)
-						clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
-					else
-						clone.ResolveReference(refName, map);
+					{
+						if (refName == null)
+							clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
+						else
+							clone.ResolveReference(refName, map);
+
+						if (clone.sel == null)
+							Messages.Message($"Tried to load {def.LabelCap} filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
+					}
 				}
 			}
 			else
@@ -680,12 +685,9 @@ namespace List_Everything
 	{
 		public ListFilterArea() => sel = Find.CurrentMap?.areaManager.Home;
 
-		public override void ResolveReference(string refName, Map map)
-		{
+		public override void ResolveReference(string refName, Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
-			if (sel == null)
-				Messages.Message($"Tried to load area Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
-		}
+
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
@@ -731,12 +733,9 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		public override void ResolveReference(string refName, Map map)
-		{
+		public override void ResolveReference(string refName, Map map) =>
 			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
-			if (sel == null)
-				Messages.Message($"Tried to load zone Filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
-		}
+
 		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
