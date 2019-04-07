@@ -376,12 +376,19 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return sel == WorkTags.None
-				? pawn.story?.CombinedDisabledWorkTags == WorkTags.None
-				: pawn.story?.WorkTagIsDisabled(sel) ?? false;
+			Pawn_StoryTracker story = pawn.story;
+			if (story == null) return false;
+
+			return 
+				extraOption == 1 ? story.CombinedDisabledWorkTags != WorkTags.None :
+				sel == WorkTags.None ? story.CombinedDisabledWorkTags == WorkTags.None :
+				story.WorkTagIsDisabled(sel);
 		}
 
 		public override IEnumerable Options() => Enum.GetValues(typeof(WorkTags));
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "Any";
 	}
 
 	enum TemperatureFilter { Cold, Cool, Okay, Warm, Hot }
@@ -446,9 +453,10 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return sel == null
-				? pawn.MentalState == null
-				: pawn.MentalState?.def is MentalStateDef def && def == sel;
+			return
+				extraOption == 1 ? pawn.MentalState != null: 
+				sel == null ? pawn.MentalState == null : 
+				pawn.MentalState?.def is MentalStateDef def && def == sel;
 		}
 
 		public override IEnumerable Options() =>
@@ -456,6 +464,9 @@ namespace List_Everything
 				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
 				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
 		public override string NullOption() => "None";
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "Any";
 	}
 	
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
