@@ -57,8 +57,8 @@ namespace List_Everything
 		{
 			if (findDesc.allMaps)
 			{
-				listedThings.Clear();
-				foreach(Map map in Find.Maps)
+				listedThings = new List<Thing>();
+				foreach (Map map in Find.Maps)
 					listedThings.AddRange(findDesc.Get(map));
 			}
 			else
