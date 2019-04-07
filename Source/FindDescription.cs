@@ -46,6 +46,9 @@ namespace List_Everything
 				case BaseListType.Buildings:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
 					break;
+				case BaseListType.Natural:
+					allThings = map.listerThings.AllThings.Where(t => t.def.filthLeaving == ThingDefOf.Filth_RubbleRock); 
+					break;
 				case BaseListType.Plants:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
 					break;
@@ -117,6 +120,7 @@ namespace List_Everything
 		Colonists,
 		Animals,
 		Buildings,
+		Natural,
 		Plants,
 		Inventory,
 		ThingRequestGroup,
@@ -129,6 +133,6 @@ namespace List_Everything
 	{
 		public static readonly BaseListType[] normalTypes =
 			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
-			BaseListType.Buildings, BaseListType.Plants, BaseListType.Inventory};
+			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory};
 	}
 }
