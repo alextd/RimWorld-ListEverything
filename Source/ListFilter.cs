@@ -449,7 +449,7 @@ namespace List_Everything
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
 		public override IEnumerable<Type> Options() =>
 			ContentsUtility.onlyAvailable ?
-				ContentsUtility.AvailableOnMap(t => t.GetType()).OrderBy(NameFor).ToList() : 
+				ContentsUtility.AvailableInGame(t => t.GetType()).OrderBy(NameFor).ToList() : 
 				types;
 	}
 
@@ -488,7 +488,7 @@ namespace List_Everything
 
 		public override IEnumerable<ThingCategoryDef> Options() =>
 			ContentsUtility.onlyAvailable ?
-				ContentsUtility.AvailableOnMap(ThingCategoryDefsOfThing) :
+				ContentsUtility.AvailableInGame(ThingCategoryDefsOfThing) :
 				base.Options();
 
 		public static IEnumerable<ThingCategoryDef> ThingCategoryDefsOfThing(Thing thing)
@@ -623,7 +623,7 @@ namespace List_Everything
 		public override string NullOption() => "Any";
 		public override IEnumerable<ThingDef> Options() => 
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => t.Stuff)
+				? ContentsUtility.AvailableInGame(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
 
 		public override string NameFor(ThingDef o) => o.LabelCap;
@@ -656,7 +656,7 @@ namespace List_Everything
 		public override string NullOption() => "Any";
 		public override IEnumerable<BodyPartDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(
+				? ContentsUtility.AvailableInGame(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
 				: base.Options();
 		

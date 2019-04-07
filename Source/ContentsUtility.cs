@@ -33,24 +33,25 @@ namespace List_Everything
 			return knownThings;
 		}
 
-		//This could be all maps, but you can just check off the limitation
 		public static bool onlyAvailable = true;
-		public static HashSet<T> AvailableOnMap<T>(Func<Thing, IEnumerable<T>> validGetter)
+		public static HashSet<T> AvailableInGame<T>(Func<Thing, IEnumerable<T>> validGetter)
 		{
 			HashSet<T> ret = new HashSet<T>();
-			foreach (Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
-				foreach (T tDef in validGetter(t))
-					ret.Add(tDef);
+			foreach(Map map in Find.Maps)
+				foreach (Thing t in ContentsUtility.AllKnownThings(map))
+					foreach (T tDef in validGetter(t))
+						ret.Add(tDef);
 
 			return ret;
 		}
 
-		public static HashSet<T> AvailableOnMap<T>(Func<Thing, T> validGetter)
+		public static HashSet<T> AvailableInGame<T>(Func<Thing, T> validGetter)
 		{
 			HashSet<T> ret = new HashSet<T>();
-			foreach (Thing t in ContentsUtility.AllKnownThings(Find.CurrentMap))
-				if(validGetter(t) is T def)
-					ret.Add(def);
+			foreach (Map map in Find.Maps)
+				foreach (Thing t in ContentsUtility.AllKnownThings(map))
+					if(validGetter(t) is T def)
+						ret.Add(def);
 
 			return ret;
 		}

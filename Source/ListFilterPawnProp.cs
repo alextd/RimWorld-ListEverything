@@ -88,7 +88,7 @@ namespace List_Everything
 
 		public override IEnumerable<TraitDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
+				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
 				: base.Options();
 
 		public override bool Ordered => true;
@@ -166,7 +166,7 @@ namespace List_Everything
 
 		public override IEnumerable<ThoughtDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(ThoughtsForThing).OrderBy(tDef => ThoughtName(tDef))
+				? ContentsUtility.AvailableInGame(ThoughtsForThing).OrderBy(tDef => ThoughtName(tDef))
 				: base.Options();
 		public override bool Ordered => true;
 		protected override void Callback(ThoughtDef o)
@@ -205,7 +205,7 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
-					ContentsUtility.AvailableOnMap(t => ThoughtStagesForThing(t, sel)) :
+					ContentsUtility.AvailableInGame(t => ThoughtStagesForThing(t, sel)) :
 					Enumerable.Range(0, sel.stages.Count);
 				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
 				{
@@ -327,7 +327,7 @@ namespace List_Everything
 		public override string NullOption() => "None";
 		public override IEnumerable<HediffDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
+				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
 				: base.Options();
 		public override bool Ordered => true;
 		protected override void Callback(HediffDef o)
@@ -468,7 +468,7 @@ namespace List_Everything
 
 		public override IEnumerable<MentalStateDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableOnMap(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
+				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
 				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
 		public override bool Ordered => true;
 		public override string NullOption() => "None";
