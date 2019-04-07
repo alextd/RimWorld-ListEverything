@@ -41,7 +41,12 @@ namespace List_Everything
 			if (continuousRefresh)
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
-				tab.RemakeList();
+				if (tab.IsOpen)
+				{
+					tab.RemakeList();
+
+					Log.Message("CONTINUOUS REFRESH!");
+				}
 			}
 		}
 
