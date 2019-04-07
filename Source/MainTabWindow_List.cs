@@ -163,21 +163,7 @@ namespace List_Everything
 				changed = true;
 
 			if (!findDesc.locked)
-			{
-				Rect addRow = filterListing.GetRect(Text.LineHeight);
-				filterListing.Gap(filterListing.verticalSpacing);
-
-				Rect butRect = addRow;	butRect.width = Text.LineHeight;
-				Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
-
-				Rect textRect = addRow; textRect.xMin += Text.LineHeight + WidgetRow.DefaultGap;
-				Widgets.Label(textRect, "Add new filter...");
-
-				Widgets.DrawHighlightIfMouseover(addRow);
-
-				if (Widgets.ButtonInvisible(addRow))
-					AddFilterFloat(findDesc);
-			}
+				DrawAddRow(filterListing, findDesc);
 
 			filterListing.EndScrollView(ref viewRect);
 			scrollViewHeightFilt = viewRect.height;
@@ -281,11 +267,28 @@ namespace List_Everything
 			return changed;
 		}
 
-		public static void AddFilterFloat(FindDescription desc, List<ListFilter> filters = null)
+		public static void DrawAddRow(Listing_StandardIndent listing, FindDescription owner, List<ListFilter> filters = null)
+		{
+			Rect addRow = listing.GetRect(Text.LineHeight);
+			listing.Gap(listing.verticalSpacing);
+
+			Rect butRect = addRow; butRect.width = Text.LineHeight;
+			Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
+
+			Rect textRect = addRow; textRect.xMin += Text.LineHeight + WidgetRow.DefaultGap;
+			Widgets.Label(textRect, "Add new filter...");
+
+			Widgets.DrawHighlightIfMouseover(addRow);
+
+			if (Widgets.ButtonInvisible(addRow))
+				AddFilterFloat(owner, filters);
+		}
+
+		public static void AddFilterFloat(FindDescription owner, List<ListFilter> filters = null)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => d.parent == null && (Prefs.DevMode || !d.devOnly)))
-				options.Add(new FloatMenuOption(def.LabelCap, () => (filters ?? desc.filters).Add(ListFilterMaker.MakeFilter(def, desc))));
+				options.Add(new FloatMenuOption(def.LabelCap, () => (filters ?? owner.filters).Add(ListFilterMaker.MakeFilter(def, owner))));
 			DoFloatMenu(options);
 		}
 
