@@ -80,7 +80,8 @@ namespace List_Everything
 				if (row.ButtonText("Rename".Translate()))
 					Find.WindowStack.Add(new Dialog_Name(newName => Rename(name, newName)));
 
-				if (row.ButtonText("Load".Translate()))
+				if (Current.Game != null && 
+					row.ButtonText("Load".Translate()))
 					MainTabWindow_List.OpenWith(desc.Clone(Find.CurrentMap));
 
 				if (row.ButtonText("Delete".Translate()))
