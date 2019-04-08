@@ -85,7 +85,7 @@ namespace List_Everything
 
 				row.Label("Seconds until shown:");
 				int sec = desc.ticksToShowAlert / 60;
-				string secStr = $"{sec}";
+				string secStr = sec.ToString();
 				Rect textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 10000);
 				TooltipHandler.TipRegion(textRect, "1000 seconds in a RimWorld day");
@@ -96,7 +96,7 @@ namespace List_Everything
 					comp.SetComp(name, (CompareType)((int)(desc.countComp + 1) % 3));
 
 				int count = desc.countToAlert;
-				string countStr = $"{count}";
+				string countStr = count.ToString();
 				textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 0, 100);
 				comp.SetCount(name, count);
