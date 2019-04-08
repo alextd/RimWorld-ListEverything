@@ -53,13 +53,13 @@ namespace List_Everything
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			row.Label("Include things that match");
-			if (row.ButtonText(any ? "Any" : "All"))
+			row.Label("TD.IncludeThingsThatMatch".Translate());
+			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
 			{
 				any = !any;
 				changed = true;
 			}
-			row.Label("of these filters:");
+			row.Label("TD.OfTheseFilters".Translate());
 			return changed;
 		}
 
@@ -116,18 +116,18 @@ namespace List_Everything
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			if (row.ButtonText(parent ? "The thing holding this" : "Anything this is holding"))
+			if (row.ButtonText(parent ? "TD.TheThingHoldingThis".Translate() : "TD.AnythingThisIsHolding".Translate()))
 			{
 				changed = true;
 				parent = !parent;
 			}
-			row.Label("matches");
-			if (row.ButtonText(any ? "Any" : "All"))
+			row.Label("TD.Matches".Translate());
+			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
 			{
 				changed = true;
 				any = !any;
 			}
-			row.Label("of:");
+			row.Label("TD.Of".Translate());
 			return changed;
 		}
 	}
@@ -164,8 +164,8 @@ namespace List_Everything
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 
-			row.Label("Anything X steps nearby matches");
-			if (row.ButtonText(any ? "Any" : "All"))
+			row.Label("TD.AnythingXStepsNearbyMatches".Translate());
+			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
 			{
 				any = !any;
 				changed = true;

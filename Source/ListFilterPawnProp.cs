@@ -190,9 +190,9 @@ namespace List_Everything
 			//	DoStageDropdown(row, stageRange.min, i => { stageRange.min = i; stageRange.max = i; });
 			//else
 			{
-				row.Label("From");
+				row.Label("TD.From".Translate());
 				DoStageDropdown(row, stageRange.min, i => stageRange.min = i);
-				row.Label("to");
+				row.Label("RangeTo".Translate());
 				DoStageDropdown(row, stageRange.max, i => stageRange.max = i);
 			}
 			return false;
@@ -200,7 +200,7 @@ namespace List_Everything
 
 		private void DoStageDropdown(WidgetRow row, int setI, Action<int> selectedAction)
 		{
-			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "(invisible)"))
+			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
@@ -209,7 +209,7 @@ namespace List_Everything
 				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
 				{
 					int localI = i;
-					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "(invisible)", () => selectedAction(localI)));
+					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate(), () => selectedAction(localI)));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
@@ -321,7 +321,7 @@ namespace List_Everything
 				(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
 		}
 
-		public override string NullOption() => "None";
+		public override string NullOption() => "NoPain".Translate();
 		public override IEnumerable<HediffDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
@@ -334,7 +334,7 @@ namespace List_Everything
 		}
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "Any";
+		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
@@ -387,7 +387,7 @@ namespace List_Everything
 		}
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "Any";
+		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
 	}
 
 	enum TemperatureFilter { Cold, Cool, Okay, Warm, Hot }
@@ -414,11 +414,11 @@ namespace List_Everything
 		{
 			switch (o)
 			{
-				case TemperatureFilter.Cold: return "Cold";
-				case TemperatureFilter.Cool: return "A little cold";
-				case TemperatureFilter.Okay: return "Comfortable";
-				case TemperatureFilter.Warm: return "A little hot";
-				case TemperatureFilter.Hot: return "Hot";
+				case TemperatureFilter.Cold: return "TD.Cold".Translate();
+				case TemperatureFilter.Cool: return "TD.ALittleCold".Translate();
+				case TemperatureFilter.Okay: return "TD.Comfortable".Translate();
+				case TemperatureFilter.Warm: return "TD.ALittleHot".Translate();
+				case TemperatureFilter.Hot: return "TD.Hot".Translate();
 			}
 			return "???";
 		}
@@ -437,12 +437,12 @@ namespace List_Everything
 			return thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == selectedArea;
 		}
 
-		public override string NullOption() => "Unrestricted";
+		public override string NullOption() => "NoAreaAllowed".Translate();
 		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a is Area_Allowed);//a.AssignableAsAllowed());
 		public override string NameFor(Area o) => o.Label;
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "Home";
+		public override string NameForExtra(int ex) => "Home".Translate();
 	}
 
 	class ListFilterMentalState : ListFilterDropDown<MentalStateDef>
@@ -463,10 +463,10 @@ namespace List_Everything
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
 				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
 		public override bool Ordered => true;
-		public override string NullOption() => "None";
+		public override string NullOption() => "NoPain".Translate();
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "Any";
+		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
 	}
 
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
@@ -491,7 +491,7 @@ namespace List_Everything
 
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) =>
-			ex == 1 ? "Is Prisoner" : "In Cell";
+			ex == 1 ? "TD.IsPrisoner".Translate() : "TD.InCell".Translate();
 	}
 
 	enum DraftFilter { Drafted, Undrafted, Controllable}

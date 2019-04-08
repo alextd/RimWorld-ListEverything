@@ -9,7 +9,7 @@ namespace List_Everything
 {
 	public class FindDescription : IExposable
 	{
-		public string name = "New Find Filters";
+		public string name = "TD.NewFindFilters".Translate();
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
 		public int countToAlert;

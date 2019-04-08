@@ -39,7 +39,7 @@ namespace List_Everything
 			listing.Begin(inRect);
 
 			Text.Font = GameFont.Medium;
-			listing.Label($"Saved Find Filters:");
+			listing.Label("TD.SavedFindFilters".Translate());
 			Text.Font = GameFont.Small;
 			listing.GapLine();
 			listing.End();

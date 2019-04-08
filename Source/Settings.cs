@@ -29,7 +29,7 @@ namespace List_Everything
 			if (!overwrite && Has(name))
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Overwrite saved filter?",
+					"TD.OverwriteSavedFilter".Translate(),
 					 () => Save(name, desc, true)));
 			}
 			else
@@ -77,16 +77,16 @@ namespace List_Everything
 
 				row.Label(name, rowRect.width / 4);
 
-				if (row.ButtonText("Rename"))
+				if (row.ButtonText("Rename".Translate()))
 					Find.WindowStack.Add(new Dialog_Name(newName => Rename(name, newName)));
 
-				if (row.ButtonText("Load"))
+				if (row.ButtonText("Load".Translate()))
 					MainTabWindow_List.OpenWith(desc.Clone(Find.CurrentMap));
 
-				if (row.ButtonText("Delete"))
+				if (row.ButtonText("Delete".Translate()))
 					remove = name;
 
-				row.CheckboxLabeled("All maps?", ref desc.allMaps);
+				row.CheckboxLabeled("TD.AllMaps".Translate(), ref desc.allMaps);
 			}
 			scrollViewHeight = RowHeight * savedFilters.Count();
 			Widgets.EndScrollView();
@@ -97,7 +97,7 @@ namespace List_Everything
 					savedFilters.Remove(remove);
 				else
 					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-						$"Delete {remove}?", () => savedFilters.Remove(remove)));
+						"TD.Delete0".Translate(remove), () => savedFilters.Remove(remove)));
 			}
 		}
 

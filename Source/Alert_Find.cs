@@ -28,7 +28,7 @@ namespace List_Everything
 			Scribe_Deep.Look(ref desc, "desc");
 		}
 
-		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "All maps") + ")";
+		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")";
 	}
 
 
@@ -103,15 +103,15 @@ namespace List_Everything
 		public override string GetExplanation()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "All") + ")");
+			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "AllDays".Translate()) + ")");
 			stringBuilder.AppendLine("");
 			var things = FoundThings();
 			foreach (Thing thing in things)
 				stringBuilder.AppendLine("   " + thing.Label);
 			if (things.Count() == maxItems)
-				stringBuilder.AppendLine($"(Maximum {maxItems} displayed)");
+				stringBuilder.AppendLine("TD.Maximum0Displayed".Translate(maxItems));
 			stringBuilder.AppendLine("");
-			stringBuilder.AppendLine($"(Right-click to open Find Tab)");
+			stringBuilder.AppendLine("TD.Right-clickToOpenFindTab".Translate());
 
 			return stringBuilder.ToString().TrimEndNewlines();
 		}

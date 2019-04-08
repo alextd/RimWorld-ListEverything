@@ -48,7 +48,7 @@ namespace List_Everything
 		public static void DoFloatMenu(List<FloatMenuOption> options)
 		{
 			if (options.NullOrEmpty())
-				Messages.Message($"There are no options available (Perhaps you should uncheck 'Only available things')", MessageTypeDefOf.RejectInput);
+				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
 			else
 				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
 		}
@@ -106,10 +106,10 @@ namespace List_Everything
 			{
 				findDesc.locked = !findDesc.locked;
 			}
-			TooltipHandler.TipRegion(headerButRect, "Lock Editing");
+			TooltipHandler.TipRegion(headerButRect, "TD.LockEditing".Translate());
 
 			//Header Title
-			Widgets.Label(labelRect, "Listing: " + findDesc.baseType);
+			Widgets.Label(labelRect, "TD.Listing".Translate() + findDesc.baseType);
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
@@ -128,7 +128,7 @@ namespace List_Everything
 			//Filter Name
 			Rect nameRect = listing.GetRect(Text.LineHeight);
 			WidgetRow nameRow = new WidgetRow(nameRect.x, nameRect.y);
-			nameRow.Label("Name:");
+			nameRow.Label("TD.Name".Translate());
 			nameRect.xMin = nameRow.FinalX;
 			findDesc.name = Widgets.TextField(nameRect, findDesc.name);
 			listing.Gap();
@@ -172,9 +172,9 @@ namespace List_Everything
 			//Extra options:
 			bool newMaps = findDesc.allMaps;
 			listing.CheckboxLabeled(
-				"All maps",
+				"TD.AllMaps".Translate(),
 				ref newMaps,
-				"Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map");
+				"TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap".Translate());
 			if (findDesc.allMaps != newMaps)
 			{
 				findDesc.allMaps = newMaps;
@@ -188,12 +188,12 @@ namespace List_Everything
 			savedRect = savedRect.LeftPart(0.25f);
 
 			//Saved Filters
-			if (Widgets.ButtonText(savedRect, "Save"))
+			if (Widgets.ButtonText(savedRect, "SaveButton".Translate()))
 				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
 
 			savedRect.x += savedRect.width;
 			if (Settings.Get().SavedNames().Count() > 0 &&
-				Widgets.ButtonText(savedRect, "Load"))
+				Widgets.ButtonText(savedRect, "Load".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (string name in Settings.Get().SavedNames())
@@ -203,7 +203,7 @@ namespace List_Everything
 			}
 
 			savedRect.x += savedRect.width * 2;
-			if (Widgets.ButtonText(savedRect, "Manage Saved"))
+			if (Widgets.ButtonText(savedRect, "TD.ManageSaved".Translate()))
 				Find.WindowStack.Add(new Dialog_ManageSavedLists());
 
 			//Alerts
@@ -212,7 +212,7 @@ namespace List_Everything
 
 			var comp = Current.Game.GetComponent<ListEverythingGameComp>();
 
-			if (Widgets.ButtonText(alertsRect, "Make Alert"))
+			if (Widgets.ButtonText(alertsRect, "TD.MakeAlert".Translate()))
 			{
 				Find.WindowStack.Add(new Dialog_Name(findDesc.name,
 					name => comp.AddAlert(name, findDesc)));
@@ -220,7 +220,7 @@ namespace List_Everything
 
 			alertsRect.x += alertsRect.width;
 			if (comp.AlertNames().Count() > 0 &&
-				Widgets.ButtonText(alertsRect, "Load Alert"))
+				Widgets.ButtonText(alertsRect, "TD.LoadAlert".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (string name in comp.AlertNames())
@@ -230,16 +230,16 @@ namespace List_Everything
 			}
 
 			alertsRect.x += alertsRect.width * 2;
-			if (Widgets.ButtonText(alertsRect, "Manage Alerts"))
+			if (Widgets.ButtonText(alertsRect, "TD.ManageAlerts".Translate()))
 				Find.WindowStack.Add(new AlertByFindDialog());
 
 
 
 			//Global Options
 			listing.CheckboxLabeled(
-			"Only show filter options for available things",
+			"TD.OnlyShowFilterOptionsForAvailableThings".Translate(),
 			ref ContentsUtility.onlyAvailable,
-			"For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel");
+			"TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel".Translate());
 
 			listing.End();
 
@@ -276,7 +276,7 @@ namespace List_Everything
 			Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
 
 			Rect textRect = addRow; textRect.xMin += Text.LineHeight + WidgetRow.DefaultGap;
-			Widgets.Label(textRect, "Add new filter...");
+			Widgets.Label(textRect, "TD.AddNewFilter...".Translate());
 
 			Widgets.DrawHighlightIfMouseover(addRow);
 
@@ -306,19 +306,19 @@ namespace List_Everything
 			listRect.yMin += 34;
 
 			selectAll = Widgets.ButtonImage(buttRect, TexButton.SelectAll);
-			TooltipHandler.TipRegion(buttRect, "Select All ( game allows up to 80 )");
+			TooltipHandler.TipRegion(buttRect, "TD.SelectAllGameAllowsUpTo80".Translate());
 
 			buttRect.x += 34;
 			if (Widgets.ButtonImage(buttRect, TexUI.RotRightTex))
 				RemakeList();
-			TooltipHandler.TipRegion(buttRect, "Refresh (The list is only saved when the filter is changed or the tab is opened)");
+			TooltipHandler.TipRegion(buttRect, "TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened".Translate());
 
 			buttRect.x += 34;
 			ref bool refresh = ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh;
 			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.yellow : Color.white, Color.Lerp(Color.yellow,Color.white, 0.5f)))
 				refresh = !refresh;
 			GUI.color = Color.white;//Because Widgets.ButtonImage doesn't set it back
-			TooltipHandler.TipRegion(buttRect, "Continuous Refresh (about every second)");
+			TooltipHandler.TipRegion(buttRect, "TD.ContinuousRefreshAboutEverySecond".Translate());
 
 
 			//Handle mouse selection

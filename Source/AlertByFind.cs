@@ -42,7 +42,7 @@ namespace List_Everything
 			if (!overwrite && GetAlert(alert.desc.name) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Overwrite Alert?", () =>
+					"TD.OverwriteAlert".Translate(), () =>
 					{
 						RemoveAlert(alert.desc.name);
 						AddAlert(alert, true, okAction);
@@ -66,7 +66,7 @@ namespace List_Everything
 			if (!overwrite && GetAlert(newName) != null)
 			{
 				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Overwrite Alert?", () =>
+					"TD.OverwriteAlert".Translate(), () =>
 					{
 						RemoveAlert(newName);
 						RenameAlert(name, newName, true, okAction);

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	
+	<TD.OverwriteAlert>Overwrite Alert?</TD.OverwriteAlert>
+	<TD.CustomAlerts>Custom Alerts:</TD.CustomAlerts>
+	<TD.CriticalAlert>Critical Alert</TD.CriticalAlert>
+	<TD.SecondsUntilShown>Seconds until shown:</TD.SecondsUntilShown>
+	<TD.Tip1000SecondsInARimworldDay>1000 seconds in a RimWorld day</TD.Tip1000SecondsInARimworldDay>
+	<TD.ShowWhen>Show when</TD.ShowWhen>
+	<TD.Delete0>Delete {0}?</TD.Delete0>
+	<TD.AllMaps>All maps</TD.AllMaps>
+	<TD.Maximum0Displayed>(Maximum {0} displayed)</TD.Maximum0Displayed>
+	<TD.Right-clickToOpenFindTab>(Right-click to open Find Tab)</TD.Right-clickToOpenFindTab>
+	<TD.SavedFindFilters>Saved Find Filters:</TD.SavedFindFilters>
+	<TD.NewFindFilters>New Find Filters</TD.NewFindFilters>
+	<TD.IncludeShort>Inc</TD.IncludeShort>
+	<TD.ExcludeShort>Exc</TD.ExcludeShort>
+	<TD.DeleteThisFilter>Delete this filter</TD.DeleteThisFilter>
+	<TD.EnableThisFilter>Enable this filter</TD.EnableThisFilter>
+	<TD.IncludeOrExcludeThingsMatchingThisFilter>Include or Exclude things matching this filter</TD.IncludeOrExcludeThingsMatchingThisFilter>
+	<TD.ThisFilterDoesntWorkWithAllMaps>This filter doesn't work with all maps</TD.ThisFilterDoesntWorkWithAllMaps>
+	<TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>Tried to load {0} filter named ({1}) but the current map doesn't have any by that name</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
+	<TD.Spoils>Spoils</TD.Spoils>
+	<TD.Refrigerated>Refrigerated</TD.Refrigerated>
+	<TD.Frozen>Frozen</TD.Frozen>
+	<TD.Player>Player</TD.Player>
+	<TD.Mechanoid>Mechanoid</TD.Mechanoid>
+	<TD.Insectoid>Insectoid</TD.Insectoid>
+	<TD.NoFaction>No Faction</TD.NoFaction>
+	<TD.NotMadeFromStuff>Not made from stuff</TD.NotMadeFromStuff>
+	<TD.AnyStockpile>Any Stockpile</TD.AnyStockpile>
+	<TD.AnyGrowingZone>Any Growing Zone</TD.AnyGrowingZone>
+	<TD.Opened>Opened</TD.Opened>
+	<TD.BlockedOpen>Blocked Open</TD.BlockedOpen>
+	<TD.IncludeThingsThatMatch>Include things that match</TD.IncludeThingsThatMatch>
+	<TD.OfTheseFilters>of these filters:</TD.OfTheseFilters>
+	<TD.TheThingHoldingThis>The thing holding this</TD.TheThingHoldingThis>
+	<TD.AnythingThisIsHolding>Anything this is holding</TD.AnythingThisIsHolding>
+	<TD.Matches>matches</TD.Matches>
+	<TD.Of>of:</TD.Of>
+	<TD.AnythingXStepsNearbyMatches>Anything X steps nearby matches</TD.AnythingXStepsNearbyMatches>
+	<TD.From>From</TD.From>
+	<TD.Invisible>(invisible)</TD.Invisible>
+	<TD.Cold>Cold</TD.Cold>
+	<TD.ALittleCold>A little cold</TD.ALittleCold>
+	<TD.Comfortable>Comfortable</TD.Comfortable>
+	<TD.ALittleHot>A little hot</TD.ALittleHot>
+	<TD.Hot>Hot</TD.Hot>
+	<TD.IsPrisoner>Is Prisoner</TD.IsPrisoner>
+	<TD.InCell>In Cell</TD.InCell>
+	<TD.ListEverything>List Everything</TD.ListEverything>
+	<TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>There are no options available (Perhaps you should uncheck 'Only available things')</TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>
+	<TD.LockEditing>Lock Editing</TD.LockEditing>
+	<TD.Listing>Listing: </TD.Listing>
+	<TD.Name>Name:</TD.Name>
+	<TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>Certain filters don't work for all maps - like zones and areas that are obviously specific to a single map</TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>
+	<TD.ManageSaved>Manage Saved</TD.ManageSaved>
+	<TD.MakeAlert>Make Alert</TD.MakeAlert>
+	<TD.LoadAlert>Load Alert</TD.LoadAlert>
+	<TD.ManageAlerts>Manage Alerts</TD.ManageAlerts>
+	<TD.OnlyShowFilterOptionsForAvailableThings>Only show filter options for available things</TD.OnlyShowFilterOptionsForAvailableThings>
+	<TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
+	<TD.AddNewFilter...>Add new filter...</TD.AddNewFilter...>
+	<TD.SelectAllGameAllowsUpTo80>Select All ( game allows up to 80 )</TD.SelectAllGameAllowsUpTo80>
+	<TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>Refresh (The list is only saved when the filter is changed or the tab is opened)</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
+	<TD.ContinuousRefreshAboutEverySecond>Continuous Refresh (about every second)</TD.ContinuousRefreshAboutEverySecond>
+	<TD.OverwriteSavedFilter>Overwrite saved filter?</TD.OverwriteSavedFilter>
+	<TD.AllMaps>All maps?</TD.AllMaps>
+	
+</LanguageData>

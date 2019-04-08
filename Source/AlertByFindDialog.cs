@@ -45,7 +45,7 @@ namespace List_Everything
 
 			Map map = Find.CurrentMap;
 			Text.Font = GameFont.Medium;
-			listing.Label($"Custom Alerts:");
+			listing.Label("TD.CustomAlerts".Translate());
 			Text.Font = GameFont.Small;
 			listing.GapLine();
 			listing.End();
@@ -70,28 +70,28 @@ namespace List_Everything
 
 				row.Label(alert.Label, rowRect.width / 4);
 
-				if(row.ButtonText("Rename"))
+				if(row.ButtonText("Rename".Translate()))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
-				if (row.ButtonText("Load"))
+				if (row.ButtonText("Load".Translate()))
 					MainTabWindow_List.OpenWith(desc.Clone(map));
 				
-				if (row.ButtonText("Delete"))
+				if (row.ButtonText("Delete".Translate()))
 					remove = name;
 
 				bool crit = desc.alertPriority == AlertPriority.Critical;
-				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "Critical Alert");
+				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "TD.CriticalAlert".Translate());
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 
-				row.Label("Seconds until shown:");
+				row.Label("TD.SecondsUntilShown".Translate());
 				int sec = desc.ticksToShowAlert / 60;
 				string secStr = sec.ToString();
 				Rect textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 10000);
-				TooltipHandler.TipRegion(textRect, "1000 seconds in a RimWorld day");
+				TooltipHandler.TipRegion(textRect, "TD.Tip1000SecondsInARimworldDay".Translate());
 				comp.SetTicks(name, sec * 60);
 
-				row.Label("Show when");
+				row.Label("TD.ShowWhen".Translate());
 				if (row.ButtonIcon(TexFor(desc.countComp)))
 					comp.SetComp(name, (CompareType)((int)(desc.countComp + 1) % 3));
 
@@ -112,7 +112,7 @@ namespace List_Everything
 					comp.RemoveAlert(remove);
 				else
 					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-						$"Delete {remove}?", () => comp.RemoveAlert(remove)));
+						"TD.Delete0".Translate(remove), () => comp.RemoveAlert(remove)));
 			}
 		}
 

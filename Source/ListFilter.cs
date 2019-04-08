@@ -85,26 +85,26 @@ namespace List_Everything
 
 			if (owner.locked)
 			{
-				row.Label(include ? "Inc" : "Exc");
+				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate());
 			}
 			else
 			{
 				//Clear button
-				if (row.ButtonIcon(TexButton.CancelTex, "Delete this filter"))
+				if (row.ButtonIcon(TexButton.CancelTex, "TD.DeleteThisFilter".Translate()))
 				{
 					delete = true;
 					changed = true;
 				}
 
 				//Toggle button
-				if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "Enable this filter"))
+				if (row.ButtonIcon(enabled ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex, "TD.EnableThisFilter".Translate()))
 				{
 					enabled = !enabled;
 					changed = true;
 				}
 
 				//Include/Exclude
-				if (row.ButtonText(include ? "Inc" : "Exc", "Include or Exclude things matching this filter"))
+				if (row.ButtonText(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(), "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate()))
 				{
 					include = !include;
 					changed = true;
@@ -125,7 +125,7 @@ namespace List_Everything
 			{
 				Widgets.DrawBoxSolid(rowRect, new Color(0.5f, 0, 0, 0.25f));
 
-				TooltipHandler.TipRegion(rowRect, "This filter doesn't work with all maps");
+				TooltipHandler.TipRegion(rowRect, "TD.ThisFilterDoesntWorkWithAllMaps".Translate());
 			}
 
 			listing.Gap(listing.verticalSpacing);
@@ -295,7 +295,7 @@ namespace List_Everything
 							clone.ResolveReference(refName, map);
 
 						if (clone.sel == null)
-							Messages.Message($"Tried to load {def.LabelCap} filter named ({refName}) but the current map doesn't have any by that name", MessageTypeDefOf.RejectInput);
+							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
 					}
 				}
 			}
@@ -397,7 +397,7 @@ namespace List_Everything
 			(thing.MapHeld.designationManager.DesignationOn(thing) != null ||
 			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
-		public override string NullOption() => "Any";
+		public override string NullOption() => "NoDrugUseRequirement".Translate();
 		public override IEnumerable<DesignationDef> Options() =>
 			ContentsUtility.onlyAvailable ?
 				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct() :
@@ -421,9 +421,9 @@ namespace List_Everything
 		
 		public override int ExtraOptionsCount => 3;
 		public override string NameForExtra(int ex) =>
-			ex == 1 ? "Spoils" :
-			ex == 2 ? "Refrigerated" : 
-			"Frozen";
+			ex == 1 ? "TD.Spoils".Translate() :
+			ex == 2 ? "TD.Refrigerated".Translate() : 
+			"TD.Frozen".Translate();
 	}
 
 	class ListFilterGrowth : ListFilterWithOption<FloatRange>
@@ -479,10 +479,10 @@ namespace List_Everything
 
 		public override int ExtraOptionsCount => 4;
 		public override string NameForExtra(int ex) => // or FleshTypeDef but this works
-			ex == 1 ? "Player" :
-			ex == 2 ? "Mechanoid" :
-			ex == 3 ? "Insectoid" :
-			"No Faction";
+			ex == 1 ? "TD.Player".Translate() :
+			ex == 2 ? "TD.Mechanoid".Translate() :
+			ex == 3 ? "TD.Insectoid".Translate() :
+			"TD.NoFaction".Translate();
 	}
 
 	/* This is no good, CanHaveFaction includes rock walls.
@@ -630,7 +630,7 @@ namespace List_Everything
 				stuff == sel;
 		}
 
-		public override string NullOption() => "Any";
+		public override string NullOption() => "NoDrugUseRequirement".Translate();
 		public override IEnumerable<ThingDef> Options() => 
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => t.Stuff)
@@ -638,7 +638,7 @@ namespace List_Everything
 		
 		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount + 1;
 		public override string NameForExtra(int ex) =>
-			ex == 1 ? "Not made from stuff" : 
+			ex == 1 ? "TD.NotMadeFromStuff".Translate() : 
 			DefDatabase<StuffCategoryDef>.AllDefsListForReading[ex-2]?.LabelCap;
 	}
 
@@ -661,7 +661,7 @@ namespace List_Everything
 				pawn.RaceProps.body.GetPartsWithDef(sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
-		public override string NullOption() => "Any";
+		public override string NullOption() => "NoDrugUseRequirement".Translate();
 		public override IEnumerable<BodyPartDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(
@@ -669,7 +669,7 @@ namespace List_Everything
 				: base.Options();
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "None";
+		public override string NameForExtra(int ex) => "NoPain".Translate();
 	}
 
 
@@ -705,7 +705,7 @@ namespace List_Everything
 			return false;
 		}
 
-		public override string NullOption() => "Any";
+		public override string NullOption() => "NoDrugUseRequirement".Translate();
 		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a is Area_Allowed);
 		public override string NameFor(Area o) => o.Label;
 
@@ -715,7 +715,7 @@ namespace List_Everything
 			if (ex == 5) return "Roofed";
 			switch((BaseAreas)(ex - 1))
 			{
-				case BaseAreas.Home: return "Home";
+				case BaseAreas.Home: return "Home".Translate();
 				case BaseAreas.BuildRoof: return "Build Roof";
 				case BaseAreas.NoRoof: return "No Roof";
 				case BaseAreas.SnowClear: return "Snow Clear";
@@ -742,11 +742,11 @@ namespace List_Everything
 				zoneAtPos != null;
 		}
 
-		public override string NullOption() => "Any";
+		public override string NullOption() => "NoDrugUseRequirement".Translate();
 		public override IEnumerable<Zone> Options() => Find.CurrentMap.zoneManager.AllZones;
 
 		public override int ExtraOptionsCount => 2;
-		public override string NameForExtra(int ex) => ex == 1 ? "Any Stockpile" : "Any Growing Zone";
+		public override string NameForExtra(int ex) => ex == 1 ? "TD.AnyStockpile".Translate() : "TD.AnyGrowingZone".Translate();
 	}
 
 	class ListFilterDeterioration : ListFilter
@@ -775,10 +775,10 @@ namespace List_Everything
 		{
 			switch (o)
 			{
-				case DoorOpenFilter.Open: return "Opened";
-				case DoorOpenFilter.Close: return "Closed";
+				case DoorOpenFilter.Open: return "TD.Opened".Translate();
+				case DoorOpenFilter.Close: return "VentClosed".Translate();
 				case DoorOpenFilter.HoldOpen: return "Hold Open";
-				case DoorOpenFilter.BlockedOpenMomentary: return "Blocked Open";
+				case DoorOpenFilter.BlockedOpenMomentary: return "TD.BlockedOpen".Translate();
 			}
 			return "???";
 		}

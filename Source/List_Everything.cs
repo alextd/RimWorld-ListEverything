@@ -20,7 +20,7 @@ namespace List_Everything
 
 		public override string SettingsCategory()
 		{
-			return "List Everything";
+			return "TD.ListEverything".Translate();
 		}
 	}
 }
