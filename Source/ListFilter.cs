@@ -712,13 +712,13 @@ namespace List_Everything
 		public override int ExtraOptionsCount => 5;
 		public override string NameForExtra(int ex)
 		{
-			if (ex == 5) return "Roofed";
+			if (ex == 5) return "Roofed".Translate().CapitalizeFirst();
 			switch((BaseAreas)(ex - 1))
 			{
 				case BaseAreas.Home: return "Home".Translate();
-				case BaseAreas.BuildRoof: return "Build Roof";
-				case BaseAreas.NoRoof: return "No Roof";
-				case BaseAreas.SnowClear: return "Snow Clear";
+				case BaseAreas.BuildRoof: return "BuildRoof".Translate().CapitalizeFirst();
+				case BaseAreas.NoRoof: return "NoRoof".Translate().CapitalizeFirst();
+				case BaseAreas.SnowClear: return "SnowClear".Translate().CapitalizeFirst();
 			}
 			return "???";
 		}
@@ -777,7 +777,7 @@ namespace List_Everything
 			{
 				case DoorOpenFilter.Open: return "TD.Opened".Translate();
 				case DoorOpenFilter.Close: return "VentClosed".Translate();
-				case DoorOpenFilter.HoldOpen: return "Hold Open";
+				case DoorOpenFilter.HoldOpen: return "CommandToggleDoorHoldOpen".Translate().CapitalizeFirst();
 				case DoorOpenFilter.BlockedOpenMomentary: return "TD.BlockedOpen".Translate();
 			}
 			return "???";

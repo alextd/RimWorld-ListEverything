@@ -99,7 +99,7 @@ namespace List_Everything
 				findDesc = new FindDescription();
 				changed = true;
 			}
-			TooltipHandler.TipRegion(headerButRect, "Clear All");
+			TooltipHandler.TipRegion(headerButRect, "ClearAll".Translate().CapitalizeFirst());
 
 			headerButRect.x -= Text.LineHeight;
 			if (Widgets.ButtonImage(headerButRect, findDesc.locked ? TexButton.LockOn : TexButton.LockOff))
