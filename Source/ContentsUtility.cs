@@ -30,7 +30,7 @@ namespace List_Everything
 
 			List<Thing> knownThings = new List<Thing>();
 			ThingOwnerUtility.GetAllThingsRecursively(holder, knownThings, true, ContentsUtility.CanPeekInventory);
-			return knownThings;
+			return knownThings.FindAll(t => DebugSettings.godMode || !t.PositionHeld.Fogged(t.MapHeld));
 		}
 
 		public static bool onlyAvailable = true;
