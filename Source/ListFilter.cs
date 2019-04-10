@@ -783,4 +783,21 @@ namespace List_Everything
 			return "???";
 		}
 	}
+
+	class ListFilterThingDef : ListFilterDropDown<ThingDef>
+	{
+		public ListFilterThingDef() => sel = ThingDefOf.WoodLog;
+
+		public override bool FilterApplies(Thing thing) =>
+			sel == thing.def;
+		
+		public override IEnumerable<ThingDef> Options() =>
+			(ContentsUtility.onlyAvailable ?
+				ContentsUtility.AvailableInGame(t => t.def) :
+				base.Options())
+			.Where(def => FindDescription.ValidDef(def));
+
+		public override bool Ordered => true;
+	}
+
 }

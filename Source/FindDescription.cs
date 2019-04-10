@@ -89,7 +89,7 @@ namespace List_Everything
 			allThings = allThings.Where(t => !(t.ParentHolder is Corpse) && !(t.ParentHolder is MinifiedThing));
 			if (!DebugSettings.godMode)
 			{
-				allThings = allThings.Where(t => t.def.drawerType != DrawerType.None);//Probably a good filter
+				allThings = allThings.Where(t => ValidDef(t.def));
 				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
 			}
 			foreach (ListFilter filter in filters)
@@ -98,6 +98,11 @@ namespace List_Everything
 			//Sort
 			return allThings.OrderBy(t => t.def.shortHash).ThenBy(t => t.Stuff?.shortHash ?? 0).ThenBy(t => t.Position.x + t.Position.z * 1000).ToList();
 		}
+
+		//Probably a good filter
+		public static bool ValidDef(ThingDef def) => 
+			!typeof(Mote).IsAssignableFrom(def.thingClass) && 
+			def.drawerType != DrawerType.None;
 
 		public virtual void ExposeData()
 		{
