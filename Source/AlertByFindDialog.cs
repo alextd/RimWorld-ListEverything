@@ -87,7 +87,7 @@ namespace List_Everything
 				int sec = desc.ticksToShowAlert / 60;
 				string secStr = sec.ToString();
 				Rect textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
-				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 10000);
+				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 999999);
 				TooltipHandler.TipRegion(textRect, "TD.Tip1000SecondsInARimworldDay".Translate());
 				comp.SetTicks(name, sec * 60);
 
@@ -97,8 +97,8 @@ namespace List_Everything
 
 				int count = desc.countToAlert;
 				string countStr = count.ToString();
-				textRect = row.GetRect(32); textRect.height -= 4; textRect.width -= 4;
-				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 0, 100);
+				textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
+				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 0, 999999);
 				comp.SetCount(name, count);
 			}
 			
