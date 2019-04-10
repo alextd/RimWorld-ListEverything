@@ -84,8 +84,8 @@ namespace List_Everything
 			if (alertData == null)	//Alert_Find auto-added as an Alert subclass, exists but never displays anything
 				return AlertReport.Inactive;
 
-			List<Thing> things = FoundThings().ToList();
-			int count = things.Count();
+			List<Thing> things = FoundThings();
+			int count = things.Sum(t => t.stackCount);
 			bool active = false;
 			switch(alertData.desc.countComp)
 			{
@@ -96,7 +96,7 @@ namespace List_Everything
 			if (!active)
 				tickStarted = Find.TickManager.TicksGame;
 			else if (Find.TickManager.TicksGame - tickStarted >= alertData.desc.ticksToShowAlert)
-				return AlertReport.CulpritsAre(things);
+				return AlertReport.CulpritsAre(things.Take(maxItems));
 			return AlertReport.Inactive;
 		}
 
@@ -105,10 +105,9 @@ namespace List_Everything
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "AllDays".Translate()) + ")");
 			stringBuilder.AppendLine("");
-			var things = FoundThings();
-			foreach (Thing thing in things)
+			foreach (Thing thing in FoundThings().Take(maxItems))
 				stringBuilder.AppendLine("   " + thing.Label);
-			if (things.Count() == maxItems)
+			if (FoundThings().Count() > maxItems)
 				stringBuilder.AppendLine("TD.Maximum0Displayed".Translate(maxItems));
 			stringBuilder.AppendLine("");
 			stringBuilder.AppendLine("TD.Right-clickToOpenFindTab".Translate());
@@ -118,32 +117,23 @@ namespace List_Everything
 
 		int currentTick;
 		List<Thing> foundThingsCache;
-		private IEnumerable<Thing> FoundThings()
+		private List<Thing> FoundThings()
 		{
 			if (Find.TickManager.TicksGame == currentTick && this.foundThingsCache != null)
 				return this.foundThingsCache;
 
 			foundThingsCache = new List<Thing>();
 			currentTick = Find.TickManager.TicksGame;
-
-			int i = 0;
+			
 			//Single map
 			if (alertData.map != null)
 				foreach (Thing t in alertData.desc.Get(alertData.map))
-				{
 					foundThingsCache.Add(t);
-					if (++i == maxItems)
-						break;
-				}
 			//All maps
 			else
 				foreach(Map m in Find.Maps)
 					foreach (Thing t in alertData.desc.Get(m))
-					{
 						foundThingsCache.Add(t);
-						if (++i == maxItems)
-							break;
-					}
 
 			return foundThingsCache;
 		}
