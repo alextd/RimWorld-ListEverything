@@ -18,6 +18,7 @@
 	<Filter_Prisoner.label>prisoner</Filter_Prisoner.label>
 	<Filter_MissingBodyPart.label>missing Body Part</Filter_MissingBodyPart.label>
 	<Filter_ItemInfo.label>item info</Filter_ItemInfo.label>
+	<Filter_Def.label>exact match</Filter_Def.label>
 	<Filter_ItemCategory.label>item grouping</Filter_ItemCategory.label>
 	<Filter_SpecialFilter.label>special filter</Filter_SpecialFilter.label>
 	<Filter_HP.label>health %</Filter_HP.label>
