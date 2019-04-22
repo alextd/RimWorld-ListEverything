@@ -58,8 +58,7 @@ namespace List_Everything
 			sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
-		public override string NameFor(TraitDef def) => TraitName(def);
-		public static string TraitName(TraitDef def) =>
+		public override string NameFor(TraitDef def) =>
 			def.degreeDatas.Count == 1
 				? def.degreeDatas.First().label.CapitalizeFirst()
 				: def.defName + "*";//TraitDefs don't have labels
@@ -121,8 +120,7 @@ namespace List_Everything
 			sel = ThoughtDefOf.AteWithoutTable;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
-		public override string NameFor(ThoughtDef def) => ThoughtName(def);
-		public static string ThoughtName(ThoughtDef def)
+		public override string NameFor(ThoughtDef def)
 		{
 			string label =
 				def.label?.CapitalizeFirst() ??
@@ -165,7 +163,7 @@ namespace List_Everything
 
 		public override IEnumerable<ThoughtDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableInGame(ThoughtsForThing).OrderBy(tDef => ThoughtName(tDef))
+				? ContentsUtility.AvailableInGame(ThoughtsForThing)
 				: base.Options();
 		public override bool Ordered => true;
 		protected override void Callback(ThoughtDef o)
@@ -460,8 +458,8 @@ namespace List_Everything
 
 		public override IEnumerable<MentalStateDef> Options() =>
 			ContentsUtility.onlyAvailable
-				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def).OrderBy(NameFor)
-				: DefDatabase<MentalStateDef>.AllDefs.OrderBy(NameFor);
+				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def)
+				: base.Options();
 		public override bool Ordered => true;
 		public override string NullOption() => "NoPain".Translate();
 
@@ -486,9 +484,7 @@ namespace List_Everything
 
 			return pawn.guest?.interactionMode == sel;
 		}
-
-		public override IEnumerable<PrisonerInteractionModeDef> Options() => DefDatabase<PrisonerInteractionModeDef>.AllDefs;
-
+		
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "TD.IsPrisoner".Translate() : "TD.InCell".Translate();
