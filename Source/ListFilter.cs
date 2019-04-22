@@ -176,7 +176,8 @@ namespace List_Everything
 		public ListFilterName() => sel = "";
 
 		public override bool FilterApplies(Thing thing) =>
-			thing.Label.Contains(sel);
+			//thing.Label.Contains(sel, CaseInsensitiveComparer.DefaultInvariant);	//Contains doesn't accept comparer with strings. okay.
+			thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
 		public override bool DrawOption(Rect rect)
 		{
