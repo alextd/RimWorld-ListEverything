@@ -676,7 +676,7 @@ namespace List_Everything
 	enum BaseAreas { Home, BuildRoof, NoRoof, SnowClear };
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
-		public ListFilterArea() => sel = Find.CurrentMap?.areaManager.Home;
+		public ListFilterArea() => extraOption = 1;
 
 		public override void ResolveReference(string refName, Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
