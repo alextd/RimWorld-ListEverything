@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Verse;
 using RimWorld;
 using UnityEngine;
@@ -517,5 +518,15 @@ namespace List_Everything
 
 			return pawn.CurJobDef == sel;
 		}
+
+		public override string NameFor(JobDef o) =>
+			Regex.Replace(o.reportString.Replace(".",""), "Target(A|B|C)", "...");
+		public override string NullOption() => "None";
+
+		public override IEnumerable<JobDef> Options() =>
+			ContentsUtility.onlyAvailable
+				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.CurJobDef)
+			: base.Options();
+		public override bool Ordered => true;
 	}
 }
