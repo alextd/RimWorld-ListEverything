@@ -54,7 +54,7 @@ namespace List_Everything
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 			row.Label("TD.IncludeThingsThatMatch".Translate());
-			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
+			if (row.ButtonText(any ? "TD.AnyOption".Translate() : "TD.AllOptions".Translate()))
 			{
 				any = !any;
 				changed = true;
@@ -122,7 +122,7 @@ namespace List_Everything
 				parent = !parent;
 			}
 			row.Label("TD.Matches".Translate());
-			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
+			if (row.ButtonText(any ? "TD.AnyOption".Translate() : "TD.AllOptions".Translate()))
 			{
 				changed = true;
 				any = !any;
@@ -165,7 +165,7 @@ namespace List_Everything
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 
 			row.Label("TD.AnythingXStepsNearbyMatches".Translate());
-			if (row.ButtonText(any ? "NoDrugUseRequirement".Translate() : "AllDays".Translate()))
+			if (row.ButtonText(any ? "TD.AnyOption".Translate() : "TD.AllOptions".Translate()))
 			{
 				any = !any;
 				changed = true;

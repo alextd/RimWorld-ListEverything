@@ -103,7 +103,7 @@ namespace List_Everything
 		public override string GetExplanation()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "AllDays".Translate()) + ")");
+			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")");
 			stringBuilder.AppendLine("");
 			foreach (Thing thing in FoundThings().Take(maxItems))
 				stringBuilder.AppendLine("   " + thing.Label);

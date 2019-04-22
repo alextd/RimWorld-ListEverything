@@ -65,5 +65,7 @@
 	<TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>Refresh (The list is only saved when the filter is changed or the tab is opened)</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
 	<TD.ContinuousRefreshAboutEverySecond>Continuous Refresh (about every second)</TD.ContinuousRefreshAboutEverySecond>
 	<TD.OverwriteSavedFilter>Overwrite saved filter?</TD.OverwriteSavedFilter>
+	<TD.AnyOption>Any</TD.AnyOption>
+	<TD.AllOptions>All</TD.AllOptions>
 	
 </LanguageData>

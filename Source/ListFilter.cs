@@ -398,7 +398,7 @@ namespace List_Everything
 			(thing.MapHeld.designationManager.DesignationOn(thing) != null ||
 			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
-		public override string NullOption() => "NoDrugUseRequirement".Translate();
+		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<DesignationDef> Options() =>
 			ContentsUtility.onlyAvailable ?
 				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct() :
@@ -631,7 +631,7 @@ namespace List_Everything
 				stuff == sel;
 		}
 
-		public override string NullOption() => "NoDrugUseRequirement".Translate();
+		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<ThingDef> Options() => 
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => t.Stuff)
@@ -662,7 +662,7 @@ namespace List_Everything
 				pawn.RaceProps.body.GetPartsWithDef(sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
-		public override string NullOption() => "NoDrugUseRequirement".Translate();
+		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<BodyPartDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(
@@ -670,7 +670,7 @@ namespace List_Everything
 				: base.Options();
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "NoPain".Translate();
+		public override string NameForExtra(int ex) => "None".Translate();
 	}
 
 
@@ -706,7 +706,7 @@ namespace List_Everything
 			return false;
 		}
 
-		public override string NullOption() => "NoDrugUseRequirement".Translate();
+		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<Area> Options() => Find.CurrentMap.areaManager.AllAreas.Where(a => a is Area_Allowed);
 		public override string NameFor(Area o) => o.Label;
 
@@ -743,7 +743,7 @@ namespace List_Everything
 				zoneAtPos != null;
 		}
 
-		public override string NullOption() => "NoDrugUseRequirement".Translate();
+		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<Zone> Options() => Find.CurrentMap.zoneManager.AllZones;
 
 		public override int ExtraOptionsCount => 2;

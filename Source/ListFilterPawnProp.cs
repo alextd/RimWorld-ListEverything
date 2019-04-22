@@ -320,7 +320,7 @@ namespace List_Everything
 				(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
 		}
 
-		public override string NullOption() => "NoPain".Translate();
+		public override string NullOption() => "None".Translate();
 		public override IEnumerable<HediffDef> Options() =>
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
@@ -333,7 +333,7 @@ namespace List_Everything
 		}
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
@@ -386,7 +386,7 @@ namespace List_Everything
 		}
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
 	}
 
 	enum TemperatureFilter { Cold, Cool, Okay, Warm, Hot }
@@ -462,10 +462,10 @@ namespace List_Everything
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def)
 				: base.Options();
 		public override bool Ordered => true;
-		public override string NullOption() => "NoPain".Translate();
+		public override string NullOption() => "None".Translate();
 
 		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "NoDrugUseRequirement".Translate();
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
 	}
 
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
@@ -521,7 +521,7 @@ namespace List_Everything
 
 		public override string NameFor(JobDef o) =>
 			Regex.Replace(o.reportString.Replace(".",""), "Target(A|B|C)", "...");
-		public override string NullOption() => "NoPain".Translate();
+		public override string NullOption() => "None";
 
 		public override IEnumerable<JobDef> Options() =>
 			ContentsUtility.onlyAvailable
