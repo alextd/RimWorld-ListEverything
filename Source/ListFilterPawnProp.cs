@@ -494,7 +494,7 @@ namespace List_Everything
 			ex == 1 ? "TD.IsPrisoner".Translate() : "TD.InCell".Translate();
 	}
 
-	enum DraftFilter { Drafted, Undrafted, Controllable}
+	enum DraftFilter { Drafted, Undrafted, Controllable }
 	class ListFilterDrafted : ListFilterDropDown<DraftFilter>
 	{
 		public override bool FilterApplies(Thing thing)
@@ -502,13 +502,24 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			switch(sel)
+			switch (sel)
 			{
 				case DraftFilter.Drafted: return pawn.Drafted;
 				case DraftFilter.Undrafted: return pawn.drafter != null && !pawn.Drafted;
 				case DraftFilter.Controllable: return pawn.drafter != null;
 			}
 			return false;
+		}
+	}
+
+	class ListFilterJob : ListFilterDropDown<JobDef>
+	{
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			return pawn.CurJobDef == sel;
 		}
 	}
 }

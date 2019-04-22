@@ -59,6 +59,7 @@
 			<li>Filter_Thought</li>
 			<li>Filter_Need</li>
 			<li>Filter_Health</li>
+			<li>Filter_Job</li>
 			<li>Filter_MentalState</li>
 			<li>Filter_Temp</li>
 			<li>Filter_Incapable</li>
@@ -128,6 +129,12 @@
 		<defName>Filter_Drafted</defName>
 		<label>drafted</label>
 		<filterClass>List_Everything.ListFilterDrafted</filterClass>
+	</List_Everything.ListFilterDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_Job</defName>
+		<label>current action</label>
+		<filterClass>List_Everything.ListFilterJob</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
