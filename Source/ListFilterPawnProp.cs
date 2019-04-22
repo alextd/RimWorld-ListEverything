@@ -521,7 +521,7 @@ namespace List_Everything
 
 		public override string NameFor(JobDef o) =>
 			Regex.Replace(o.reportString.Replace(".",""), "Target(A|B|C)", "...");
-		public override string NullOption() => "None";
+		public override string NullOption() => "NoPain".Translate();
 
 		public override IEnumerable<JobDef> Options() =>
 			ContentsUtility.onlyAvailable
