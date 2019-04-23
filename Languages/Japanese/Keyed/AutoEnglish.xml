@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <TD.OverwriteAlert>上書きを警告する?</TD.OverwriteAlert>
+  <TD.CustomAlerts>カスタム警告：</TD.CustomAlerts>
+  <TD.CriticalAlert>緊急警告</TD.CriticalAlert>
+  <TD.SecondsUntilShown>表示までの秒数</TD.SecondsUntilShown>
+  <TD.Tip1000SecondsInARimworldDay>RimWorldの1日は1000秒</TD.Tip1000SecondsInARimworldDay>
+  <TD.ShowWhen>いつ表示?</TD.ShowWhen>
+  <TD.Delete0>{0}を削除?</TD.Delete0>
+  <TD.AllMaps>全マップ</TD.AllMaps>
+  <TD.Maximum0Displayed>(最大{0}を表示)</TD.Maximum0Displayed>
+  <TD.Right-clickToOpenFindTab>(右クリックで[検索]タブを開く)</TD.Right-clickToOpenFindTab>
+  <TD.SavedFindFilters>保存済検索フィルタ：</TD.SavedFindFilters>
+  <TD.NewFindFilters>新規検索フィルタ</TD.NewFindFilters>
+  <TD.IncludeShort>含</TD.IncludeShort>
+  <TD.ExcludeShort>除外</TD.ExcludeShort>
+  <TD.DeleteThisFilter>このフィルタを削除</TD.DeleteThisFilter>
+  <TD.EnableThisFilter>このフィルタを有効</TD.EnableThisFilter>
+  <TD.IncludeOrExcludeThingsMatchingThisFilter>このフィルタに一致する結果を含めるか除外する</TD.IncludeOrExcludeThingsMatchingThisFilter>
+  <TD.ThisFilterDoesntWorkWithAllMaps>このフィルタは全マップでは機能しません</TD.ThisFilterDoesntWorkWithAllMaps>
+  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>({1})という名前の{0}フィルタを読み込もうとしましたが、現在のマップにその名前のフィルタがない</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
+  <TD.Spoils>腐敗</TD.Spoils>
+  <TD.Refrigerated>冷蔵</TD.Refrigerated>
+  <TD.Frozen>冷凍</TD.Frozen>
+  <TD.Player>プレイヤー</TD.Player>
+  <TD.Mechanoid>メカノイド</TD.Mechanoid>
+  <TD.Insectoid>昆虫</TD.Insectoid>
+  <TD.NoFaction>非派閥</TD.NoFaction>
+  <TD.NotMadeFromStuff>材料を使わない物</TD.NotMadeFromStuff>
+  <TD.AnyStockpile>任意の備蓄ゾーン</TD.AnyStockpile>
+  <TD.AnyGrowingZone>任意の農業ゾーン</TD.AnyGrowingZone>
+  <TD.Opened>開いた</TD.Opened>
+  <TD.BlockedOpen>開けません</TD.BlockedOpen>
+  <TD.IncludeThingsThatMatch>一致するものを含める</TD.IncludeThingsThatMatch>
+  <TD.OfTheseFilters>これらのフィルタのうち：</TD.OfTheseFilters>
+  <TD.TheThingHoldingThis>これを含むもの</TD.TheThingHoldingThis>
+  <TD.AnythingThisIsHolding>これを含む全て</TD.AnythingThisIsHolding>
+  <TD.Matches>一致</TD.Matches>
+  <TD.Of>の：</TD.Of>
+  <TD.AnythingXStepsNearbyMatches>Xステップの近くにあるすべてと一致</TD.AnythingXStepsNearbyMatches>
+  <TD.From>から</TD.From>
+  <TD.Invisible>(見えない)</TD.Invisible>
+  <TD.Cold>寒い</TD.Cold>
+  <TD.ALittleCold>少し寒い</TD.ALittleCold>
+  <TD.Comfortable>快適</TD.Comfortable>
+  <TD.ALittleHot>少し暑い</TD.ALittleHot>
+  <TD.Hot>暑い</TD.Hot>
+  <TD.IsPrisoner>は囚人です</TD.IsPrisoner>
+  <TD.InCell>セル内</TD.InCell>
+  <TD.ListEverything>List Everything</TD.ListEverything>
+  <TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>利用可能なオプションはありません（多分「利用可能な物だけ」のチェックを外してください）。</TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>
+  <TD.LockEditing>編集を固定</TD.LockEditing>
+  <TD.Listing>リスト：</TD.Listing>
+  <TD.Name>名前：</TD.Name>
+  <TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>特定のフィルタは、全マップに対して機能しません。確実なのは1つのマップに存在するゾーンやエリアのような場合だけです。</TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>
+  <TD.ManageSaved>保存管理</TD.ManageSaved>
+  <TD.MakeAlert>警告を作成</TD.MakeAlert>
+  <TD.LoadAlert>警告を読込</TD.LoadAlert>
+  <TD.ManageAlerts>警告を管理</TD.ManageAlerts>
+  <TD.OnlyShowFilterOptionsForAvailableThings>利用可能な物だけのフィルタオプションを表示</TD.OnlyShowFilterOptionsForAvailableThings>
+  <TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>例として、プラスチール製のアイテムが存在しない場合、「プラスチール製」検索オプションを表示しないでください。</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
+  <TD.AddNewFilter...>新規フィルタ追加...</TD.AddNewFilter...>
+  <TD.SelectAllGameAllowsUpTo80>すべて選択（ゲームでは80まで可能）</TD.SelectAllGameAllowsUpTo80>
+  <TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>更新（リストはフィルタが変更された場合かタブが開かれた際だけ保存されます）</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
+  <TD.ContinuousRefreshAboutEverySecond>連続更新（約1秒ごと）</TD.ContinuousRefreshAboutEverySecond>
+  <TD.OverwriteSavedFilter>保存したフィルタを上書きしますか？</TD.OverwriteSavedFilter>
+
+</LanguageData>
