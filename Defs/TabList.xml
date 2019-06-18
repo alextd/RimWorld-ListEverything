@@ -66,6 +66,7 @@
 			<li>Filter_AreaRestriction</li>
 			<li>Filter_Drafted</li>
 			<li>Filter_Prisoner</li>
+			<li>Filter_RaceProps</li>
 			<li>Filter_MissingBodyPart</li>
 			<!-- Seems like it should be here but it also includes "holder has" which is an item detail - shrug. <li>Filter_Inventory</li>-->
 		</subFilters>
@@ -141,6 +142,12 @@
 		<defName>Filter_Prisoner</defName>
 		<label>prisoner</label>
 		<filterClass>List_Everything.ListFilterPrisoner</filterClass>
+	</List_Everything.ListFilterDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_RaceProps</defName>
+		<label>race</label>
+		<filterClass>List_Everything.ListFilterRaceProps</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>

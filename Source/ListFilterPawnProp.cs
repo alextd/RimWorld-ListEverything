@@ -529,4 +529,123 @@ namespace List_Everything
 			: base.Options();
 		public override bool Ordered => true;
 	}
+
+	enum RacePropsFilter { Predator, Prey, Herd, Pack, Wildness, Petness, Trainability, Intelligence }
+	class ListFilterRaceProps : ListFilterDropDown<RacePropsFilter>
+	{
+		Intelligence intelligence;
+		FloatRange wild;
+		FloatRange petness;
+		TrainabilityDef trainability;
+
+		public ListFilterRaceProps()
+		{
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref intelligence, "intelligence");
+			Scribe_Values.Look(ref wild, "wild");
+			Scribe_Values.Look(ref petness, "petness");
+			Scribe_Defs.Look(ref trainability, "trainability");
+		}
+		public override ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilterRaceProps clone = (ListFilterRaceProps)base.Clone(map, newOwner);
+			clone.intelligence = intelligence;
+			clone.wild = wild;
+			clone.petness = petness;
+			clone.trainability = trainability;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			RaceProperties props = pawn.RaceProps;
+			if (props == null) return false;
+
+			switch (sel)
+			{
+				case RacePropsFilter.Intelligence: return props.intelligence == intelligence;
+				case RacePropsFilter.Herd: 
+					return props.herdAnimal;
+				case RacePropsFilter.Pack: 
+					return props.packAnimal;
+				case RacePropsFilter.Predator: 
+					return props.predator;
+				case RacePropsFilter.Prey: 
+					return props.canBePredatorPrey;
+				case RacePropsFilter.Wildness: 
+					return wild.Includes(props.wildness);
+				case RacePropsFilter.Petness: 
+					return petness.Includes(props.petness);
+				case RacePropsFilter.Trainability:
+					return props.trainability == trainability;
+			}
+			return false;
+		}
+
+		protected override void Callback(RacePropsFilter o)
+		{
+			sel = o;
+			switch (sel)
+			{
+				case RacePropsFilter.Intelligence: intelligence = Intelligence.Humanlike; return;
+				case RacePropsFilter.Wildness: wild = new FloatRange(0.25f, 0.75f); return;
+				case RacePropsFilter.Petness: petness = new FloatRange(0.25f, 0.75f); return;
+				case RacePropsFilter.Trainability: trainability = TrainabilityDefOf.Advanced; return;
+			}
+		}
+	
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			switch (sel)
+			{
+				case RacePropsFilter.Intelligence:
+					if (row.ButtonText(intelligence.ToString()))
+					{
+						foreach (Intelligence intel in Enum.GetValues(typeof(Intelligence)))
+						{
+							options.Add(new FloatMenuOption(intel.ToString(), () => intelligence = intel));
+						}
+						MainTabWindow_List.DoFloatMenu(options);
+					}
+					break;
+
+				case RacePropsFilter.Wildness:
+				case RacePropsFilter.Petness:
+					ref FloatRange oldRange = ref wild;
+					if (sel == RacePropsFilter.Petness)
+						oldRange = ref petness;
+
+					FloatRange newRange = oldRange;
+					Widgets.FloatRange(rect, id, ref newRange, valueStyle:ToStringStyle.PercentZero);
+					if (newRange != oldRange)
+					{
+						oldRange = newRange;
+						return true;
+					}
+					break;
+
+				case RacePropsFilter.Trainability:
+					if (row.ButtonText(trainability.LabelCap))
+					{
+						foreach (TrainabilityDef def in DefDatabase<TrainabilityDef>.AllDefsListForReading)
+						{
+							options.Add(new FloatMenuOption(def.LabelCap, () => trainability = def));
+						}
+						MainTabWindow_List.DoFloatMenu(options);
+					}
+					break;
+			}
+			return false;
+		}
+	}
 }
