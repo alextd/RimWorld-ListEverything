@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
   <TD.OverwriteAlert>上書きを警告する?</TD.OverwriteAlert>
@@ -13,8 +13,8 @@
   <TD.Right-clickToOpenFindTab>(右クリックで[検索]タブを開く)</TD.Right-clickToOpenFindTab>
   <TD.SavedFindFilters>保存済検索フィルタ：</TD.SavedFindFilters>
   <TD.NewFindFilters>新規検索フィルタ</TD.NewFindFilters>
-  <TD.IncludeShort>含</TD.IncludeShort>
-  <TD.ExcludeShort>除外</TD.ExcludeShort>
+  <TD.IncludeShort>を含む</TD.IncludeShort>
+  <TD.ExcludeShort>を除外</TD.ExcludeShort>
   <TD.DeleteThisFilter>このフィルタを削除</TD.DeleteThisFilter>
   <TD.EnableThisFilter>このフィルタを有効</TD.EnableThisFilter>
   <TD.IncludeOrExcludeThingsMatchingThisFilter>このフィルタに一致する結果を含めるか除外する</TD.IncludeOrExcludeThingsMatchingThisFilter>
@@ -32,12 +32,12 @@
   <TD.AnyGrowingZone>任意の農業ゾーン</TD.AnyGrowingZone>
   <TD.Opened>開いた</TD.Opened>
   <TD.BlockedOpen>開けません</TD.BlockedOpen>
-  <TD.IncludeThingsThatMatch>一致するものを含める</TD.IncludeThingsThatMatch>
-  <TD.OfTheseFilters>これらのフィルタのうち：</TD.OfTheseFilters>
-  <TD.TheThingHoldingThis>これを含むもの</TD.TheThingHoldingThis>
+  <TD.IncludeThingsThatMatch>以下のフィルタに一致する</TD.IncludeThingsThatMatch>
+  <TD.OfTheseFilters>の条件：</TD.OfTheseFilters>
+  <TD.TheThingHoldingThis>以下を含むもの</TD.TheThingHoldingThis>
   <TD.AnythingThisIsHolding>これを含む全て</TD.AnythingThisIsHolding>
-  <TD.Matches>一致</TD.Matches>
-  <TD.Of>の：</TD.Of>
+  <TD.Matches>一致する</TD.Matches>
+  <TD.Of>を：</TD.Of>
   <TD.AnythingXStepsNearbyMatches>Xステップの近くにあるすべてと一致</TD.AnythingXStepsNearbyMatches>
   <TD.From>から</TD.From>
   <TD.Invisible>(見えない)</TD.Invisible>
@@ -65,5 +65,7 @@
   <TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>更新（リストはフィルタが変更された場合かタブが開かれた際だけ保存されます）</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
   <TD.ContinuousRefreshAboutEverySecond>連続更新（約1秒ごと）</TD.ContinuousRefreshAboutEverySecond>
   <TD.OverwriteSavedFilter>保存したフィルタを上書きしますか？</TD.OverwriteSavedFilter>
+  <TD.AnyOption>どれか</TD.AnyOption>
+  <TD.AllOptions>全て</TD.AllOptions>
 
 </LanguageData>
