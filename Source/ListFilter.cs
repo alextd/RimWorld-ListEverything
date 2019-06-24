@@ -564,7 +564,7 @@ namespace List_Everything
 			switch (sel)
 			{
 				case MineableType.Resource: return thing.def.building?.isResourceRock ?? false;
-				case MineableType.Rock: return thing.def.building?.isNaturalRock ?? false;
+				case MineableType.Rock: return (thing.def.building?.isNaturalRock ?? false) && (!thing.def.building?.isResourceRock ?? true);
 				case MineableType.All: return thing.def.mineable;
 			}
 			return false;
