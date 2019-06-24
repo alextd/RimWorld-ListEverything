@@ -109,13 +109,13 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "TD.LockEditing".Translate());
 
 			//Header Title
-			Widgets.Label(labelRect, "TD.Listing".Translate() + findDesc.baseType);
+			Widgets.Label(labelRect, "TD.Listing".Translate() + findDesc.baseType.TranslateEnum());
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
-					types.Add(new FloatMenuOption(type.ToString(), () => findDesc.baseType = type));
+					types.Add(new FloatMenuOption(type.TranslateEnum(), () => findDesc.baseType = type));
 
 				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
 			}

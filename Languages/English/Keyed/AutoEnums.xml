@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	
+	<TD.All>All</TD.All>
+	<TD.Items>Items</TD.Items>
+	<TD.Everyone>Everyone</TD.Everyone>
+	<TD.Colonists>Colonists</TD.Colonists>
+	<TD.Animals>Animals</TD.Animals>
+	<TD.Buildings>Buildings</TD.Buildings>
+	<TD.Natural>Natural</TD.Natural>
+	<TD.Plants>Plants</TD.Plants>
+	<TD.Inventory>Inventory</TD.Inventory>
+	<TD.Haulables>Haulables</TD.Haulables>
+	<TD.Mergables>Mergables</TD.Mergables>
+	<TD.FilthInHomeArea>Filth In Home Area</TD.FilthInHomeArea>
+	<TD.Forbidden>Forbidden</TD.Forbidden>
+	<TD.Allowed>Allowed</TD.Allowed>
+	<TD.Forbiddable>Forbiddable</TD.Forbiddable>
+	<TD.Person>Person</TD.Person>
+	<TD.Animal>Animal</TD.Animal>
+	<TD.Item>Item</TD.Item>
+	<TD.Building>Building</TD.Building>
+	<TD.Natural>Natural</TD.Natural>
+	<TD.Plant>Plant</TD.Plant>
+	<TD.Other>Other</TD.Other>
+	<TD.Resource>Resource</TD.Resource>
+	<TD.Rock>Rock</TD.Rock>
+	<TD.All>All</TD.All>
+	<TD.Drafted>Drafted</TD.Drafted>
+	<TD.Undrafted>Undrafted</TD.Undrafted>
+	<TD.Controllable>Controllable</TD.Controllable>
+	<TD.Predator>Predator</TD.Predator>
+	<TD.Prey>Prey</TD.Prey>
+	<TD.Herd>Herd</TD.Herd>
+	<TD.Pack>Pack</TD.Pack>
+	<TD.Wildness>Wildness</TD.Wildness>
+	<TD.Petness>Petness</TD.Petness>
+	<TD.Trainability>Trainability</TD.Trainability>
+	<TD.Intelligence>Intelligence</TD.Intelligence>
+	
+</LanguageData>

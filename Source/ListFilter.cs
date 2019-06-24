@@ -340,8 +340,8 @@ namespace List_Everything
 			throw new NotImplementedException();
 		}
 		public virtual bool Ordered => false;
-		public virtual string NameFor(T o) => o is Def def ? def.LabelCap : o.ToString();
-		public override string MakeRefName() => NameFor(sel);
+		public virtual string NameFor(T o) => o is Def def ? def.LabelCap : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
+		public override string MakeRefName() => NameFor(sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
 		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
 
 		public virtual int ExtraOptionsCount => 0;
@@ -417,7 +417,9 @@ namespace List_Everything
 				extraOption == 3 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) <= 0 : 
 				rot?.Stage == sel;
 		}
-		
+
+		public override string NameFor(RotStage o) => ("RotState"+o.ToString()).Translate();
+
 		public override int ExtraOptionsCount => 3;
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "TD.Spoils".Translate() :
@@ -475,6 +477,8 @@ namespace List_Everything
 			extraOption == 3 ? thing.Faction == Faction.OfInsects :
 			extraOption == 4 ? thing.Faction == null || thing.Faction.def.hidden :
 			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
+
+		public override string NameFor(FactionRelationKind o) => o.GetLabel();
 
 		public override int ExtraOptionsCount => 4;
 		public override string NameForExtra(int ex) => // or FleshTypeDef but this works

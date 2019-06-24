@@ -609,11 +609,11 @@ namespace List_Everything
 			switch (sel)
 			{
 				case RacePropsFilter.Intelligence:
-					if (row.ButtonText(intelligence.ToString()))
+					if (row.ButtonText(intelligence.TranslateEnum()))
 					{
 						foreach (Intelligence intel in Enum.GetValues(typeof(Intelligence)))
 						{
-							options.Add(new FloatMenuOption(intel.ToString(), () => intelligence = intel));
+							options.Add(new FloatMenuOption(intel.TranslateEnum(), () => intelligence = intel));
 						}
 						MainTabWindow_List.DoFloatMenu(options);
 					}
