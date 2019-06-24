@@ -63,8 +63,10 @@ namespace List_Everything
 
 		public void AddAlert(string name, FindDescription desc)
 		{
-			Map map = desc.allMaps ? null : Find.CurrentMap;
+			desc.name = name; //Remember for current copy
 
+			Map map = desc.allMaps ? null : Find.CurrentMap;
+			
 			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
 			//This was a good idea at one point but now I don't care to consolidate them into one ist
 			FindDescription refDesc = desc.Clone(null); //This one has ref string

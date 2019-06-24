@@ -34,7 +34,9 @@ namespace List_Everything
 			}
 			else
 			{
-				FindDescription newDesc = desc.Clone(null); ;
+				desc.name = name;	//Remember for current copy
+
+				FindDescription newDesc = desc.Clone(null);
 				newDesc.name = name;
 				savedFilters[name] = newDesc;
 			}
