@@ -246,6 +246,7 @@ namespace List_Everything
 		{
 			base.ExposeData();
 
+			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
 			if (typeof(Def).IsAssignableFrom(typeof(T)))
 			{
 				//From Scribe_Collections:
@@ -263,14 +264,12 @@ namespace List_Everything
 			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
 			{
 				//Of course between games you can't get references so just save by name should be good enough.
-				//objects saved here  need to be copies made with Clone(null)
+				//objects saved here need to be copies made with Clone(null)
 				Scribe_Values.Look(ref refName, "refName"); //And Clone will handle references
 			}
 			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
 			{
-				//Of course between games you can't get references so just save by name should be good enough.
-				//objects saved here  need to be copies made with Clone(null)
-				Scribe_Deep.Look(ref sel, "sel"); //And Clone will handle references
+				Scribe_Deep.Look(ref sel, "sel");
 			}
 			else
 				Scribe_Values.Look(ref sel, "sel");
@@ -315,7 +314,6 @@ namespace List_Everything
 		protected DropDownDrawStyle drawStyle;
 		public int extraOption; //0 being use T, 1+ defined in subclass
 
-		//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
 		public override void ExposeData()
 		{
 			base.ExposeData();
