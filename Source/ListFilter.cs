@@ -487,14 +487,7 @@ namespace List_Everything
 			ex == 3 ? "TD.Insectoid".Translate() :
 			"TD.NoFaction".Translate();
 	}
-
-	/* This is no good, CanHaveFaction includes rock walls.
-	class ListFilterCanFaction : ListFilter
-	{
-		public override bool Applies(Thing thing) =>
-			thing.def.CanHaveFaction;
-	}*/
-
+	
 	class ListFilterItemCategory : ListFilterDropDown<ThingCategoryDef>
 	{
 		public ListFilterItemCategory() => sel = ThingCategoryDefOf.Root;

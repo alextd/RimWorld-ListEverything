@@ -292,14 +292,6 @@
 	</List_Everything.ListFilterDef>
 
 
-	<!-- This is no good, includes rock walls.
-	<List_Everything.ListFilterDef>
-		<defName>Filter_CanFaction</defName>
-		<label>can Have Faction</label>
-		<filterClass>List_Everything.ListFilterCanFaction</filterClass>
-	</List_Everything.ListFilterDef>
-	-->
-
 	<!-- debug types -->
 
 
