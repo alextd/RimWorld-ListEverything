@@ -74,13 +74,15 @@ namespace List_Everything
 				case BaseListType.Animals:
 					allThings = map.mapPawns.AllPawnsSpawned.Where(p => !p.RaceProps.Humanlike).Cast<Thing>();
 					break;
+
+					//Devmode options:
 				case BaseListType.Haulables:
 					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
 					break;
 				case BaseListType.Mergables:
 					allThings = map.listerMergeables.ThingsPotentiallyNeedingMerging();
 					break;
-				case BaseListType.Filth:
+				case BaseListType.FilthInHomeArea:
 					allThings = map.listerFilthInHomeArea.FilthInHomeArea;
 					break;
 			}
@@ -131,10 +133,9 @@ namespace List_Everything
 		Natural,
 		Plants,
 		Inventory,
-		ThingRequestGroup,
 		Haulables,
 		Mergables,
-		Filth
+		FilthInHomeArea
 	}
 
 	public static class BaseListNormalTypes
