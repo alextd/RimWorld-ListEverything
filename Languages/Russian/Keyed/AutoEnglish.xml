@@ -48,7 +48,7 @@
   <TD.Hot>Жара</TD.Hot>
   <TD.IsPrisoner>Заключенный</TD.IsPrisoner>
   <TD.InCell>В камере</TD.InCell>
-  <TD.ListEverything>Перечислить все</TD.ListEverything>
+  <TD.ListEverything>Просмотреть все фильтры</TD.ListEverything>
   <TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>Нет доступных вариантов (возможно, вам следует снять флажок «Только доступные вещи»)</TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>
   <TD.LockEditing>Запретить редактирование</TD.LockEditing>
   <TD.Listing>Список: </TD.Listing>
