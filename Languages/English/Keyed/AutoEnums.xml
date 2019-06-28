@@ -17,15 +17,13 @@
 	<TD.Allowed>Allowed</TD.Allowed>
 	<TD.Forbiddable>Forbiddable</TD.Forbiddable>
 	<TD.Person>Person</TD.Person>
-	<TD.Animal>Animal</TD.Animal>
+	<!--<TD.Animal>Animal</TD.Animal> Already in Intelligence enum -->
 	<TD.Item>Item</TD.Item>
 	<TD.Building>Building</TD.Building>
-	<TD.Natural>Natural</TD.Natural>
 	<TD.Plant>Plant</TD.Plant>
 	<TD.Other>Other</TD.Other>
 	<TD.Resource>Resource</TD.Resource>
 	<TD.Rock>Rock</TD.Rock>
-	<TD.All>All</TD.All>
 	<TD.Drafted>Drafted</TD.Drafted>
 	<TD.Undrafted>Undrafted</TD.Undrafted>
 	<TD.Controllable>Controllable</TD.Controllable>
