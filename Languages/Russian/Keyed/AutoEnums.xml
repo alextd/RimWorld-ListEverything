@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	
+	<TD.All>Все</TD.All>
+	<TD.Items>Веши</TD.Items>
+	<TD.Everyone>Все</TD.Everyone>
+	<TD.Colonists>Колонисты</TD.Colonists>
+	<TD.Animals>Животные</TD.Animals>
+	<TD.Buildings>Постройки</TD.Buildings>
+	<TD.Natural>Природа</TD.Natural>
+	<TD.Plants>Растения</TD.Plants>
+	<TD.Inventory>Снаряжение</TD.Inventory>
+	<TD.Haulables>Носимое</TD.Haulables>
+	<TD.Mergables>Объединяемое</TD.Mergables>
+	<TD.FilthInHomeArea>Грязь в домашней зоне</TD.FilthInHomeArea>
+	<TD.Forbidden>Запрещенное</TD.Forbidden>
+	<TD.Allowed>Разрешенное</TD.Allowed>
+	<TD.Forbiddable>Запрещаемое</TD.Forbiddable>
+	<TD.Person>Персонаж</TD.Person>
+	<TD.Animal>Животное</TD.Animal>
+	<TD.Item>Вещь</TD.Item>
+	<TD.Building>Строение</TD.Building>
+	<TD.Natural>Природа</TD.Natural>
+	<TD.Plant>Растение</TD.Plant>
+	<TD.Other>Разное</TD.Other>
+	<TD.Resource>Ресурсы</TD.Resource>
+	<TD.Rock>Камень</TD.Rock>
+	<TD.All>Все</TD.All>
+	<TD.Drafted>Активен</TD.Drafted>
+	<TD.Undrafted>Не активен</TD.Undrafted>
+	<TD.Controllable>Управляемый</TD.Controllable>
+	<TD.Predator>Хищный</TD.Predator>
+	<TD.Prey>Добыча</TD.Prey>
+	<TD.Herd>Травоядные</TD.Herd>
+	<TD.Pack>Стая</TD.Pack>
+	<TD.Wildness>Дикий</TD.Wildness>
+	<TD.Petness>Одомашненный</TD.Petness>
+	<TD.Trainability>Обучаемость</TD.Trainability>
+	<TD.Intelligence>Интеллект</TD.Intelligence>
+	
+</LanguageData>

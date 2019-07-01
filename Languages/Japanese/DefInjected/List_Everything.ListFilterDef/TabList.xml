@@ -24,6 +24,7 @@
   <Filter_Drafted.label>徴兵中</Filter_Drafted.label>
   <Filter_Job.label>現在の仕事</Filter_Job.label>
   <Filter_Prisoner.label>囚人</Filter_Prisoner.label>
+  <Filter_RaceProps.label>種族</Filter_RaceProps.label>
   <Filter_MissingBodyPart.label>欠損部位</Filter_MissingBodyPart.label>
 
 

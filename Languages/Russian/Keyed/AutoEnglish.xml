@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <TD.OverwriteAlert>Перезап. оповещение?</TD.OverwriteAlert>
+  <TD.CustomAlerts>Польз. оповещения:</TD.CustomAlerts>
+  <TD.CriticalAlert>Крит. оповещение</TD.CriticalAlert>
+  <TD.SecondsUntilShown>Секунды, пока не показано:</TD.SecondsUntilShown>
+  <TD.Tip1000SecondsInARimworldDay>В дне RimWorld'а 1000 секунд</TD.Tip1000SecondsInARimworldDay>
+  <TD.ShowWhen>Показывать, когда</TD.ShowWhen>
+  <TD.Delete0>Удалить {0}?</TD.Delete0>
+  <TD.AllMaps>Все карты</TD.AllMaps>
+  <TD.Maximum0Displayed>(Максимум {0} показано)</TD.Maximum0Displayed>
+  <TD.Right-clickToOpenFindTab>(Клик правой кнопкой мыши, для открытия таблицы поиска)</TD.Right-clickToOpenFindTab>
+  <TD.SavedFindFilters>Сохр. фильтры:</TD.SavedFindFilters>
+  <TD.NewFindFilters>Новый фильтр</TD.NewFindFilters>
+  <TD.IncludeShort>Вкл.</TD.IncludeShort>
+  <TD.ExcludeShort>Иск.</TD.ExcludeShort>
+  <TD.DeleteThisFilter>Удалить фильтр</TD.DeleteThisFilter>
+  <TD.EnableThisFilter>Включить фильтр</TD.EnableThisFilter>
+  <TD.IncludeOrExcludeThingsMatchingThisFilter>Включить или Исключить вещи подходящие под этот фильтр</TD.IncludeOrExcludeThingsMatchingThisFilter>
+  <TD.ThisFilterDoesntWorkWithAllMaps>Этот фильтр не работает на любой карте</TD.ThisFilterDoesntWorkWithAllMaps>
+  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>Пытался загрузить {0} фильтр названный ({1}), но текущая карта не имеет ничего с таким именем</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
+  <TD.Spoils>Портится</TD.Spoils>
+  <TD.Refrigerated>Охлажденный</TD.Refrigerated>
+  <TD.Frozen>Замерзший</TD.Frozen>
+  <TD.Player>Игрок</TD.Player>
+  <TD.Mechanoid>Механоид</TD.Mechanoid>
+  <TD.Insectoid>Инсектоид</TD.Insectoid>
+  <TD.NoFaction>Без фракции</TD.NoFaction>
+  <TD.NotMadeFromStuff>Не из материала</TD.NotMadeFromStuff>
+  <TD.AnyStockpile>Любой склад</TD.AnyStockpile>
+  <TD.AnyGrowingZone>Любая зона посадки</TD.AnyGrowingZone>
+  <TD.Opened>Открыта</TD.Opened>
+  <TD.BlockedOpen>Заблокирована</TD.BlockedOpen>
+  <TD.IncludeThingsThatMatch>То, с чем совпадает</TD.IncludeThingsThatMatch>
+  <TD.OfTheseFilters>фильтр:</TD.OfTheseFilters>
+  <TD.TheThingHoldingThis>Все снаряжение, что</TD.TheThingHoldingThis>
+  <TD.AnythingThisIsHolding>Каждый человек, кто</TD.AnythingThisIsHolding>
+  <TD.Matches>подпадает под</TD.Matches>
+  <TD.Of>фильтр:</TD.Of>
+  <TD.AnythingXStepsNearbyMatches>В Х шагах и с фильтром </TD.AnythingXStepsNearbyMatches>
+  <TD.From>От</TD.From>
+  <TD.Invisible>(невидимый)</TD.Invisible>
+  <TD.Cold>Холод</TD.Cold>
+  <TD.ALittleCold>Небольшой холод</TD.ALittleCold>
+  <TD.Comfortable>Комфорт</TD.Comfortable>
+  <TD.ALittleHot>Небольшая жара</TD.ALittleHot>
+  <TD.Hot>Жара</TD.Hot>
+  <TD.IsPrisoner>Заключенный</TD.IsPrisoner>
+  <TD.InCell>В камере</TD.InCell>
+  <TD.ListEverything>Просмотреть все фильтры</TD.ListEverything>
+  <TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>Нет доступных вариантов (возможно, вам следует снять флажок «Только доступные вещи»)</TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>
+  <TD.LockEditing>Запретить редактирование</TD.LockEditing>
+  <TD.Listing>Список: </TD.Listing>
+  <TD.Name>Имя:</TD.Name>
+  <TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>Некоторые фильтры не работают на всех картах - например, зоны и области, которые имеют отношение только к одной карте</TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>
+  <TD.ManageSaved>Управлять сохр.</TD.ManageSaved>
+  <TD.MakeAlert>Создать опов.</TD.MakeAlert>
+  <TD.LoadAlert>Загрузить опов.</TD.LoadAlert>
+  <TD.ManageAlerts>Управлять опов.</TD.ManageAlerts>
+  <TD.OnlyShowFilterOptionsForAvailableThings>Показывать параметры фильтра только для доступных вещей</TD.OnlyShowFilterOptionsForAvailableThings>
+  <TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>Например, не показывать опцию «Сделано из пластали», если из пластали ничего не сделано.</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
+  <TD.AddNewFilter...>Добавить новый фильтр...</TD.AddNewFilter...>
+  <TD.SelectAllGameAllowsUpTo80>Выбрать все (игра позволяет выбрать до 80 позиций)</TD.SelectAllGameAllowsUpTo80>
+  <TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>Обновить (список сохранится только при смене фильтра или при открытии вкладки)</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
+  <TD.ContinuousRefreshAboutEverySecond>Непрерывное обновление (примерно каждую секунду)</TD.ContinuousRefreshAboutEverySecond>
+  <TD.OverwriteSavedFilter>Перезаписать сохраненный фильтр?</TD.OverwriteSavedFilter>
+  <TD.AnyOption>Любой</TD.AnyOption>
+  <TD.AllOptions>Каждый</TD.AllOptions>
+
+</LanguageData>
