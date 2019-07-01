@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <TD.All>全て</TD.All>
+  <TD.Items>アイテム</TD.Items>
+  <TD.Everyone>全員</TD.Everyone>
+  <TD.Colonists>入植者達</TD.Colonists>
+  <TD.Animals>動物達</TD.Animals>
+  <TD.Buildings>建物類</TD.Buildings>
+  <TD.Natural>自然構造物</TD.Natural>
+  <TD.Plants>植物類</TD.Plants>
+  <TD.Inventory>インベントリ</TD.Inventory>
+  <TD.Haulables>運搬可能</TD.Haulables>
+  <TD.Mergables>スタック可能</TD.Mergables>
+  <TD.FilthInHomeArea>ホームエリアのゴミ</TD.FilthInHomeArea>
+  <TD.Forbidden>禁止</TD.Forbidden>
+  <TD.Allowed>許可</TD.Allowed>
+  <TD.Forbiddable>禁止可能</TD.Forbiddable>
+  <TD.Person>人物</TD.Person>
+  <TD.Animal>動物</TD.Animal>
+  <TD.Item>アイテム</TD.Item>
+  <TD.Building>建物</TD.Building>
+  <TD.Natural>自然</TD.Natural>
+  <TD.Plant>植物</TD.Plant>
+  <TD.Other>その他</TD.Other>
+  <TD.Resource>資源</TD.Resource>
+  <TD.Rock>岩塊</TD.Rock>
+  <TD.All>全て</TD.All>
+  <TD.Drafted>徴兵済</TD.Drafted>
+  <TD.Undrafted>徴兵無</TD.Undrafted>
+  <TD.Controllable>制御可能</TD.Controllable>
+  <TD.Predator>捕食者</TD.Predator>
+  <TD.Prey>獲物</TD.Prey>
+  <TD.Herd>群れ</TD.Herd>
+  <TD.Pack>荷駄獣</TD.Pack>
+  <TD.Wildness>野生</TD.Wildness>
+  <TD.Petness>家畜度</TD.Petness>
+  <TD.Trainability>訓練可能</TD.Trainability>
+  <TD.Intelligence>知性</TD.Intelligence>
+
+</LanguageData>
