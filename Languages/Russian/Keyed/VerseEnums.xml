@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	
+	<!-- enum Intelligence -->
+		<TD.Animal>Животное</TD.Animal>
+		<TD.ToolUser>Польз. инструмента</TD.ToolUser>
+		<TD.Humanlike>Гуманоид</TD.Humanlike>
+	
+</LanguageData>
