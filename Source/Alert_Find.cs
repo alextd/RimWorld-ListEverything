@@ -96,7 +96,11 @@ namespace List_Everything
 			if (!active)
 				tickStarted = Find.TickManager.TicksGame;
 			else if (Find.TickManager.TicksGame - tickStarted >= alertData.desc.ticksToShowAlert)
+			{
+				if (count == 0)
+					return AlertReport.Active;
 				return AlertReport.CulpritsAre(things.Take(maxItems));
+			}
 			return AlertReport.Inactive;
 		}
 
