@@ -120,8 +120,5 @@ namespace List_Everything
 			comp == CompareType.Equal ? TexButton.Equals :
 			comp == CompareType.Greater ? TexButton.GreaterThan :
 			TexButton.LessThan;
-				
-
-
 	}
 }
