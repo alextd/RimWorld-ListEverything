@@ -478,12 +478,13 @@ namespace List_Everything
 				return thing.GetRoom()?.isPrisonCell ?? false;
 
 			Pawn pawn = thing as Pawn;
-			//Default setting for interactionMode is NoInteraction so fail early if not prisoner
-			//this also covers extraOption == 1, isPrisoner
-			if (!pawn?.IsPrisoner ?? true)
+			if (pawn == null)
 				return false;
 
-			return pawn.guest?.interactionMode == sel;
+			if (extraOption == 1)
+				return pawn.IsPrisoner;
+
+			return pawn.IsPrisoner && pawn.guest?.interactionMode == sel;
 		}
 		
 		public override int ExtraOptionsCount => 2;
