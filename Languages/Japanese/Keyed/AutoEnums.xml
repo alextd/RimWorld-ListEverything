@@ -7,7 +7,6 @@
   <TD.Colonists>入植者達</TD.Colonists>
   <TD.Animals>動物達</TD.Animals>
   <TD.Buildings>建物類</TD.Buildings>
-  <TD.Natural>自然構造物</TD.Natural>
   <TD.Plants>植物類</TD.Plants>
   <TD.Inventory>インベントリ</TD.Inventory>
   <TD.Haulables>運搬可能</TD.Haulables>
@@ -19,6 +18,7 @@
   <TD.Person>人物</TD.Person>
   <TD.Item>アイテム</TD.Item>
   <TD.Building>建物</TD.Building>
+  <TD.Natural>自然</TD.Natural>
   <TD.Plant>植物</TD.Plant>
   <TD.Other>その他</TD.Other>
   <TD.Resource>資源</TD.Resource>
