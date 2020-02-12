@@ -239,7 +239,7 @@ namespace List_Everything
 			set
 			{
 				sel = value;
-				defaultSel = sel.Equals(default(T));
+				defaultSel = sel == null || sel.Equals(default(T));
 			}
 		}
 
