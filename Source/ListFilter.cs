@@ -453,6 +453,12 @@ namespace List_Everything
 			thing is Plant plant && plant.HarvestableNow;
 	}
 
+	class ListFilterPlantDies : ListFilter
+	{
+		public override bool FilterApplies(Thing thing) =>
+			thing is Plant plant && (plant.def.plant?.dieIfLeafless ?? false);
+	}
+
 	class ListFilterClassType : ListFilterDropDown<Type>
 	{
 		public ListFilterClassType() => sel = typeof(Thing);
