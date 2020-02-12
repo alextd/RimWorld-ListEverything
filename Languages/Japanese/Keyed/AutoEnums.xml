@@ -17,15 +17,12 @@
   <TD.Allowed>許可</TD.Allowed>
   <TD.Forbiddable>禁止可能</TD.Forbiddable>
   <TD.Person>人物</TD.Person>
-  <TD.Animal>動物</TD.Animal>
   <TD.Item>アイテム</TD.Item>
   <TD.Building>建物</TD.Building>
-  <TD.Natural>自然</TD.Natural>
   <TD.Plant>植物</TD.Plant>
   <TD.Other>その他</TD.Other>
   <TD.Resource>資源</TD.Resource>
   <TD.Rock>岩塊</TD.Rock>
-  <TD.All>全て</TD.All>
   <TD.Drafted>徴兵済</TD.Drafted>
   <TD.Undrafted>徴兵無</TD.Undrafted>
   <TD.Controllable>制御可能</TD.Controllable>
