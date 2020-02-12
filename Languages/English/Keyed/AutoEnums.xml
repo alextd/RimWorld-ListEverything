@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
-	
+
+	<TD.Selectable>Map</TD.Selectable>
 	<TD.All>All</TD.All>
 	<TD.Items>Items</TD.Items>
 	<TD.Everyone>Everyone</TD.Everyone>

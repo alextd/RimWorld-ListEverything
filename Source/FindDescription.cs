@@ -42,6 +42,9 @@ namespace List_Everything
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch (baseType)
 			{
+				case BaseListType.Selectable:
+					allThings = map.listerThings.AllThings.Where(t => t.def.selectable);
+					break;
 				case BaseListType.All:
 					allThings = ContentsUtility.AllKnownThings(map);
 					break;
@@ -124,6 +127,7 @@ namespace List_Everything
 
 	public enum BaseListType
 	{
+		Selectable,
 		All,
 		Items,
 		Everyone,
@@ -141,7 +145,7 @@ namespace List_Everything
 	public static class BaseListNormalTypes
 	{
 		public static readonly BaseListType[] normalTypes =
-			{ BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
+			{ BaseListType.Selectable, BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
 			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory};
 	}
 }
