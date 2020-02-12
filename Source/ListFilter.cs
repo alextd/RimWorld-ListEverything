@@ -173,11 +173,11 @@ namespace List_Everything
 
 	class ListFilterName : ListFilterWithOption<string>
 	{
-		public ListFilterName() => sel = "";
+		public ListFilterName() => Sel = "";
 
 		public override bool FilterApplies(Thing thing) =>
 			//thing.Label.Contains(sel, CaseInsensitiveComparer.DefaultInvariant);	//Contains doesn't accept comparer with strings. okay.
-			thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
+			defaultSel || thing.Label.IndexOf(Sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
 		public override bool DrawOption(Rect rect)
 		{
@@ -189,16 +189,16 @@ namespace List_Everything
 			}
 
 			GUI.SetNextControlName($"LIST_FILTER_NAME_INPUT{id}");
-			string newStr = Widgets.TextField(rect.LeftPart(0.9f), sel);
-			if (newStr != sel)
+			string newStr = Widgets.TextField(rect.LeftPart(0.9f), Sel);
+			if (newStr != Sel)
 			{
-				sel = newStr;
+				Sel = newStr;
 				return true;
 			}
 			if (Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
 			{
 				GUI.FocusControl("");
-				sel = "";
+				Sel = "";
 				return true;
 			}
 			return false;
@@ -218,7 +218,7 @@ namespace List_Everything
 			bool forbiddable = thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 			if (!forbiddable) return false;
 			bool forbidden = thing.IsForbidden(Faction.OfPlayer);
-			switch (sel)
+			switch (Sel)
 			{
 				case ForbiddenType.Forbidden: return forbidden;
 				case ForbiddenType.Allowed: return !forbidden;
@@ -230,7 +230,18 @@ namespace List_Everything
 	//automated ExposeData + Clone 
 	public abstract class ListFilterWithOption<T> : ListFilter
 	{
-		protected T sel;
+		private T sel;//selection
+		protected bool defaultSel = true;
+
+		protected T Sel
+		{
+			get => sel;
+			set
+			{
+				sel = value;
+				defaultSel = sel.Equals(default(T));
+			}
+		}
 
 		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
 		//(probably could be in ListFilter)
@@ -273,6 +284,9 @@ namespace List_Everything
 			}
 			else
 				Scribe_Values.Look(ref sel, "sel");
+
+			if(Scribe.mode == LoadSaveMode.PostLoadInit)
+				defaultSel = sel == null || sel.Equals(default(T));	//since we cant work with 'Sel = ...' with refs
 		}
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
@@ -282,29 +296,31 @@ namespace List_Everything
 			{
 				if (map == null)//SAVING: I don't have refName, but I make it and tell saved clone
 				{
-					clone.refName = sel == null ? "null" : MakeRefName();
+					clone.refName = Sel == null ? "null" : MakeRefName();
 				}
 				else //LOADING: use my refName to resolve loaded clone's reference
 				{
 					if (refName == "null")
-						clone.sel = default(T);
+					{
+						clone.Sel = default(T);
+					}
 					{
 						if (refName == null)
 							clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
 						else
 							clone.ResolveReference(refName, map);
 
-						if (clone.sel == null)
+						if (clone.Sel == null)
 							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
 					}
 				}
 			}
 			else
-				clone.sel = sel;
+				clone.Sel = Sel;
 
 			return clone;
 		}
-		public virtual string MakeRefName() => sel.ToString();
+		public virtual string MakeRefName() => Sel.ToString();
 		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 	}
 
@@ -329,7 +345,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): sel != null ? NameFor(sel) : NullOption();
+		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): Sel != null ? NameFor(Sel) : NullOption();
 		public virtual string NullOption() => null;
 		public virtual IEnumerable<T> Options()
 		{
@@ -341,8 +357,8 @@ namespace List_Everything
 		}
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		public override string MakeRefName() => NameFor(sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
-		protected virtual void Callback(T o) { sel = o; extraOption = 0; }
+		public override string MakeRefName() => NameFor(Sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
+		protected virtual void Callback(T o) { Sel = o; extraOption = 0; }
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
@@ -390,9 +406,9 @@ namespace List_Everything
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
 	{
 		public override bool FilterApplies(Thing thing) =>
-			sel != null ?
-			(sel.targetType == TargetType.Thing ? thing.MapHeld.designationManager.DesignationOn(thing, sel) != null :
-			thing.MapHeld.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
+			Sel != null ?
+			(Sel.targetType == TargetType.Thing ? thing.MapHeld.designationManager.DesignationOn(thing, Sel) != null :
+			thing.MapHeld.designationManager.DesignationAt(thing.PositionHeld, Sel) != null) :
 			(thing.MapHeld.designationManager.DesignationOn(thing) != null ||
 			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
@@ -415,7 +431,7 @@ namespace List_Everything
 				extraOption == 1 ? rot != null : 
 				extraOption == 2 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) is float r && r>0 && r<1 : 
 				extraOption == 3 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) <= 0 : 
-				rot?.Stage == sel;
+				rot?.Stage == Sel;
 		}
 
 		public override string NameFor(RotStage o) => ("RotState"+o.ToString()).Translate();
@@ -429,18 +445,18 @@ namespace List_Everything
 
 	class ListFilterGrowth : ListFilterWithOption<FloatRange>
 	{
-		public ListFilterGrowth() => sel = FloatRange.ZeroToOne;
+		public ListFilterGrowth() => Sel = FloatRange.ZeroToOne;
 
 		public override bool FilterApplies(Thing thing) =>
-			thing is Plant p && sel.Includes(p.Growth);
+			thing is Plant p && Sel.Includes(p.Growth);
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			FloatRange newRange = sel;
+			FloatRange newRange = Sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (sel != newRange)
+			if (Sel != newRange)
 			{
-				sel = newRange;
+				Sel = newRange;
 				return true;
 			}
 			return false;
@@ -461,10 +477,10 @@ namespace List_Everything
 
 	class ListFilterClassType : ListFilterDropDown<Type>
 	{
-		public ListFilterClassType() => sel = typeof(Thing);
+		public ListFilterClassType() => Sel = typeof(Thing);
 
 		public override bool FilterApplies(Thing thing) =>
-			sel.IsAssignableFrom(thing.GetType());
+			Sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
 		public override IEnumerable<Type> Options() =>
@@ -482,7 +498,7 @@ namespace List_Everything
 			extraOption == 2 ? thing.Faction == Faction.OfMechanoids :
 			extraOption == 3 ? thing.Faction == Faction.OfInsects :
 			extraOption == 4 ? thing.Faction == null || thing.Faction.def.hidden :
-			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
+			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == Sel);
 
 		public override string NameFor(FactionRelationKind o) => o.GetLabel();
 
@@ -496,10 +512,10 @@ namespace List_Everything
 	
 	class ListFilterItemCategory : ListFilterDropDown<ThingCategoryDef>
 	{
-		public ListFilterItemCategory() => sel = ThingCategoryDefOf.Root;
+		public ListFilterItemCategory() => Sel = ThingCategoryDefOf.Root;
 
 		public override bool FilterApplies(Thing thing) =>
-			thing.def.IsWithinCategory(sel);
+			thing.def.IsWithinCategory(Sel);
 
 		public override IEnumerable<ThingCategoryDef> Options() =>
 			ContentsUtility.onlyAvailable ?
@@ -521,10 +537,10 @@ namespace List_Everything
 
 	class ListFilterSpecialFilter : ListFilterDropDown<SpecialThingFilterDef>
 	{
-		public ListFilterSpecialFilter() => sel = SpecialThingFilterDefOf.AllowFresh;
+		public ListFilterSpecialFilter() => Sel = SpecialThingFilterDefOf.AllowFresh;
 
 		public override bool FilterApplies(Thing thing) =>
-			sel.Worker.Matches(thing);
+			Sel.Worker.Matches(thing);
 	}
 
 	enum ListCategory
@@ -541,7 +557,7 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing)
 		{
-			switch(sel)
+			switch(Sel)
 			{
 				case ListCategory.Person: return thing is Pawn pawn && !pawn.NonHumanlikeOrWildMan();
 				case ListCategory.Animal: return thing is Pawn animal && animal.NonHumanlikeOrWildMan();
@@ -560,7 +576,7 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing)
 		{
-			switch (sel)
+			switch (Sel)
 			{
 				case MineableType.Resource: return thing.def.building?.isResourceRock ?? false;
 				case MineableType.Rock: return (thing.def.building?.isNaturalRock ?? false) && (!thing.def.building?.isResourceRock ?? true);
@@ -572,7 +588,7 @@ namespace List_Everything
 
 	class ListFilterHP : ListFilterWithOption<FloatRange>
 	{
-		public ListFilterHP() => sel = FloatRange.ZeroToOne;
+		public ListFilterHP() => Sel = FloatRange.ZeroToOne;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -581,17 +597,17 @@ namespace List_Everything
 				pct = pawn.health.summaryHealth.SummaryHealthPercent;
 			if (thing.def.useHitPoints)
 				pct = (float)thing.HitPoints / thing.MaxHitPoints;
-			return pct != null && sel.Includes(pct.Value);
+			return pct != null && Sel.Includes(pct.Value);
 		}
 
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			FloatRange newRange = sel;
+			FloatRange newRange = Sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (sel != newRange)
+			if (Sel != newRange)
 			{
-				sel = newRange;
+				Sel = newRange;
 				return true;
 			}
 			return false;
@@ -600,20 +616,20 @@ namespace List_Everything
 
 	class ListFilterQuality : ListFilterWithOption<QualityRange>
 	{
-		public ListFilterQuality() => sel = QualityRange.All;
+		public ListFilterQuality() => Sel = QualityRange.All;
 
 		public override bool FilterApplies(Thing thing) =>
 			thing.TryGetQuality(out QualityCategory qc) &&
-			sel.Includes(qc);
+			Sel.Includes(qc);
 
 		public override bool DrawOption(Rect rect)
 		{
 			base.DrawOption(rect);
-			QualityRange newRange = sel;
+			QualityRange newRange = Sel;
 			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
-			if (sel != newRange)
+			if (Sel != newRange)
 			{
-				sel = newRange;
+				Sel = newRange;
 				return true;
 			}
 			return false;
@@ -628,8 +644,8 @@ namespace List_Everything
 			return 
 				extraOption == 1 ? !thing.def.MadeFromStuff :
 				extraOption > 1 ?	stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 2]) ?? false :
-				sel == null ? stuff != null :
-				stuff == sel;
+				Sel == null ? stuff != null :
+				stuff == Sel;
 		}
 
 		public override string NullOption() => "TD.AnyOption".Translate();
@@ -647,7 +663,7 @@ namespace List_Everything
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
 	{
 		public override bool FilterApplies(Thing thing) =>
-			thing.def.drawerType == sel;
+			thing.def.drawerType == Sel;
 	}
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
@@ -659,8 +675,8 @@ namespace List_Everything
 
 			return
 				extraOption == 1 ? pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
-				sel == null ? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
-				pawn.RaceProps.body.GetPartsWithDef(sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
+				Sel == null ? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
+				pawn.RaceProps.body.GetPartsWithDef(Sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
 		public override string NullOption() => "TD.AnyOption".Translate();
@@ -681,9 +697,9 @@ namespace List_Everything
 		public ListFilterArea() => extraOption = 1;
 
 		public override void ResolveReference(string refName, Map map) =>
-			sel = map.areaManager.GetLabeled(refName);
+			Sel = map.areaManager.GetLabeled(refName);
 
-		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
+		public override bool ValidForAllMaps => extraOption > 0 || Sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -694,7 +710,7 @@ namespace List_Everything
 				return pos.Roofed(map);
 
 			if(extraOption == 0)
-				return sel != null ? sel[pos] :
+				return Sel != null ? Sel[pos] :
 				map.areaManager.AllAreas.Any(a => a[pos]);
 
 			switch((BaseAreas)(extraOption - 1))
@@ -729,9 +745,9 @@ namespace List_Everything
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
 		public override void ResolveReference(string refName, Map map) =>
-			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
+			Sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 
-		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
+		public override bool ValidForAllMaps => extraOption != 0 || Sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -740,7 +756,7 @@ namespace List_Everything
 			return 
 				extraOption == 1 ? zoneAtPos is Zone_Stockpile :
 				extraOption == 2 ? zoneAtPos is Zone_Growing :
-				sel != null ? zoneAtPos == sel :
+				Sel != null ? zoneAtPos == Sel :
 				zoneAtPos != null;
 		}
 
@@ -764,7 +780,7 @@ namespace List_Everything
 		{
 			Building_Door door = thing as Building_Door;
 			if (door == null) return false;
-			switch (sel)
+			switch (Sel)
 			{
 				case DoorOpenFilter.Open: return door.Open;
 				case DoorOpenFilter.Close: return !door.Open;
@@ -788,10 +804,10 @@ namespace List_Everything
 
 	class ListFilterThingDef : ListFilterDropDown<ThingDef>
 	{
-		public ListFilterThingDef() => sel = ThingDefOf.WoodLog;
+		public ListFilterThingDef() => Sel = ThingDefOf.WoodLog;
 
 		public override bool FilterApplies(Thing thing) =>
-			sel == thing.def;
+			Sel == thing.def;
 		
 		public override IEnumerable<ThingDef> Options() =>
 			(ContentsUtility.onlyAvailable ?
