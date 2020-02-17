@@ -40,19 +40,24 @@ namespace List_Everything
 		private float scrollViewHeight;
 		public override void DoWindowContents(Rect inRect)
 		{
+			//Title
 			var listing = new Listing_Standard();
 			listing.Begin(inRect);
-
-			Map map = Find.CurrentMap;
 			Text.Font = GameFont.Medium;
 			listing.Label("TD.CustomAlerts".Translate());
 			Text.Font = GameFont.Small;
 			listing.GapLine();
 			listing.End();
 
+			//Check off
+			Rect enableRect = inRect.RightHalf().TopPartPixels(Text.LineHeight);
+			Widgets.CheckboxLabeled(enableRect, "Enable Alerts", ref Alert_Find.enableAll);
+
+			//Margin
 			inRect.yMin += listing.CurHeight;
 
 			//Useful things:
+			Map map = Find.CurrentMap;
 			ListEverythingGameComp comp = Current.Game.GetComponent<ListEverythingGameComp>();
 			string remove = null;
 

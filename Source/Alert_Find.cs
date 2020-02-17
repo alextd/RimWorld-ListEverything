@@ -38,6 +38,8 @@ namespace List_Everything
 		public int maxItems = 16;
 		int tickStarted;
 
+		public static bool enableAll = true;
+
 		public Alert_Find()
 		{
 			//The vanilla alert added to AllAlerts will be constructed but never be active with null filter
@@ -81,7 +83,7 @@ namespace List_Everything
 		
 		public override AlertReport GetReport()
 		{
-			if (alertData == null)	//Alert_Find auto-added as an Alert subclass, exists but never displays anything
+			if (alertData == null || !enableAll)	//Alert_Find auto-added as an Alert subclass, exists but never displays anything
 				return AlertReport.Inactive;
 
 			List<Thing> things = FoundThings();
