@@ -640,7 +640,7 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing)
 		{
-			ThingDef stuff = thing is IConstructible c ? c.UIStuff() : thing.Stuff;
+			ThingDef stuff = thing is IConstructible c ? c.EntityToBuildStuff() : thing.Stuff;
 			return 
 				extraOption == 1 ? !thing.def.MadeFromStuff :
 				extraOption > 1 ?	stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 2]) ?? false :
