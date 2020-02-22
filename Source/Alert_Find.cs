@@ -101,12 +101,12 @@ namespace List_Everything
 			{
 				if (count == 0)
 					return AlertReport.Active;
-				return AlertReport.CulpritsAre(things.Take(maxItems));
+				return AlertReport.CulpritsAre(things.Take(maxItems).ToList());
 			}
 			return AlertReport.Inactive;
 		}
 
-		public override string GetExplanation()
+		public override TaggedString GetExplanation()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")");
