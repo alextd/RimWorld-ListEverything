@@ -405,7 +405,7 @@ namespace List_Everything
 			//Mouse event: select.
 			if (Mouse.IsOver(rect))
 			{
-				if (Event.current.type == EventType.mouseDown)
+				if (Event.current.type == EventType.MouseDown)
 				{
 					if (!thing.def.selectable || !thing.Spawned)
 					{
@@ -455,7 +455,7 @@ namespace List_Everything
 						}
 					}
 				}
-				if (Event.current.type == EventType.mouseDrag)
+				if (Event.current.type == EventType.MouseDrag)
 				{
 					if (!thing.def.selectable || !thing.Spawned)
 						CameraJumper.TryJump(thing);

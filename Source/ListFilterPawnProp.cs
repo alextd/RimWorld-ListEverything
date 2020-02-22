@@ -376,13 +376,10 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			Pawn_StoryTracker story = pawn.story;
-			if (story == null) return false;
-
 			return 
-				extraOption == 1 ? story.CombinedDisabledWorkTags != WorkTags.None :
-				Sel == WorkTags.None ? story.CombinedDisabledWorkTags == WorkTags.None :
-				story.WorkTagIsDisabled(Sel);
+				extraOption == 1 ? pawn.CombinedDisabledWorkTags != WorkTags.None :
+				Sel == WorkTags.None ? pawn.CombinedDisabledWorkTags == WorkTags.None :
+				pawn.WorkTagIsDisabled(Sel);
 		}
 
 		public override int ExtraOptionsCount => 1;

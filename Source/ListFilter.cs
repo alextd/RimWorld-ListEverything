@@ -182,7 +182,7 @@ namespace List_Everything
 		public override bool DrawOption(Rect rect)
 		{
 			if (GUI.GetNameOfFocusedControl() == $"LIST_FILTER_NAME_INPUT{id}" &&
-				Mouse.IsOver(rect) && Event.current.type == EventType.mouseDown && Event.current.button == 1)
+				Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 1)
 			{
 				GUI.FocusControl("");
 				Event.current.Use();
@@ -356,7 +356,7 @@ namespace List_Everything
 			throw new NotImplementedException();
 		}
 		public virtual bool Ordered => false;
-		public virtual string NameFor(T o) => o is Def def ? def.LabelCap : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
+		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
 		public override string MakeRefName() => NameFor(Sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
 		protected virtual void Callback(T o) { Sel = o; extraOption = 0; }
 
