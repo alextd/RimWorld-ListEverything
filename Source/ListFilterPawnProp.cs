@@ -646,4 +646,10 @@ namespace List_Everything
 			return false;
 		}
 	}
+
+	class ListFilterGender : ListFilterDropDown<Gender>
+	{
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && pawn.gender == Sel;
+	}
 }
