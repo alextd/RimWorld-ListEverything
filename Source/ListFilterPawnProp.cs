@@ -651,5 +651,7 @@ namespace List_Everything
 	{
 		public override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.gender == Sel;
+
+		public ListFilterGender() => Sel = Gender.Male;
 	}
 }
