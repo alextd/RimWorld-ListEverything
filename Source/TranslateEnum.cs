@@ -10,7 +10,17 @@ namespace List_Everything
 	{
 		public static string TranslateEnum(this object e)
 		{
-			return ("TD."+e.ToString()).Translate();
+			string type = e.GetType().Name;
+			string name = e.ToString();
+			string key = ("TD." + type + "." + name);
+
+			TaggedString result;
+			if (key.TryTranslate(out result))
+				return result;
+			if (name.TryTranslate(out result))
+				return result;
+			//return key.Translate(); //And get markings on letters, nah.
+			return name;
 		}
 	}
 }

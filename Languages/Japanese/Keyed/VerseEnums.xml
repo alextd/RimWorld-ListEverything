@@ -2,8 +2,8 @@
 <LanguageData>
 
   <!-- enum Intelligence -->
-  <TD.Animal>動物</TD.Animal>
-  <TD.ToolUser>ツール利用者</TD.ToolUser>
-  <TD.Humanlike>人類</TD.Humanlike>
+  <TD.Intelligence.Animal>動物</TD.Intelligence.Animal>
+  <TD.Intelligence.ToolUser>ツール利用者</TD.Intelligence.ToolUser>
+  <TD.Intelligence.Humanlike>人類</TD.Intelligence.Humanlike>
 
 </LanguageData>
