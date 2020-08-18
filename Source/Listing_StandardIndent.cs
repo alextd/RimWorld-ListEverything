@@ -13,21 +13,21 @@ namespace List_Everything
 		private Stack<float> indentSizes = new Stack<float>();
 		private Stack<float> indentHeights = new Stack<float>();
 
-		public void Indent(float size)
+		public void NestedIndent(float size)
 		{
-			curX += size;
+			Indent(size);
 			totalIndent += size;
 			SetWidthForIndent();
 			indentSizes.Push(size);
 			indentHeights.Push(curY);
 		}
 
-		public void EndIndent()
+		public void NestedOutdent()
 		{
 			if (indentSizes.Count > 0)
 			{
 				float size = indentSizes.Pop();
-				curX -= size;
+				Outdent(size);
 				totalIndent -= size;
 				SetWidthForIndent();
 

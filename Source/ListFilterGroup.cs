@@ -66,14 +66,14 @@ namespace List_Everything
 		public override bool DrawMore(Listing_StandardIndent listing)
 		{
 			listing.Gap();
-			listing.Indent(12);
+			listing.NestedIndent(Listing_Standard.DefaultIndent);
 
 			//Draw filters
 			bool changed = MainTabWindow_List.DoFilters(listing, filters);
 			if (!owner.locked)
 				MainTabWindow_List.DrawAddRow(listing, owner, filters);
 
-			listing.EndIndent();
+			listing.NestedOutdent();
 			return changed;
 		}
 	}
