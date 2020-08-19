@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-  <!-- enum Intelligence -->
   <TD.Intelligence.Animal>動物</TD.Intelligence.Animal>
-  <TD.Intelligence.ToolUser>ツール利用者</TD.Intelligence.ToolUser>
+  <TD.Intelligence.ToolUser>道具利用者</TD.Intelligence.ToolUser>
   <TD.Intelligence.Humanlike>人類</TD.Intelligence.Humanlike>
+  <TD.Gender.Male>男性</TD.Gender.Male>
+  <TD.Gender.Female>女性</TD.Gender.Female>
+  <TD.Gender.None>無性</TD.Gender.None>
 
 </LanguageData>
