@@ -32,6 +32,7 @@ namespace List_Everything
 		{
 			ListFilterSkill clone = (ListFilterSkill)base.Clone(map, newOwner);
 			clone.skillRange = skillRange;
+			clone.passion = passion;
 			return clone;
 		}
 
