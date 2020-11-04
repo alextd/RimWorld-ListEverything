@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,9 @@ namespace List_Everything
 {
 	class ListFilterSkill : ListFilterDropDown<SkillDef>
 	{
-		IntRange skillRange = new IntRange(10, 20);
+		IntRange skillRange = new IntRange(0, 20);
+		int passion = 3;
+		static string[] passionText = new string[] { "No flame", "One flame", "Two flame", "Any" };
 
 		public ListFilterSkill()
 		{
@@ -24,6 +26,7 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref skillRange, "skillRange");
+			Scribe_Values.Look(ref passion, "passion");
 		}
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
@@ -36,10 +39,22 @@ namespace List_Everything
 			thing is Pawn pawn &&
 				pawn.skills?.GetSkill(Sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
-				skillRange.Includes(rec.Level);
-		
+				skillRange.Includes(rec.Level) && (passion == 3 || (int)rec.passion == passion);
+
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
+			if (row.ButtonText(passionText[passion]))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>{
+				new FloatMenuOption(passionText[0], () => passion = 0),
+				new FloatMenuOption(passionText[1], () => passion = 1),
+				new FloatMenuOption(passionText[2], () => passion = 2),
+				new FloatMenuOption(passionText[3], () => passion = 3),
+			};
+				MainTabWindow_List.DoFloatMenu(options);
+			}
+			rect.x += 100;
+			rect.width -= 100;
 			IntRange newRange = skillRange;
 			Widgets.IntRange(rect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
 			if (newRange != skillRange)
@@ -113,7 +128,7 @@ namespace List_Everything
 		}
 	}
 
-	class ListFilterThought: ListFilterDropDown<ThoughtDef>
+	class ListFilterThought : ListFilterDropDown<ThoughtDef>
 	{
 		IntRange stageRange;
 		public ListFilterThought()
@@ -376,7 +391,7 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return 
+			return
 				extraOption == 1 ? pawn.CombinedDisabledWorkTags != WorkTags.None :
 				Sel == WorkTags.None ? pawn.CombinedDisabledWorkTags == WorkTags.None :
 				pawn.WorkTagIsDisabled(Sel);
@@ -449,8 +464,8 @@ namespace List_Everything
 			if (pawn == null) return false;
 
 			return
-				extraOption == 1 ? pawn.MentalState != null: 
-				Sel == null ? pawn.MentalState == null : 
+				extraOption == 1 ? pawn.MentalState != null :
+				Sel == null ? pawn.MentalState == null :
 				pawn.MentalState?.def is MentalStateDef def && def == Sel;
 		}
 
@@ -483,7 +498,7 @@ namespace List_Everything
 
 			return pawn.IsPrisoner && pawn.guest?.interactionMode == Sel;
 		}
-		
+
 		public override int ExtraOptionsCount => 2;
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "TD.IsPrisoner".Translate() : "TD.InCell".Translate();
@@ -518,7 +533,7 @@ namespace List_Everything
 		}
 
 		public override string NameFor(JobDef o) =>
-			Regex.Replace(o.reportString.Replace(".",""), "Target(A|B|C)", "...");
+			Regex.Replace(o.reportString.Replace(".", ""), "Target(A|B|C)", "...");
 		public override string NullOption() => "None".Translate();
 
 		public override IEnumerable<JobDef> Options() =>
@@ -570,17 +585,17 @@ namespace List_Everything
 			switch (Sel)
 			{
 				case RacePropsFilter.Intelligence: return props.intelligence == intelligence;
-				case RacePropsFilter.Herd: 
+				case RacePropsFilter.Herd:
 					return props.herdAnimal;
-				case RacePropsFilter.Pack: 
+				case RacePropsFilter.Pack:
 					return props.packAnimal;
-				case RacePropsFilter.Predator: 
+				case RacePropsFilter.Predator:
 					return props.predator;
-				case RacePropsFilter.Prey: 
+				case RacePropsFilter.Prey:
 					return props.canBePredatorPrey;
-				case RacePropsFilter.Wildness: 
+				case RacePropsFilter.Wildness:
 					return wild.Includes(props.wildness);
-				case RacePropsFilter.Petness: 
+				case RacePropsFilter.Petness:
 					return petness.Includes(props.petness);
 				case RacePropsFilter.Trainability:
 					return props.trainability == trainability;
@@ -599,7 +614,7 @@ namespace List_Everything
 				case RacePropsFilter.Trainability: trainability = TrainabilityDefOf.Advanced; return;
 			}
 		}
-	
+
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
@@ -624,7 +639,7 @@ namespace List_Everything
 						oldRange = ref petness;
 
 					FloatRange newRange = oldRange;
-					Widgets.FloatRange(rect, id, ref newRange, valueStyle:ToStringStyle.PercentZero);
+					Widgets.FloatRange(rect, id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 					if (newRange != oldRange)
 					{
 						oldRange = newRange;
