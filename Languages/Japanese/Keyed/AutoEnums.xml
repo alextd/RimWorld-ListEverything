@@ -1,46 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 
-	<TD.BaseListType.All>全て</TD.BaseListType.All>
-	<TD.BaseListType.Items>アイテム</TD.BaseListType.Items>
-	<TD.BaseListType.Everyone>全員</TD.BaseListType.Everyone>
-	<TD.BaseListType.Colonists>入植者達</TD.BaseListType.Colonists>
-	<TD.BaseListType.Animals>動物達</TD.BaseListType.Animals>
-	<TD.BaseListType.Buildings>建物類</TD.BaseListType.Buildings>
-	<TD.BaseListType.Natural>自然</TD.BaseListType.Natural>
-	<TD.BaseListType.Plants>植物類</TD.BaseListType.Plants>
-	<TD.BaseListType.Inventory>インベントリ</TD.BaseListType.Inventory>
-	<TD.BaseListType.Haulables>運搬可能</TD.BaseListType.Haulables>
-	<TD.BaseListType.Mergables>スタック可能</TD.BaseListType.Mergables>
-	<TD.BaseListType.FilthInHomeArea>ホームエリアのゴミ</TD.BaseListType.FilthInHomeArea>
+  <TD.BaseListType.Selectable>マップ</TD.BaseListType.Selectable>
+  <TD.BaseListType.All>全て</TD.BaseListType.All>
+  <TD.BaseListType.Items>アイテム</TD.BaseListType.Items>
+  <TD.BaseListType.Everyone>全員</TD.BaseListType.Everyone>
+  <TD.BaseListType.Colonists>入植者達</TD.BaseListType.Colonists>
+  <TD.BaseListType.Animals>動物達</TD.BaseListType.Animals>
+  <TD.BaseListType.Buildings>建物類</TD.BaseListType.Buildings>
+  <TD.BaseListType.Natural>自然</TD.BaseListType.Natural>
+  <TD.BaseListType.Plants>植物類</TD.BaseListType.Plants>
+  <TD.BaseListType.Inventory>インベントリ</TD.BaseListType.Inventory>
+  <TD.BaseListType.Haulables>運搬可能</TD.BaseListType.Haulables>
+  <TD.BaseListType.Mergables>スタック可能</TD.BaseListType.Mergables>
+  <TD.BaseListType.FilthInHomeArea>ホームエリアのゴミ</TD.BaseListType.FilthInHomeArea>
 
-	<TD.ForbiddenType.Forbidden>禁止</TD.ForbiddenType.Forbidden>
-	<TD.ForbiddenType.Allowed>許可</TD.ForbiddenType.Allowed>
-	<TD.ForbiddenType.Forbiddable>禁止可能</TD.ForbiddenType.Forbiddable>
+  <TD.ForbiddenType.Forbidden>禁止</TD.ForbiddenType.Forbidden>
+  <TD.ForbiddenType.Allowed>許可</TD.ForbiddenType.Allowed>
+  <TD.ForbiddenType.Forbiddable>禁止可能</TD.ForbiddenType.Forbiddable>
 
-	<TD.ListCategory.Person>人物</TD.ListCategory.Person>
-	<TD.ListCategory.Animal>動物</TD.ListCategory.Animal>
-	<TD.ListCategory.Item>アイテム</TD.ListCategory.Item>
-	<TD.ListCategory.Building>建物</TD.ListCategory.Building>
-	<TD.ListCategory.Natural>自然</TD.ListCategory.Natural>
-	<TD.ListCategory.Plant>植物</TD.ListCategory.Plant>
-	<TD.ListCategory.Other>その他</TD.ListCategory.Other>
+  <TD.ListCategory.Person>人物</TD.ListCategory.Person>
+  <TD.ListCategory.Animal>動物</TD.ListCategory.Animal>
+  <TD.ListCategory.Item>アイテム</TD.ListCategory.Item>
+  <TD.ListCategory.Building>建物</TD.ListCategory.Building>
+  <TD.ListCategory.Natural>自然</TD.ListCategory.Natural>
+  <TD.ListCategory.Plant>植物</TD.ListCategory.Plant>
+  <TD.ListCategory.Other>その他</TD.ListCategory.Other>
 
-	<TD.MineableType.Resource>資源</TD.MineableType.Resource>
-	<TD.MineableType.Rock>岩塊</TD.MineableType.Rock>
-	<TD.MineableType.All>全て</TD.MineableType.All>
+  <TD.MineableType.Resource>資源</TD.MineableType.Resource>
+  <TD.MineableType.Rock>岩塊</TD.MineableType.Rock>
+  <TD.MineableType.All>全て</TD.MineableType.All>
 
-	<TD.DraftFilter.Drafted>徴兵済</TD.DraftFilter.Drafted>
-	<TD.DraftFilter.Undrafted>徴兵無</TD.DraftFilter.Undrafted>
-	<TD.DraftFilter.Controllable>制御可能</TD.DraftFilter.Controllable>
-	
+  <TD.DraftFilter.Drafted>徴兵済</TD.DraftFilter.Drafted>
+  <TD.DraftFilter.Undrafted>徴兵無</TD.DraftFilter.Undrafted>
+  <TD.DraftFilter.Controllable>制御可能</TD.DraftFilter.Controllable>
+
   <TD.RacePropsFilter.Predator>捕食者</TD.RacePropsFilter.Predator>
-	<TD.RacePropsFilter.Prey>獲物</TD.RacePropsFilter.Prey>
-	<TD.RacePropsFilter.Herd>群れ</TD.RacePropsFilter.Herd>
-	<TD.RacePropsFilter.Pack>荷駄獣</TD.RacePropsFilter.Pack>
-	<TD.RacePropsFilter.Wildness>野生</TD.RacePropsFilter.Wildness>
-	<TD.RacePropsFilter.Petness>家畜度</TD.RacePropsFilter.Petness>
-	<TD.RacePropsFilter.Trainability>訓練可能</TD.RacePropsFilter.Trainability>
-	<TD.RacePropsFilter.Intelligence>知性</TD.RacePropsFilter.Intelligence>
+  <TD.RacePropsFilter.Prey>獲物</TD.RacePropsFilter.Prey>
+  <TD.RacePropsFilter.Herd>群れ</TD.RacePropsFilter.Herd>
+  <TD.RacePropsFilter.Pack>荷駄獣</TD.RacePropsFilter.Pack>
+  <TD.RacePropsFilter.Wildness>野生</TD.RacePropsFilter.Wildness>
+  <TD.RacePropsFilter.Petness>家畜度</TD.RacePropsFilter.Petness>
+  <TD.RacePropsFilter.Trainability>訓練可能</TD.RacePropsFilter.Trainability>
+  <TD.RacePropsFilter.Intelligence>知性</TD.RacePropsFilter.Intelligence>
 
 </LanguageData>
