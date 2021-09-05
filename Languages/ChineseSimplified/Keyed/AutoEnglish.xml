@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <TD.OverwriteAlert>是否覆盖警报？</TD.OverwriteAlert>
+  <TD.CustomAlerts>自定义警报：</TD.CustomAlerts>
+  <TD.CriticalAlert>严重警报</TD.CriticalAlert>
+  <TD.SecondsUntilShown>显示前的秒数：</TD.SecondsUntilShown>
+  <TD.Tip1000SecondsInARimworldDay>Rimworld的一天是1000秒</TD.Tip1000SecondsInARimworldDay>
+  <TD.ShowWhen>当数量</TD.ShowWhen>
+  <TD.Delete0>删除 {0}?</TD.Delete0>
+  <TD.AllMaps>所有地图</TD.AllMaps>
+  <TD.Maximum0Displayed>(最多显示 {0} 个)</TD.Maximum0Displayed>
+  <TD.Right-clickToOpenFindTab>(右键打开“搜索”标签页)</TD.Right-clickToOpenFindTab>
+  <TD.SavedFindFilters>已保存的筛选器</TD.SavedFindFilters>
+  <TD.NewFindFilters>新筛选器</TD.NewFindFilters>
+  <TD.IncludeShort>包含</TD.IncludeShort>
+  <TD.ExcludeShort>排除</TD.ExcludeShort>
+  <TD.DeleteThisFilter>删除这个筛选器</TD.DeleteThisFilter>
+  <TD.EnableThisFilter>开启这个筛选器</TD.EnableThisFilter>
+  <TD.IncludeOrExcludeThingsMatchingThisFilter>包含或排除与此筛选器匹配的内容</TD.IncludeOrExcludeThingsMatchingThisFilter>
+  <TD.ThisFilterDoesntWorkWithAllMaps>此筛选器不适用于所有地图</TD.ThisFilterDoesntWorkWithAllMaps>
+  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>尝试加载名为 {1} 的筛选器 {0} ，但是当前地图上没有此名称的筛选器</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
+  <TD.Spoils>腐烂</TD.Spoils>
+  <TD.Refrigerated>冷藏</TD.Refrigerated>
+  <TD.Frozen>冷冻</TD.Frozen>
+  <TD.Player>玩家</TD.Player>
+  <TD.Mechanoid>机械族</TD.Mechanoid>
+  <TD.Insectoid>虫族</TD.Insectoid>
+  <TD.NoFaction>无派系</TD.NoFaction>
+  <TD.NotMadeFromStuff>没有材料属性</TD.NotMadeFromStuff>
+  <TD.AnyStockpile>任何储存区</TD.AnyStockpile>
+  <TD.AnyGrowingZone>任何种植区</TD.AnyGrowingZone>
+  <TD.Opened>打开的</TD.Opened>
+  <TD.BlockedOpen>被强制打开的</TD.BlockedOpen>
+  <TD.IncludeThingsThatMatch>匹配满足以下</TD.IncludeThingsThatMatch>
+  <TD.OfTheseFilters>筛选器的事物:</TD.OfTheseFilters>
+  <TD.TheThingHoldingThis>持有该物品的人</TD.TheThingHoldingThis>
+  <TD.AnythingThisIsHolding>他所持有的物品</TD.AnythingThisIsHolding>
+  <TD.Matches>满足以下</TD.Matches>
+  <TD.Of>筛选器:</TD.Of>
+  <TD.AnythingXStepsNearbyMatches>附近X格的任何东西满足</TD.AnythingXStepsNearbyMatches>
+  <TD.From>从</TD.From>
+  <TD.Invisible>(不可见)</TD.Invisible>
+  <TD.Cold>冷</TD.Cold>
+  <TD.ALittleCold>有点冷</TD.ALittleCold>
+  <TD.Comfortable>舒适</TD.Comfortable>
+  <TD.ALittleHot>有点热</TD.ALittleHot>
+  <TD.Hot>热</TD.Hot>
+  <TD.IsPrisoner>是囚犯</TD.IsPrisoner>
+  <TD.InCell>在屋内</TD.InCell>
+  <TD.ListEverything>列出所有内容</TD.ListEverything>
+  <TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>没有可用的选项(也许您应该取消选中“仅显示可用选项”)</TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings>
+  <TD.LockEditing>锁定编辑</TD.LockEditing>
+  <TD.Listing>范围: </TD.Listing>
+  <TD.Name>名称:</TD.Name>
+  <TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>某些筛选器并不适用于所有的地图，例如明显只适用于单个地图的储存区筛选器</TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap>
+  <TD.ManageSaved>管理保存的筛选器</TD.ManageSaved>
+  <TD.MakeAlert>做为警报</TD.MakeAlert>
+  <TD.LoadAlert>加载警报</TD.LoadAlert>
+  <TD.ManageAlerts>管理警报</TD.ManageAlerts>
+  <TD.OnlyShowFilterOptionsForAvailableThings>仅显示可用选项</TD.OnlyShowFilterOptionsForAvailableThings>
+  <TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>比如，如果没有玻璃钢，则不会显示玻璃钢的材质选项。</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
+  <TD.AddNewFilter...>添加新筛选器...</TD.AddNewFilter...>
+  <TD.SelectAllGameAllowsUpTo80>全选(游戏最多允许选中80个)</TD.SelectAllGameAllowsUpTo80>
+  <TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>刷新(列表仅在更改筛选器或打开选项卡时刷新)</TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened>
+  <TD.ContinuousRefreshAboutEverySecond>持续刷新(大约每秒刷新一次)</TD.ContinuousRefreshAboutEverySecond>
+  <TD.OverwriteSavedFilter>是否覆盖保存的筛选器？</TD.OverwriteSavedFilter>
+  <TD.AnyOption>任何</TD.AnyOption>
+  <TD.AllOptions>所有</TD.AllOptions>
+
+</LanguageData>

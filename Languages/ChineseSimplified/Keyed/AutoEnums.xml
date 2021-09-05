@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <TD.BaseListType.Selectable>可选择</TD.BaseListType.Selectable>
+  <TD.BaseListType.All>所有一切</TD.BaseListType.All>
+  <TD.BaseListType.Items>物品</TD.BaseListType.Items>
+  <TD.BaseListType.Everyone>所有人</TD.BaseListType.Everyone>
+  <TD.BaseListType.Colonists>殖民者</TD.BaseListType.Colonists>
+  <TD.BaseListType.Animals>动物</TD.BaseListType.Animals>
+  <TD.BaseListType.Buildings>建筑</TD.BaseListType.Buildings>
+  <TD.BaseListType.Natural>自然</TD.BaseListType.Natural>
+  <TD.BaseListType.Plants>植物</TD.BaseListType.Plants>
+  <TD.BaseListType.Inventory>货物</TD.BaseListType.Inventory>
+  <TD.BaseListType.Haulables>可搬运的</TD.BaseListType.Haulables>
+  <TD.BaseListType.Mergables>可堆叠的</TD.BaseListType.Mergables>
+  <TD.BaseListType.FilthInHomeArea>居住区的污渍</TD.BaseListType.FilthInHomeArea>
+
+  <TD.ForbiddenType.Forbidden>禁用</TD.ForbiddenType.Forbidden>
+  <TD.ForbiddenType.Allowed>允许</TD.ForbiddenType.Allowed>
+  <TD.ForbiddenType.Forbiddable>可以禁用</TD.ForbiddenType.Forbiddable>
+
+  <TD.ListCategory.Person>人类</TD.ListCategory.Person>
+  <TD.ListCategory.Animal>动物</TD.ListCategory.Animal>
+  <TD.ListCategory.Item>物品</TD.ListCategory.Item>
+  <TD.ListCategory.Building>建筑物</TD.ListCategory.Building>
+  <TD.ListCategory.Natural>自然</TD.ListCategory.Natural>
+  <TD.ListCategory.Plant>植物</TD.ListCategory.Plant>
+  <TD.ListCategory.Other>其他</TD.ListCategory.Other>
+
+  <TD.MineableType.Resource>资源</TD.MineableType.Resource>
+  <TD.MineableType.Rock>岩石</TD.MineableType.Rock>
+  <TD.MineableType.All>所有</TD.MineableType.All>
+
+  <TD.DraftFilter.Drafted>已征召</TD.DraftFilter.Drafted>
+  <TD.DraftFilter.Undrafted>未征召</TD.DraftFilter.Undrafted>
+  <TD.DraftFilter.Controllable>可征召</TD.DraftFilter.Controllable>
+
+  <TD.RacePropsFilter.Predator>捕食者</TD.RacePropsFilter.Predator>
+  <TD.RacePropsFilter.Prey>猎物</TD.RacePropsFilter.Prey>
+  <TD.RacePropsFilter.Herd>兽群</TD.RacePropsFilter.Herd>
+  <TD.RacePropsFilter.Pack>驮运动物</TD.RacePropsFilter.Pack>
+  <TD.RacePropsFilter.Wildness>野性</TD.RacePropsFilter.Wildness>
+  <TD.RacePropsFilter.Petness>宠物度</TD.RacePropsFilter.Petness>
+  <TD.RacePropsFilter.Trainability>可训练度</TD.RacePropsFilter.Trainability>
+  <TD.RacePropsFilter.Intelligence>智力</TD.RacePropsFilter.Intelligence>
+
+</LanguageData>
