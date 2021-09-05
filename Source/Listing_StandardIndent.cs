@@ -67,5 +67,13 @@ namespace List_Everything
 
 			Text.Font = font;
 		}
+
+		//1.3 just removed Listing Scrollviews?
+		public void EndScrollView(ref Rect viewRect)
+		{
+			viewRect = new Rect(0f, 0f, listingRect.width, curY);
+			Widgets.EndScrollView();
+			End();
+		}
 	}
 }

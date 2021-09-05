@@ -472,7 +472,7 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			if (extraOption == 2)
-				return thing.GetRoom()?.isPrisonCell ?? false;
+				return thing.GetRoom()?.IsPrisonCell ?? false;
 
 			Pawn pawn = thing as Pawn;
 			if (pawn == null)

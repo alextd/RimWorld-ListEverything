@@ -31,7 +31,6 @@ namespace List_Everything
 
 		public override void DoWindowContents(Rect fillRect)
 		{
-			base.DoWindowContents(fillRect);
 			Rect filterRect = fillRect.LeftPart(0.60f);
 			Rect listRect = fillRect.RightPart(0.39f);
 
