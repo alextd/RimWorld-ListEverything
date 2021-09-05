@@ -10,9 +10,14 @@ using UnityEngine;
 
 namespace List_Everything
 {
+	
 	class ListFilterSkill : ListFilterDropDown<SkillDef>
 	{
-		IntRange skillRange = new IntRange(10, 20);
+		IntRange skillRange = new IntRange(0, 20);
+		int passion = 3;
+
+		static string[] passionText = new string[] { "PassionNone", "PassionMinor", "PassionMajor", "TD.AnyOption" };
+		public static string GetPassionText(int x) => passionText[x].Translate().ToString().Split('\n')[0];
 
 		public ListFilterSkill()
 		{
@@ -24,11 +29,13 @@ namespace List_Everything
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref skillRange, "skillRange");
+			Scribe_Values.Look(ref passion, "passion");
 		}
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
 			ListFilterSkill clone = (ListFilterSkill)base.Clone(map, newOwner);
 			clone.skillRange = skillRange;
+			clone.passion = passion;
 			return clone;
 		}
 
@@ -36,10 +43,22 @@ namespace List_Everything
 			thing is Pawn pawn &&
 				pawn.skills?.GetSkill(Sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
-				skillRange.Includes(rec.Level);
-		
+				skillRange.Includes(rec.Level) && (passion == 3 || (int)rec.passion == passion);
+
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
+			if (row.ButtonText(GetPassionText(passion)))
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>{
+				new FloatMenuOption(GetPassionText(0), () => passion = 0),
+				new FloatMenuOption(GetPassionText(1), () => passion = 1),
+				new FloatMenuOption(GetPassionText(2), () => passion = 2),
+				new FloatMenuOption(GetPassionText(3), () => passion = 3),
+			};
+				MainTabWindow_List.DoFloatMenu(options);
+			}
+			rect.x += 100;
+			rect.width -= 100;
 			IntRange newRange = skillRange;
 			Widgets.IntRange(rect, id, ref newRange, SkillRecord.MinLevel, SkillRecord.MaxLevel);
 			if (newRange != skillRange)
