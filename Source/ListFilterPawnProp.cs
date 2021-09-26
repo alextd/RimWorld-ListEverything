@@ -547,6 +547,12 @@ namespace List_Everything
 		public override bool Ordered => true;
 	}
 
+	class ListFilterGuestStatus : ListFilterDropDown<GuestStatus>
+	{
+		public override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && pawn.GuestStatus is GuestStatus status && status == Sel;
+	}
+
 	enum RacePropsFilter { Predator, Prey, Herd, Pack, Wildness, Petness, Trainability, Intelligence }
 	class ListFilterRaceProps : ListFilterDropDown<RacePropsFilter>
 	{
