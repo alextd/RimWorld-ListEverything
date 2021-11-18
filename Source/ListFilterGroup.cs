@@ -31,8 +31,8 @@ namespace List_Everything
 		protected bool any = true; // or all
 
 		public override bool FilterApplies(Thing t) => 
-			any ? filters.Any(f => f.AppliesTo(t)) : 
-			filters.All(f => f.AppliesTo(t));
+			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) : 
+			filters.All(f => f.Enabled && f.AppliesTo(t));
 
 		public override void ExposeData()
 		{
