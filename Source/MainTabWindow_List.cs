@@ -188,15 +188,15 @@ namespace List_Everything
 
 			//Saved Filters
 			if (Widgets.ButtonText(savedRect, "SaveButton".Translate()))
-				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Settings.Get().Save(name, findDesc)));
+				Find.WindowStack.Add(new Dialog_Name(findDesc.name, name => Mod.settings.Save(name, findDesc)));
 
 			savedRect.x += savedRect.width;
-			if (Settings.Get().SavedNames().Count() > 0 &&
+			if (Mod.settings.SavedNames().Count() > 0 &&
 				Widgets.ButtonText(savedRect, "Load".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (string name in Settings.Get().SavedNames())
-					options.Add(new FloatMenuOption(name, () => findDesc = Settings.Get().Load(name)));
+				foreach (string name in Mod.settings.SavedNames())
+					options.Add(new FloatMenuOption(name, () => findDesc = Mod.settings.Load(name)));
 
 				DoFloatMenu(options);
 			}

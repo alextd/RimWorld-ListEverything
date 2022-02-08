@@ -8,14 +8,9 @@ using RimWorld;
 
 namespace List_Everything
 {
-	class Settings : ModSettings
+	public class Settings : ModSettings
 	{
 		private Dictionary<string, FindDescription> savedFilters = new Dictionary<string, FindDescription>();
-
-		public static Settings Get()
-		{
-			return LoadedModManager.GetMod<Mod>().GetSettings<Settings>();
-		}
 
 		public IEnumerable<string> SavedNames() => savedFilters.Keys;
 
