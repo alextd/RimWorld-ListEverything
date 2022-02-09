@@ -51,7 +51,7 @@ namespace List_Everything
 
 			//Check off
 			Rect enableRect = inRect.RightHalf().TopPartPixels(Text.LineHeight);
-			Widgets.CheckboxLabeled(enableRect, "Enable Alerts", ref Alert_Find.enableAll);
+			Widgets.CheckboxLabeled(enableRect, "TD.EnableAlerts".Translate(), ref Alert_Find.enableAll);
 
 			//Margin
 			inRect.yMin += listing.CurHeight;

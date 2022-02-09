@@ -16,7 +16,7 @@ namespace List_Everything
 		IntRange skillRange = new IntRange(0, 20);
 		int passion = 3;
 
-		static string[] passionText = new string[] { "PassionNone", "PassionMinor", "PassionMajor", "TD.AnyOption" };
+		static string[] passionText = new string[] { "PassionNone", "PassionMinor", "PassionMajor", "TD.AnyOption" };//notranslate
 		public static string GetPassionText(int x) => passionText[x].Translate().ToString().Split('\n')[0];
 
 		public ListFilterSkill()
