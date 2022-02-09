@@ -11,7 +11,7 @@ namespace List_Everything
 		public static Settings settings;
 		public Mod(ModContentPack content) : base(content)
 		{
-			settings = GetSettings<Settings>();
+			LongEventHandler.ExecuteWhenFinished(() => { settings = GetSettings<Settings>(); });
 		}
 
 		public override void DoSettingsWindowContents(Rect inRect)
