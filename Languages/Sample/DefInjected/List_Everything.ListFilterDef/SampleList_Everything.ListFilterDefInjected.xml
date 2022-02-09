@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 	
-	<Filter_Group.label>filter group</Filter_Group.label>
 	<Filter_Name.label>search by name</Filter_Name.label>
 	<Filter_Def.label>specific thing</Filter_Def.label>
 	<Filter_Category.label>category</Filter_Category.label>
@@ -17,7 +16,10 @@
 	<Filter_AreaRestriction.label>area restriction</Filter_AreaRestriction.label>
 	<Filter_Drafted.label>drafted</Filter_Drafted.label>
 	<Filter_Job.label>current action</Filter_Job.label>
+	<Filter_Guest.label>guest status</Filter_Guest.label>
 	<Filter_Prisoner.label>prisoner</Filter_Prisoner.label>
+	<Filter_RaceProps.label>race</Filter_RaceProps.label>
+	<Filter_Gender.label>gender</Filter_Gender.label>
 	<Filter_MissingBodyPart.label>missing Body Part</Filter_MissingBodyPart.label>
 	<Filter_ItemInfo.label>item info</Filter_ItemInfo.label>
 	<Filter_ItemCategory.label>item grouping</Filter_ItemCategory.label>
@@ -29,9 +31,11 @@
 	<Filter_Mineable.label>mineable</Filter_Mineable.label>
 	<Filter_Forbidden.label>forbidden</Filter_Forbidden.label>
 	<Filter_Designation.label>designated</Filter_Designation.label>
+	<Filter_Plants.label>plants and food</Filter_Plants.label>
 	<Filter_Harvestable.label>plant harvestable</Filter_Harvestable.label>
 	<Filter_Growth.label>plant growth</Filter_Growth.label>
 	<Filter_Freshness.label>freshness</Filter_Freshness.label>
+	<Filter_DiesLeafless.label>dies to cold</Filter_DiesLeafless.label>
 	<Filter_Deterioration.label>deteriorating</Filter_Deterioration.label>
 	<Filter_Location.label>location</Filter_Location.label>
 	<Filter_Area.label>area</Filter_Area.label>
@@ -39,7 +43,7 @@
 	<Filter_Faction.label>faction</Filter_Faction.label>
 	<Filter_Door.label>Door Status</Filter_Door.label>
 	<Filter_Nearby.label>nearby</Filter_Nearby.label>
-	<Filter_CanFaction.label>can Have Faction</Filter_CanFaction.label>
+	<Filter_Group.label>filter group</Filter_Group.label>
 	<Filter_ClassType.label>C# Class Type</Filter_ClassType.label>
 	<Filter_DrawerType.label>drawer Type</Filter_DrawerType.label>
 	
