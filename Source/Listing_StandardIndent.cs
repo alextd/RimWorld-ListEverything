@@ -53,7 +53,7 @@ namespace List_Everything
 
 			//Need BeginGroup before ScrollView, listingRect needs rect.width-=20 but the group doesn't
 
-			GUI.BeginGroup(rect);
+			Widgets.BeginGroup(rect);
 			Widgets.BeginScrollView(rect.AtZero(), ref scrollPosition, viewRect, true);
 			
 			maxOneColumn = true;
