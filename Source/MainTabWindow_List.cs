@@ -293,7 +293,7 @@ namespace List_Everything
 
 
 		public static string LabelCountThings(List<Thing> things) =>
-			$"{things.Sum(t => t.stackCount)} things";
+			"TD.LabelCountThings".Translate(things.Sum(t => t.stackCount));
 
 
 		private Vector2 scrollPositionList = Vector2.zero;

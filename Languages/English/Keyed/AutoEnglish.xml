@@ -68,4 +68,5 @@
 	<TD.AnyOption>Any</TD.AnyOption>
 	<TD.AllOptions>All</TD.AllOptions>
 	<TD.EnableAlerts>Enable Alerts</TD.EnableAlerts>
+	<TD.LabelCountThings>{0} things</TD.LabelCountThings>
 </LanguageData>
