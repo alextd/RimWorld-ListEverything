@@ -292,6 +292,10 @@ namespace List_Everything
 		}
 
 
+		public static string LabelCountThings(List<Thing> things) =>
+			$"{things.Sum(t => t.stackCount)} things";
+
+
 		private Vector2 scrollPositionList = Vector2.zero;
 		private float scrollViewHeightList;
 
@@ -302,7 +306,6 @@ namespace List_Everything
 			//Top-row buttons
 			Rect buttRect = listRect.LeftPartPixels(32);
 			buttRect.height = 32;
-			listRect.yMin += 34;
 
 			selectAll = Widgets.ButtonImage(buttRect, TexButton.SelectAll);
 			TooltipHandler.TipRegion(buttRect, "TD.SelectAllGameAllowsUpTo80".Translate());
@@ -319,6 +322,11 @@ namespace List_Everything
 			GUI.color = Color.white;//Because Widgets.ButtonImage doesn't set it back
 			TooltipHandler.TipRegion(buttRect, "TD.ContinuousRefreshAboutEverySecond".Translate());
 
+			//Count text
+			Text.Anchor = TextAnchor.UpperRight;
+			Widgets.Label(listRect, LabelCountThings(listedThings));
+			Text.Anchor = TextAnchor.UpperLeft;
+			listRect.yMin += 34;
 
 			//Handle mouse selection
 			if (!Input.GetMouseButton(0))

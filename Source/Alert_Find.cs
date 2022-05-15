@@ -108,12 +108,14 @@ namespace List_Everything
 
 		public override TaggedString GetExplanation()
 		{
+			var things = FoundThings();
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")");
+			stringBuilder.Append(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")");
+			stringBuilder.AppendLine(" - " + MainTabWindow_List.LabelCountThings(things));
 			stringBuilder.AppendLine("");
-			foreach (Thing thing in FoundThings().Take(maxItems))
+			foreach (Thing thing in things.Take(maxItems))
 				stringBuilder.AppendLine("   " + thing.Label);
-			if (FoundThings().Count() > maxItems)
+			if (things.Count() > maxItems)
 				stringBuilder.AppendLine("TD.Maximum0Displayed".Translate(maxItems));
 			stringBuilder.AppendLine("");
 			stringBuilder.AppendLine("TD.Right-clickToOpenFindTab".Translate());
