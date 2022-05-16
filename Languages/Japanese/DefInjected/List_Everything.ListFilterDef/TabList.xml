@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
   <!-- filters in order -->
@@ -22,6 +22,7 @@
   <Filter_AreaRestriction.label>エリア制限</Filter_AreaRestriction.label>
   <Filter_Drafted.label>徴兵中</Filter_Drafted.label>
   <Filter_Job.label>現在の仕事</Filter_Job.label>
+  <Filter_Guest.label>客人情報</Filter_Guest.label>
   <Filter_Prisoner.label>囚人</Filter_Prisoner.label>
   <Filter_RaceProps.label>種族</Filter_RaceProps.label>
   <Filter_Gender.label>性別</Filter_Gender.label>
@@ -62,7 +63,7 @@
   <Filter_Area.label>エリア</Filter_Area.label>
   <Filter_Zone.label>ゾーン</Filter_Zone.label>
   <Filter_Faction.label>派閥</Filter_Faction.label>
-  <Filter_Door.label>ドア状態</Filter_Door.label>
+  <Filter_Door.label>ドアの状態</Filter_Door.label>
   <Filter_Nearby.label>最も近い</Filter_Nearby.label>
   <Filter_Group.label>フィルタ種類</Filter_Group.label>
 
