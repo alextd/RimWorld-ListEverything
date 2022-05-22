@@ -685,12 +685,11 @@ namespace List_Everything
 	// -------------------------
 
 
-	class ListFilterMeat : ListFilterDropDown<ThingDef>
+	abstract class ListFilterDefCount: ListFilterDropDown<ThingDef>
 	{
-		public static int mostMeat = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultMeatAmount(d))).Max();
-		IntRange countRange = new IntRange(50, mostMeat);
+		protected IntRange countRange;
 
-		public ListFilterMeat()
+		public ListFilterDefCount()
 		{
 			Sel = null;
 			extraOption = 1;
@@ -709,23 +708,58 @@ namespace List_Everything
 			return clone;
 		}
 
+		public abstract ThingDef DefFor(Thing thing);
+		public abstract int CountOf(Thing thing);
+
 		public override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			ThingDef meatDef = pawn.RaceProps.meatDef;
+			ThingDef productDef = DefFor(thing);
 
 			if (extraOption == 0 && Sel == null)
-				return meatDef == null;
+				return productDef == null;
 
-			if(extraOption == 1 ? meatDef != null : Sel == meatDef)
+			if(extraOption == 1 ? productDef != null : Sel == productDef)
+				return countRange.Includes(CountOf(pawn));
+
+			return false;
+		}
+
+		public abstract int Max();
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
+			if (extraOption == 0 && Sel == null) return false;
+
+			IntRange newRange = countRange;
+			
+			Widgets.IntRange(rect, id, ref newRange, 0, Max());
+			if (newRange != countRange)
 			{
-				int meatCount = Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.MeatAmount));
-				return countRange.Includes(meatCount);
+				countRange = newRange;
+				return true;
 			}
 			return false;
 		}
+
+		public override string NullOption() => "None".Translate();
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
+	}
+
+	class ListFilterMeat : ListFilterDefCount
+	{
+		public static int mostMeat = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultMeatAmount(d))).Max();
+
+		public ListFilterMeat()
+		{
+			countRange = new IntRange(50, mostMeat);
+		}
+		public override ThingDef DefFor(Thing thing) => (thing as Pawn)?.RaceProps.meatDef;
+		public override int CountOf(Thing thing) => Mathf.RoundToInt(thing.GetStatValue(StatDefOf.MeatAmount));
 
 		public static List<ThingDef> allMeats = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsMeat).ToList();
 		public override IEnumerable<ThingDef> Options()
@@ -743,26 +777,11 @@ namespace List_Everything
 			return allMeats;
 		}
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
-		{
-			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
-			if (extraOption == 0 && Sel == null) return false;
-
-			IntRange newRange = countRange;
-			
-			Widgets.IntRange(rect, id, ref newRange, 0, mostMeat);
-			if (newRange != countRange)
-			{
-				countRange = newRange;
-				return true;
-			}
-			return false;
-		}
-
-		public override string NullOption() => "None".Translate();
-
-		public override int ExtraOptionsCount => 1;
-		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
+		public override int Max() => mostMeat;
 	}
 
+	//Leather
+	//Milk
+	//Wool
+	//Egg
 }
