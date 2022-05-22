@@ -679,4 +679,90 @@ namespace List_Everything
 
 		public ListFilterGender() => Sel = Gender.Male;
 	}
+
+	// -------------------------
+	// Animal Details
+	// -------------------------
+
+
+	class ListFilterMeat : ListFilterDropDown<ThingDef>
+	{
+		public static int mostMeat = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultMeatAmount(d))).Max();
+		IntRange countRange = new IntRange(50, mostMeat);
+
+		public ListFilterMeat()
+		{
+			Sel = null;
+			extraOption = 1;
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref countRange, "countRange");
+		}
+		public override ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilterMeat clone = (ListFilterMeat)base.Clone(map, newOwner);
+			clone.countRange = countRange;
+			return clone;
+		}
+
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			ThingDef meatDef = pawn.RaceProps.meatDef;
+
+			if (extraOption == 0 && Sel == null)
+				return meatDef == null;
+
+			if(extraOption == 1 ? meatDef != null : Sel == meatDef)
+			{
+				int meatCount = Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.MeatAmount));
+				return countRange.Includes(meatCount);
+			}
+			return false;
+		}
+
+		public static List<ThingDef> allMeats = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsMeat).ToList();
+		public override IEnumerable<ThingDef> Options()
+		{
+			if (ContentsUtility.onlyAvailable)
+			{
+				HashSet<ThingDef> ret = new HashSet<ThingDef>();
+				foreach (Map map in Find.Maps)
+					foreach (Pawn p in map.mapPawns.AllPawns)
+						if (p.RaceProps.meatDef is ThingDef meatDeaf)
+							ret.Add(meatDeaf);
+
+				return ret;
+			}
+			return allMeats;
+		}
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
+			if (extraOption == 0 && Sel == null) return false;
+
+			IntRange newRange = countRange;
+			
+			Widgets.IntRange(rect, id, ref newRange, 0, mostMeat);
+			if (newRange != countRange)
+			{
+				countRange = newRange;
+				return true;
+			}
+			return false;
+		}
+
+		public override string NullOption() => "None".Translate();
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
+	}
+
 }
