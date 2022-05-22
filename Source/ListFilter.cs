@@ -143,8 +143,9 @@ namespace List_Everything
 		private bool shouldFocus;
 		public void Focus() => shouldFocus = true;
 		protected virtual void DoFocus() { }
-		
-		public virtual void ExposeData()
+
+		public virtual void ExposeData() => BaseExposeData();
+		protected void BaseExposeData()
 		{
 			Scribe_Defs.Look(ref def, "def");
 			Scribe_Values.Look(ref enabled, "enabled", true);
@@ -816,6 +817,28 @@ namespace List_Everything
 			.Where(def => FindDescription.ValidDef(def));
 
 		public override bool Ordered => true;
+	}
+
+	class ListFilterModded : ListFilterDropDown<ModContentPack>
+	{
+		public ListFilterModded() => Sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
+
+		public override void ExposeData()
+		{
+			BaseExposeData();
+			string packageId = Sel.PackageId;
+			Scribe_Values.Look(ref packageId, "sel");
+			if(Scribe.mode == LoadSaveMode.LoadingVars)
+				Sel = LoadedModManager.RunningMods.First(mod => mod.PackageId == packageId);
+		}
+
+		public override bool FilterApplies(Thing thing) =>
+			Sel == thing.ContentSource;
+		
+		public override IEnumerable<ModContentPack> Options() =>
+			LoadedModManager.RunningMods;
+
+		public override string NameFor(ModContentPack o) => o.Name;
 	}
 
 }
