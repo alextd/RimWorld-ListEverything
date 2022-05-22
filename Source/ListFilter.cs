@@ -836,7 +836,7 @@ namespace List_Everything
 			Sel == thing.ContentSource;
 		
 		public override IEnumerable<ModContentPack> Options() =>
-			LoadedModManager.RunningMods;
+			LoadedModManager.RunningMods.Where(mod => mod.AllDefs.Any(d => d is ThingDef));
 
 		public override string NameFor(ModContentPack o) => o.Name;
 	}
