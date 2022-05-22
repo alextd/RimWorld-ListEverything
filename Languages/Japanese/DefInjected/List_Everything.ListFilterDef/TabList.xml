@@ -64,6 +64,7 @@
   <Filter_Zone.label>ゾーン</Filter_Zone.label>
   <Filter_Faction.label>派閥</Filter_Faction.label>
   <Filter_Door.label>ドアの状態</Filter_Door.label>
+  <Filter_Mod.label>Modから</Filter_Mod.label>
   <Filter_Nearby.label>最も近い</Filter_Nearby.label>
   <Filter_Group.label>フィルタ種類</Filter_Group.label>
 
