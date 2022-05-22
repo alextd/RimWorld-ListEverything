@@ -780,6 +780,36 @@ namespace List_Everything
 		public override int Max() => mostMeat;
 	}
 
+	class ListFilterLeather: ListFilterDefCount
+	{
+		public static int mostLeather = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultLeatherAmount(d))).Max();
+
+		public ListFilterLeather()
+		{
+			countRange = new IntRange(50, mostLeather);
+		}
+		public override ThingDef DefFor(Thing thing) => (thing as Pawn)?.RaceProps.leatherDef;
+		public override int CountOf(Thing thing) => Mathf.RoundToInt(thing.GetStatValue(StatDefOf.LeatherAmount));
+
+		public static List<ThingDef> allLeathers = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsLeather).ToList();
+		public override IEnumerable<ThingDef> Options()
+		{
+			if (ContentsUtility.onlyAvailable)
+			{
+				HashSet<ThingDef> ret = new HashSet<ThingDef>();
+				foreach (Map map in Find.Maps)
+					foreach (Pawn p in map.mapPawns.AllPawns)
+						if (p.RaceProps.leatherDef is ThingDef leatherDeaf)
+							ret.Add(leatherDeaf);
+
+				return ret;
+			}
+			return allLeathers;
+		}
+
+		public override int Max() => mostLeather;
+	}
+
 	//Leather
 	//Milk
 	//Wool
