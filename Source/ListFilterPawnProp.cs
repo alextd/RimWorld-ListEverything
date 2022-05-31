@@ -799,7 +799,7 @@ namespace List_Everything
 
 			if (props == null)
 				return null;
-			if (props.eggLayFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+			if (props.eggLayFemaleOnly && pawn.gender != Gender.Female)
 				return null;
 
 			return props.eggUnfertilizedDef;
@@ -822,7 +822,7 @@ namespace List_Everything
 
 			if (props == null)
 				return null;
-			if (props.milkFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+			if (props.milkFemaleOnly && pawn.gender != Gender.Female)
 				return null;
 
 			return props.milkDef;
@@ -847,8 +847,8 @@ namespace List_Everything
 		public static int mostWool = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.WoolPerYear(d))).Max();
 		public override int Max() => mostWool;
 	}
-	/*
-	enum ProgressType { EggLay, EggHatch, Milk, Wool, Milkable, Shearable }
+	
+	enum ProgressType { Milkable, Shearable, Milk, Wool, EggLay, EggHatch}
 	class ListFilterProductProgress : ListFilterDropDown<ProgressType>
 	{
 		protected FloatRange progressRange = new FloatRange(0, 1);
@@ -870,47 +870,66 @@ namespace List_Everything
 			return clone;
 		}
 
-		public float ProgressFor(Thing thing)
-		{
-			switch(Sel)
+		public float ProgressFor(Thing thing) =>
+			(float)
+			(Sel switch
 			{
-				case ProgressType.EggLay:
-					thing.TryGetComp<CompEggLayer>()?.
-				case ProgressType.Milk:
-				case ProgressType.Wool:
-
-			}
-		}
+				ProgressType.EggLay => thing.TryGetComp<CompEggLayer>()?.eggProgress,
+				ProgressType.EggHatch => thing.TryGetComp<CompHatcher>()?.gestateProgress,
+				ProgressType.Milk => thing.TryGetComp<CompMilkable>()?.Fullness,
+				ProgressType.Wool => thing.TryGetComp<CompShearable>()?.Fullness,
+				ProgressType.Milkable => thing.TryGetComp<CompMilkable>()?.ActiveAndFull ?? false ? 1 : 0,
+				ProgressType.Shearable => thing.TryGetComp<CompShearable>()?.ActiveAndFull ?? false ? 1 : 0,
+				_ => 0,
+			});
 
 		public override bool FilterApplies(Thing thing)
 		{
-			Pawn pawn = thing as Pawn;
-			if (pawn == null) return false;
+			if (!thing.def.HasComp(Sel switch
+			{
+				ProgressType.EggLay => typeof(CompEggLayer),
+				ProgressType.EggHatch => typeof(CompHatcher),
+				ProgressType.Milk => typeof(CompMilkable),
+				ProgressType.Wool => typeof(CompShearable),
+				ProgressType.Milkable => typeof(CompMilkable),
+				ProgressType.Shearable => typeof(CompShearable),
+				_ => null
+			}))
+				return false;
 
-			if (extraOption == 0 && Sel == null)
-				return productDef == null;
+			if (Sel == ProgressType.EggLay)
+			{
+				if (thing.def.GetCompProperties<CompProperties_EggLayer>().eggLayFemaleOnly && (thing as Pawn).gender != Gender.Female)
+					return false;
+			}
+			if (Sel == ProgressType.Milk || Sel == ProgressType.Milkable)
+			{
+				if (thing.def.GetCompProperties<CompProperties_Milkable>().milkFemaleOnly && (thing as Pawn).gender != Gender.Female)
+					return false;
+			}
 
-			if (extraOption == 1 ? productDef != null : Sel == productDef)
-				return countRange.Includes(CountFor(pawn));
-
-			return false;
+			float progress = ProgressFor(thing);
+			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+				return progress == 1;
+			else
+				return progressRange.Includes(progress);
 		}
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
-			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
-			if (extraOption == 0 && Sel == null) return false;
+			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+				return false;
 
-			IntRange newRange = countRange;
+			FloatRange newRange = progressRange;
 
-			Widgets.IntRange(rect, id, ref newRange, 0, Max());
-			if (newRange != countRange)
+			Widgets.FloatRange(rect, id, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			if (newRange != progressRange)
 			{
-				countRange = newRange;
+				progressRange = newRange;
 				return true;
 			}
 			return false;
 		}
 	}
-	*/
+	
 }
