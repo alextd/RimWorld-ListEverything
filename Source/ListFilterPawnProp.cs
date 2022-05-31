@@ -848,7 +848,8 @@ namespace List_Everything
 		public override int Max() => mostWool;
 	}
 	
-	enum ProgressType { Milkable, Shearable, Milk, Wool, EggLay, EggHatch}
+	//Enum values matching existing translation keys
+	enum ProgressType { Milkable, Shearable, MilkFullness, WoolGrowth, EggProgress, EggHatch}
 	class ListFilterProductProgress : ListFilterDropDown<ProgressType>
 	{
 		protected FloatRange progressRange = new FloatRange(0, 1);
@@ -874,10 +875,10 @@ namespace List_Everything
 			(float)
 			(Sel switch
 			{
-				ProgressType.EggLay => thing.TryGetComp<CompEggLayer>()?.eggProgress,
+				ProgressType.EggProgress => thing.TryGetComp<CompEggLayer>()?.eggProgress,
 				ProgressType.EggHatch => thing.TryGetComp<CompHatcher>()?.gestateProgress,
-				ProgressType.Milk => thing.TryGetComp<CompMilkable>()?.Fullness,
-				ProgressType.Wool => thing.TryGetComp<CompShearable>()?.Fullness,
+				ProgressType.MilkFullness => thing.TryGetComp<CompMilkable>()?.Fullness,
+				ProgressType.WoolGrowth => thing.TryGetComp<CompShearable>()?.Fullness,
 				ProgressType.Milkable => thing.TryGetComp<CompMilkable>()?.ActiveAndFull ?? false ? 1 : 0,
 				ProgressType.Shearable => thing.TryGetComp<CompShearable>()?.ActiveAndFull ?? false ? 1 : 0,
 				_ => 0,
@@ -887,22 +888,22 @@ namespace List_Everything
 		{
 			if (!thing.def.HasComp(Sel switch
 			{
-				ProgressType.EggLay => typeof(CompEggLayer),
+				ProgressType.EggProgress => typeof(CompEggLayer),
 				ProgressType.EggHatch => typeof(CompHatcher),
-				ProgressType.Milk => typeof(CompMilkable),
-				ProgressType.Wool => typeof(CompShearable),
+				ProgressType.MilkFullness => typeof(CompMilkable),
+				ProgressType.WoolGrowth => typeof(CompShearable),
 				ProgressType.Milkable => typeof(CompMilkable),
 				ProgressType.Shearable => typeof(CompShearable),
 				_ => null
 			}))
 				return false;
 
-			if (Sel == ProgressType.EggLay)
+			if (Sel == ProgressType.EggProgress)
 			{
 				if (thing.def.GetCompProperties<CompProperties_EggLayer>().eggLayFemaleOnly && (thing as Pawn).gender != Gender.Female)
 					return false;
 			}
-			if (Sel == ProgressType.Milk || Sel == ProgressType.Milkable)
+			if (Sel == ProgressType.MilkFullness || Sel == ProgressType.Milkable)
 			{
 				if (thing.def.GetCompProperties<CompProperties_Milkable>().milkFemaleOnly && (thing as Pawn).gender != Gender.Female)
 					return false;

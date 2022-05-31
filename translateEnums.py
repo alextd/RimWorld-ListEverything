@@ -2,7 +2,7 @@ import os
 import sys
 import re 
 
-print("TODO: Handle .TypeName.")
+print("Script is unfinised. Handle updating instead of rewriting. Handle adding .TypeName. to xml tag")
 sys.exit(0)
 
 xmlBegin = """<?xml version="1.0" encoding="utf-8" ?>

@@ -44,4 +44,8 @@
 	<TD.RacePropsFilter.Trainability>Trainability</TD.RacePropsFilter.Trainability>
 	<TD.RacePropsFilter.Intelligence>Intelligence</TD.RacePropsFilter.Intelligence>
 
+	<TD.ProgressType.Milkable>Milk ready</TD.ProgressType.Milkable>
+	<TD.ProgressType.Shearable>Wool ready</TD.ProgressType.Shearable>
+	<TD.ProgressType.EggHatch>Hatching progress</TD.ProgressType.EggHatch>
+	
 </LanguageData>
