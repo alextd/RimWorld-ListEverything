@@ -793,15 +793,18 @@ namespace List_Everything
 
 	class ListFilterEgg : ListFilterProduct //Per Year
 	{
-		public override ThingDef DefFor(Pawn pawn) => pawn.def.GetCompProperties<CompProperties_EggLayer>()?.eggUnfertilizedDef;
-		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.EggsPerYear(pawn.def));
-
-		public override bool FilterApplies(Thing thing)
+		public override ThingDef DefFor(Pawn pawn)
 		{
-			if (!base.FilterApplies(thing)) return false;
-			if ((thing as Pawn)?.gender == Gender.Female) return true;
-			return thing.def.GetCompProperties<CompProperties_EggLayer>()?.eggLayFemaleOnly == false;
+			var props = pawn.def.GetCompProperties<CompProperties_EggLayer>();
+
+			if (props == null)
+				return null;
+			if (props.eggLayFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+				return null;
+
+			return props.eggUnfertilizedDef;
 		}
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.EggsPerYear(pawn.def));
 
 		public static HashSet<ThingDef> allEggs = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_EggLayer>()?.eggUnfertilizedDef).Where(d => d != null).ToHashSet();
 		public override IEnumerable<ThingDef> AllOptions() => allEggs;
@@ -813,31 +816,18 @@ namespace List_Everything
 
 	class ListFilterMilk : ListFilterProduct //Per Year
 	{
-		public override ThingDef DefFor(Pawn pawn) => pawn.def.GetCompProperties<CompProperties_Milkable>()?.milkDef;
-		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.MilkPerYear(pawn.def));
-
-		public override bool FilterApplies(Thing thing)
+		public override ThingDef DefFor(Pawn pawn)
 		{
-			if (!base.FilterApplies(thing)) return false;
+			var props = pawn.def.GetCompProperties<CompProperties_Milkable>();
 
-			CompMilkable comp = thing.TryGetComp<CompMilkable>();
+			if (props == null)
+				return null;
+			if (props.milkFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+				return null;
 
-			if (comp == null) return true;//This means searching for 'none' since base FilterApplies returned true to get this far
-
-			//can't use comp.Active because it checks base.Active that checks Faction == null
-			//So copy/paste from there instead
-			Pawn pawn = thing as Pawn;
-			if (comp.Props.milkFemaleOnly && pawn != null && pawn.gender != Gender.Female)
-			{
-				return false;
-			}
-			if (pawn != null && !pawn.ageTracker.CurLifeStage.milkable)
-			{
-				return false;
-			}
-			return true;
-			//No Comp means Search for 'None', because base.FilterApplies returned true to get here.
+			return props.milkDef;
 		}
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.MilkPerYear(pawn.def));
 
 		public static HashSet<ThingDef> allMilks = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Milkable>()?.milkDef).Where(d => d != null).ToHashSet();
 		public override IEnumerable<ThingDef> AllOptions() => allMilks;
@@ -850,25 +840,6 @@ namespace List_Everything
 	{
 		public override ThingDef DefFor(Pawn pawn) => pawn.def.GetCompProperties<CompProperties_Shearable>()?.woolDef;
 		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.WoolPerYear(pawn.def));
-
-		public override bool FilterApplies(Thing thing)
-		{
-			if (!base.FilterApplies(thing)) return false;
-
-			CompShearable comp = thing.TryGetComp<CompShearable>();
-
-			if (comp == null) return true;//This means searching for 'none' since base FilterApplies returned true to get this far
-
-			//can't use comp.Active because it checks base.Active that checks Faction == null
-			//So copy/paste from there instead
-			Pawn pawn = thing as Pawn;
-			if (pawn != null && !pawn.ageTracker.CurLifeStage.shearable)
-			{
-				return false;
-			}
-			return true;
-			//No Comp means Search for 'None', because base.FilterApplies returned true to get here.
-		}
 
 		public static HashSet<ThingDef> allWools = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Shearable>()?.woolDef).Where(d => d != null).ToHashSet();
 		public override IEnumerable<ThingDef> AllOptions() => allWools;
