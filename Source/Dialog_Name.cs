@@ -22,8 +22,9 @@ namespace List_Everything
 			setNameAction = act;
 		}
 
-
-		protected override void SetName(string name)
+		//protected but using publicized assembly
+		//protected override void SetName(string name)
+		public override void SetName(string name)
 		{
 			setNameAction(name);
 		}

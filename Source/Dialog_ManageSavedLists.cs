@@ -17,8 +17,9 @@ namespace List_Everything
 				return new Vector2(900f, 700f);
 			}
 		}
-
-		protected override void SetInitialSizeAndPosition()
+		//protected but using publicized assembly
+		//protected override void SetInitialSizeAndPosition()
+		public override void SetInitialSizeAndPosition()
 		{
 			base.SetInitialSizeAndPosition();
 			windowRect.x = UI.screenWidth - windowRect.width;

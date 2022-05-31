@@ -18,7 +18,9 @@ namespace List_Everything
 			}
 		}
 
-		protected override void SetInitialSizeAndPosition()
+		//protected but using publicized assembly
+		//protected override void SetInitialSizeAndPosition()
+		public override void SetInitialSizeAndPosition()
 		{
 			base.SetInitialSizeAndPosition();
 			windowRect.x = UI.screenWidth - windowRect.width;
