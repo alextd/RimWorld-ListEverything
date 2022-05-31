@@ -62,7 +62,6 @@
 			<li>Filter_Drafted</li>
 			<li>Filter_Prisoner</li>
 			<li>Filter_Gender</li>
-			<li>Filter_RaceProps</li>
 			<li>Filter_MissingBodyPart</li>
 			<!-- Seems like it should be here but it also includes "holder has" which is an item detail - shrug. <li>Filter_Inventory</li>-->
 		</subFilters>
@@ -170,6 +169,7 @@
 		<defName>Filter_AnimalProp</defName>
 		<label>animal details</label>
 		<subFilters>
+			<li>Filter_RaceProps</li>
 			<li>Filter_Meat</li>
 			<li>Filter_Leather</li>
 			<li>Filter_Egg</li>
