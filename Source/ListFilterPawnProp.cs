@@ -819,22 +819,25 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing)
 		{
 			if (!base.FilterApplies(thing)) return false;
-			if ((thing as Pawn)?.gender == Gender.Female) return true;
-			return thing.def.GetCompProperties<CompProperties_Milkable>()?.milkFemaleOnly== false;
+
+			CompMilkable comp = thing.TryGetComp<CompMilkable>();
+
+			if (comp == null) return true;//This means searching for 'none' since base FilterApplies returned true to get this far
+
+			//can't use comp.Active because it checks base.Active that checks Faction == null
+			//So copy/paste from there instead
+			Pawn pawn = thing as Pawn;
+			if (comp.Props.milkFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+			{
+				return false;
+			}
+			if (pawn != null && !pawn.ageTracker.CurLifeStage.milkable)
+			{
+				return false;
+			}
+			return true;
+			//No Comp means Search for 'None', because base.FilterApplies returned true to get here.
 		}
-
-		/* TODO: Only active. That's private. Sigh.
-		public override bool FilterApplies(Thing thing)
-		{
-			if (!base.FilterApplies(thing)) return false;
-
-			var milk = thing.TryGetComp<CompMilkable>();
-			if (milk == null) return true;//Searched for 'None'
-
-			if (milk.ActiveAndFull) return false;
-			if ((thing as Pawn)?.gender == Gender.Female) return true;
-			return ?.milkFemaleOnly == false;
-		}*/
 
 		public static HashSet<ThingDef> allMilks = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Milkable>()?.milkDef).Where(d => d != null).ToHashSet();
 		public override IEnumerable<ThingDef> AllOptions() => allMilks;
@@ -847,6 +850,25 @@ namespace List_Everything
 	{
 		public override ThingDef DefFor(Pawn pawn) => pawn.def.GetCompProperties<CompProperties_Shearable>()?.woolDef;
 		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.WoolPerYear(pawn.def));
+
+		public override bool FilterApplies(Thing thing)
+		{
+			if (!base.FilterApplies(thing)) return false;
+
+			CompShearable comp = thing.TryGetComp<CompShearable>();
+
+			if (comp == null) return true;//This means searching for 'none' since base FilterApplies returned true to get this far
+
+			//can't use comp.Active because it checks base.Active that checks Faction == null
+			//So copy/paste from there instead
+			Pawn pawn = thing as Pawn;
+			if (pawn != null && !pawn.ageTracker.CurLifeStage.shearable)
+			{
+				return false;
+			}
+			return true;
+			//No Comp means Search for 'None', because base.FilterApplies returned true to get here.
+		}
 
 		public static HashSet<ThingDef> allWools = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Shearable>()?.woolDef).Where(d => d != null).ToHashSet();
 		public override IEnumerable<ThingDef> AllOptions() => allWools;
