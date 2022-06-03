@@ -44,4 +44,8 @@
   <TD.RacePropsFilter.Trainability>訓練可能</TD.RacePropsFilter.Trainability>
   <TD.RacePropsFilter.Intelligence>知性</TD.RacePropsFilter.Intelligence>
 
+  <TD.ProgressType.Milkable>ミルク準備状態</TD.ProgressType.Milkable>
+  <TD.ProgressType.Shearable>ウール準備状態</TD.ProgressType.Shearable>
+  <TD.ProgressType.EggHatch>孵化の進捗</TD.ProgressType.EggHatch>
+
 </LanguageData>
