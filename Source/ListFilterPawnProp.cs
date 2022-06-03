@@ -679,4 +679,258 @@ namespace List_Everything
 
 		public ListFilterGender() => Sel = Gender.Male;
 	}
+
+	// -------------------------
+	// Animal Details
+	// -------------------------
+
+
+	abstract class ListFilterProduct : ListFilterDropDown<ThingDef>
+	{
+		protected IntRange countRange;
+
+		public ListFilterProduct()
+		{
+			Sel = null;
+			extraOption = 1;
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+			countRange = new IntRange(0, Max());
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref countRange, "countRange");
+		}
+		public override ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilterProduct clone = (ListFilterProduct)base.Clone(map, newOwner);
+			clone.countRange = countRange;
+			return clone;
+		}
+
+		public abstract ThingDef DefFor(Pawn pawn);
+		public abstract int CountFor(Pawn pawn);
+
+		public override bool FilterApplies(Thing thing)
+		{
+			Pawn pawn = thing as Pawn;
+			if (pawn == null) return false;
+
+			ThingDef productDef = DefFor(pawn);
+
+			if (extraOption == 0 && Sel == null)
+				return productDef == null;
+
+			if(extraOption == 1 ? productDef != null : Sel == productDef)
+				return countRange.Includes(CountFor(pawn));
+
+			return false;
+		}
+
+		public abstract int Max();
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
+			if (extraOption == 0 && Sel == null) return false;
+
+			IntRange newRange = countRange;
+			
+			Widgets.IntRange(rect, id, ref newRange, 0, Max());
+			if (newRange != countRange)
+			{
+				countRange = newRange;
+				return true;
+			}
+			return false;
+		}
+
+		public abstract IEnumerable<ThingDef> AllOptions();
+		public override IEnumerable<ThingDef> Options()
+		{
+			if (ContentsUtility.onlyAvailable)
+			{
+				HashSet<ThingDef> ret = new HashSet<ThingDef>();
+				foreach (Map map in Find.Maps)
+					foreach (Pawn p in map.mapPawns.AllPawns)
+						if (DefFor(p) is ThingDef def)
+							ret.Add(def);
+
+				return ret;
+			}
+			return AllOptions();
+		}
+
+		public override string NullOption() => "None".Translate();
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
+	}
+
+	class ListFilterMeat : ListFilterProduct
+	{
+		public override ThingDef DefFor(Pawn pawn) => pawn.RaceProps.meatDef;
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.MeatAmount));
+
+		public static List<ThingDef> allMeats = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsMeat).ToList();
+		public override IEnumerable<ThingDef> AllOptions() => allMeats;
+
+		public static int mostMeat = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultMeatAmount(d))).Max();
+		public override int Max() => mostMeat;
+	}
+
+	class ListFilterLeather : ListFilterProduct
+	{
+		public override ThingDef DefFor(Pawn pawn) => pawn.RaceProps.leatherDef;
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.LeatherAmount));
+
+		public static List<ThingDef> allLeathers = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsLeather).ToList();
+		public override IEnumerable<ThingDef> AllOptions() => allLeathers;
+
+		public static int mostLeather = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.AdultLeatherAmount(d))).Max();
+		public override int Max() => mostLeather;
+	}
+
+	class ListFilterEgg : ListFilterProduct //Per Year
+	{
+		public override ThingDef DefFor(Pawn pawn)
+		{
+			var props = pawn.def.GetCompProperties<CompProperties_EggLayer>();
+
+			if (props == null)
+				return null;
+			if (props.eggLayFemaleOnly && pawn.gender != Gender.Female)
+				return null;
+
+			return props.eggUnfertilizedDef;
+		}
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.EggsPerYear(pawn.def));
+
+		public static HashSet<ThingDef> allEggs = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_EggLayer>()?.eggUnfertilizedDef).Where(d => d != null).ToHashSet();
+		public override IEnumerable<ThingDef> AllOptions() => allEggs;
+
+		public static int mostEggs = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.EggsPerYear(d))).Max();
+		public override int Max() => mostEggs;
+	}
+
+
+	class ListFilterMilk : ListFilterProduct //Per Year
+	{
+		public override ThingDef DefFor(Pawn pawn)
+		{
+			var props = pawn.def.GetCompProperties<CompProperties_Milkable>();
+
+			if (props == null)
+				return null;
+			if (props.milkFemaleOnly && pawn.gender != Gender.Female)
+				return null;
+
+			return props.milkDef;
+		}
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.MilkPerYear(pawn.def));
+
+		public static HashSet<ThingDef> allMilks = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Milkable>()?.milkDef).Where(d => d != null).ToHashSet();
+		public override IEnumerable<ThingDef> AllOptions() => allMilks;
+
+		public static int mostMilk = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.MilkPerYear(d))).Max();
+		public override int Max() => mostMilk;
+	}
+
+	class ListFilterWool : ListFilterProduct //Per Year
+	{
+		public override ThingDef DefFor(Pawn pawn) => pawn.def.GetCompProperties<CompProperties_Shearable>()?.woolDef;
+		public override int CountFor(Pawn pawn) => Mathf.RoundToInt(AnimalProductionUtility.WoolPerYear(pawn.def));
+
+		public static HashSet<ThingDef> allWools = DefDatabase<ThingDef>.AllDefs.Select(d => d.GetCompProperties<CompProperties_Shearable>()?.woolDef).Where(d => d != null).ToHashSet();
+		public override IEnumerable<ThingDef> AllOptions() => allWools;
+
+		public static int mostWool = DefDatabase<ThingDef>.AllDefs.Select(d => Mathf.RoundToInt(AnimalProductionUtility.WoolPerYear(d))).Max();
+		public override int Max() => mostWool;
+	}
+	
+	//Enum values matching existing translation keys
+	enum ProgressType { Milkable, Shearable, MilkFullness, WoolGrowth, EggProgress, EggHatch}
+	class ListFilterProductProgress : ListFilterDropDown<ProgressType>
+	{
+		protected FloatRange progressRange = new FloatRange(0, 1);
+
+		public ListFilterProductProgress()
+		{
+			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref progressRange, "progressRange");
+		}
+		public override ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilterProductProgress clone = (ListFilterProductProgress)base.Clone(map, newOwner);
+			clone.progressRange = progressRange;
+			return clone;
+		}
+
+		public float ProgressFor(Thing thing) =>
+			(float)
+			(Sel switch
+			{
+				ProgressType.EggProgress => thing.TryGetComp<CompEggLayer>()?.eggProgress,
+				ProgressType.EggHatch => thing.TryGetComp<CompHatcher>()?.gestateProgress,
+				ProgressType.MilkFullness => thing.TryGetComp<CompMilkable>()?.Fullness,
+				ProgressType.WoolGrowth => thing.TryGetComp<CompShearable>()?.Fullness,
+				ProgressType.Milkable => thing.TryGetComp<CompMilkable>()?.ActiveAndFull ?? false ? 1 : 0,
+				ProgressType.Shearable => thing.TryGetComp<CompShearable>()?.ActiveAndFull ?? false ? 1 : 0,
+				_ => 0,
+			});
+
+		public override bool FilterApplies(Thing thing)
+		{
+			if (!thing.def.HasComp(Sel switch
+			{
+				ProgressType.EggProgress => typeof(CompEggLayer),
+				ProgressType.EggHatch => typeof(CompHatcher),
+				ProgressType.MilkFullness => typeof(CompMilkable),
+				ProgressType.WoolGrowth => typeof(CompShearable),
+				ProgressType.Milkable => typeof(CompMilkable),
+				ProgressType.Shearable => typeof(CompShearable),
+				_ => null
+			}))
+				return false;
+
+			if (Sel == ProgressType.EggProgress)
+			{
+				if (thing.def.GetCompProperties<CompProperties_EggLayer>().eggLayFemaleOnly && (thing as Pawn).gender != Gender.Female)
+					return false;
+			}
+			if (Sel == ProgressType.MilkFullness || Sel == ProgressType.Milkable)
+			{
+				if (thing.def.GetCompProperties<CompProperties_Milkable>().milkFemaleOnly && (thing as Pawn).gender != Gender.Female)
+					return false;
+			}
+
+			float progress = ProgressFor(thing);
+			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+				return progress == 1;
+			else
+				return progressRange.Includes(progress);
+		}
+
+		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		{
+			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+				return false;
+
+			FloatRange newRange = progressRange;
+
+			Widgets.FloatRange(rect, id, ref newRange, valueStyle: ToStringStyle.PercentZero);
+			if (newRange != progressRange)
+			{
+				progressRange = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
+	
 }

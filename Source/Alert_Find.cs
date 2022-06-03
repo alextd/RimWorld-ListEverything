@@ -56,8 +56,10 @@ namespace List_Everything
 		private const float PulseFreq = 0.5f;
 		private const float PulseAmpCritical = 0.6f;
 		private const float PulseAmpTutorial = 0.2f;
-
-		protected override Color BGColor
+		
+		//protected but using publicized assembly
+		//protected override Color BGColor
+		public override Color BGColor
 		{
 			get
 			{
