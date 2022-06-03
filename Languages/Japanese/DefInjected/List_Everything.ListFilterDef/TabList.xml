@@ -29,6 +29,17 @@
   <Filter_MissingBodyPart.label>欠損部位</Filter_MissingBodyPart.label>
 
 
+  <!-- animal properties -->
+
+  <Filter_AnimalProp.label>動物詳細</Filter_AnimalProp.label>
+  <Filter_Meat.label>生肉</Filter_Meat.label>
+  <Filter_Leather.label>皮</Filter_Leather.label>
+  <Filter_Egg.label>産卵/年</Filter_Egg.label>
+  <Filter_Milk.label>ミルク/年</Filter_Milk.label>
+  <Filter_Wool.label>ウール/年</Filter_Wool.label>
+  <Filter_ProductProgress.label>発育</Filter_ProductProgress.label>
+
+
   <!-- Item filters -->
 
   <Filter_ItemInfo.label>アイテム情報</Filter_ItemInfo.label>
