@@ -416,7 +416,7 @@ namespace List_Everything
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<DesignationDef> Options() =>
 			ContentsUtility.onlyAvailable ?
-				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct() :
+				Find.CurrentMap.designationManager.AllDesignations.Select(d => d.def).Distinct() :
 				base.Options();
 
 		public override bool Ordered => true;
