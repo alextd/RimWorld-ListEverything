@@ -51,7 +51,7 @@ namespace List_Everything
 		public ListFilterDef def;
 		public FindDescription owner;
 
-		protected ListFilter()	// Of course protected here doesn't make subclasses protected sooo ?
+		protected ListFilter()  // Of course protected here doesn't make subclasses protected sooo ?
 		{
 			id = nextID++;
 		}
@@ -59,7 +59,7 @@ namespace List_Everything
 		private bool enabled = true; //simply turn off but keep in list
 		public bool Enabled
 		{
-			get => enabled && !ForceDisable();
+			get => enabled && DisableReason == null;
 		}
 		public bool include = true; //or exclude
 		public bool topLevel = true;
@@ -116,16 +116,16 @@ namespace List_Everything
 			rowRect.width -= (rowRect.xMax - row.FinalX);
 			changed |= DrawOption(rowRect);
 			changed |= DrawMore(listing);
-			if(shouldFocus)
+			if (shouldFocus)
 			{
 				DoFocus();
 				shouldFocus = false;
 			}
-			if (ForceDisable())
+			if (DisableReason is string reason)
 			{
 				Widgets.DrawBoxSolid(rowRect, new Color(0.5f, 0, 0, 0.25f));
 
-				TooltipHandler.TipRegion(rowRect, "TD.ThisFilterDoesntWorkWithAllMaps".Translate());
+				TooltipHandler.TipRegion(rowRect, reason);
 			}
 
 			listing.Gap(listing.verticalSpacing);
@@ -135,7 +135,7 @@ namespace List_Everything
 
 		public virtual bool DrawOption(Rect rect)
 		{
-			if(topLevel)	Widgets.Label(rect, def.LabelCap);
+			if (topLevel) Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
 		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
@@ -169,7 +169,10 @@ namespace List_Everything
 
 		public virtual void PostMake() { }
 		public virtual bool ValidForAllMaps => true;
-		public bool ForceDisable() => !ValidForAllMaps && owner.allMaps;
+		public virtual string DisableReason =>
+			!ValidForAllMaps && owner.allMaps
+				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
+				: null;
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
@@ -329,8 +332,11 @@ namespace List_Everything
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
 	{
 		protected DropDownDrawStyle drawStyle;
-		public int extraOption; //0 being use T, 1+ defined in subclass
+		public int extraOption; //0 meaning use T, 1+ defined in subclass
+		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
+		public override string DisableReason => base.DisableReason ?? selectionError;
 
+		// A subclass with extra fields needs to override ExposeData and Clone to copy them, like extraOption:
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -343,11 +349,37 @@ namespace List_Everything
 				(ListFilterDropDown<T>)base.Clone(map, newOwner) ://ListFilterwithOption handles sel, and refName for sel if needed
 				(ListFilterDropDown<T>)BaseClone(map, newOwner);  //This is not needed with extraOption, so bypass ListFilterWithOption<T> to ListFilter
 			clone.extraOption = extraOption;
+			clone.selectionError = selectionError;
 			return clone;
 		}
+		protected virtual void PostChosen()
+		{
+			// A subclass with fields whose validity depends on the selection should override this
+			// Most common usage is to set a default value that is valid for the selection
+			// e.g. the skill filter has a range 0-20, but that's valid for all skills, so no need to reset here
+			// e.g. the hediff filter has a range too, but that depends on the selected hediff, so the selected range needs to be set here
 
-		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): Sel != null ? NameFor(Sel) : NullOption();
+			// extraOption is set = 0 before PostChosen() is called, so subclasses need not base.PostChosen() just for that.
+		}
+
+		private string GetLabel()
+		{
+			if (selectionError != null)
+				return selectionError;
+
+			if (extraOption > 0)
+				return NameForExtra(extraOption);
+
+			if (Sel != null)
+				return NameFor(Sel);
+					
+			return NullOption() ?? "??Null selection??";
+		}
+
+		// This method works double duty:
+		// Both telling if Sel can be set to null, and the string to show for null selection
 		public virtual string NullOption() => null;
+
 		public virtual IEnumerable<T> Options()
 		{
 			if (typeof(T).IsEnum)
@@ -356,15 +388,29 @@ namespace List_Everything
 				return GenDefDatabase.GetAllDefsInDatabaseForDef(typeof(T)).Cast<T>();
 			throw new NotImplementedException();
 		}
+
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
 		public override string MakeRefName() => NameFor(Sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
-		protected virtual void Callback(T o) { Sel = o; extraOption = 0; }
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
 		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
-		private void CallbackExtra(int ex) => extraOption = ex;
+
+		private void ChooseSelected(T o)
+		{
+			Sel = o;	
+			extraOption = 0;
+			selectionError = null;//Right?
+			PostChosen(); //If null is valid, subclass should know to handle it in PostChosen, and wherever Sel is
+		}
+
+		private void ChooseExtra(int ex)
+		{
+			Sel = default;
+			extraOption = ex;
+			selectionError = null;//Right?
+		}
 
 		public override bool DrawOption(Rect rect)
 		{
@@ -387,12 +433,16 @@ namespace List_Everything
 			if (changeSelection)
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
+
 				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => Callback(default(T))));
+					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default(T)) ));
+
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
+					options.Add(new FloatMenuOption(NameFor(o), () => ChooseSelected(o) ));
+
 				foreach (int ex in ExtraOptions())
-					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
+					options.Add(new FloatMenuOption(NameForExtra(ex), () => ChooseExtra(ex)));
+
 				MainTabWindow_List.DoFloatMenu(options);
 
 				changed = true;
@@ -648,7 +698,7 @@ namespace List_Everything
 				Sel == null ? stuff != null :
 				stuff == Sel;
 		}
-
+		
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<ThingDef> Options() => 
 			ContentsUtility.onlyAvailable
@@ -695,7 +745,10 @@ namespace List_Everything
 	enum BaseAreas { Home, BuildRoof, NoRoof, SnowClear };
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
-		public ListFilterArea() => extraOption = 1;
+		public ListFilterArea()
+		{
+			extraOption = 1;
+		}
 
 		public override void ResolveReference(string refName, Map map) =>
 			Sel = map.areaManager.GetLabeled(refName);
@@ -805,11 +858,14 @@ namespace List_Everything
 
 	class ListFilterThingDef : ListFilterDropDown<ThingDef>
 	{
-		public ListFilterThingDef() => Sel = ThingDefOf.WoodLog;
+		public ListFilterThingDef()
+		{
+			Sel = ThingDefOf.WoodLog;
+		}
 
 		public override bool FilterApplies(Thing thing) =>
 			Sel == thing.def;
-		
+
 		public override IEnumerable<ThingDef> Options() =>
 			(ContentsUtility.onlyAvailable ?
 				ContentsUtility.AvailableInGame(t => t.def) :
@@ -821,20 +877,39 @@ namespace List_Everything
 
 	class ListFilterModded : ListFilterDropDown<ModContentPack>
 	{
-		public ListFilterModded() => Sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
+		private string packageId = "ludeon.rimworld";	//kept in case loaded from a missing mod, so it can be saved back out.
+
+		public ListFilterModded()
+		{
+			Sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
+		}
 
 		public override void ExposeData()
 		{
 			BaseExposeData();
-			string packageId = Sel.PackageId;
+
+			if (Scribe.mode == LoadSaveMode.Saving && Sel != null)
+				packageId = Sel.PackageId;
+
 			Scribe_Values.Look(ref packageId, "sel");
-			if(Scribe.mode == LoadSaveMode.LoadingVars)
-				Sel = LoadedModManager.RunningMods.First(mod => mod.PackageId == packageId);
+
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				Sel = LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageId == packageId);
+				if (Sel == null)
+					selectionError = $"Missing: {packageId}?";
+			}
+		}
+		public override ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilterModded clone = (ListFilterModded)base.Clone(map, newOwner);
+			clone.packageId = packageId;
+			return clone;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
 			Sel == thing.ContentSource;
-		
+
 		public override IEnumerable<ModContentPack> Options() =>
 			LoadedModManager.RunningMods.Where(mod => mod.AllDefs.Any(d => d is ThingDef));
 

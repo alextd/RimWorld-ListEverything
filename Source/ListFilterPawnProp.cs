@@ -50,11 +50,11 @@ namespace List_Everything
 			if (row.ButtonText(GetPassionText(passion)))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>{
-				new FloatMenuOption(GetPassionText(0), () => passion = 0),
-				new FloatMenuOption(GetPassionText(1), () => passion = 1),
-				new FloatMenuOption(GetPassionText(2), () => passion = 2),
-				new FloatMenuOption(GetPassionText(3), () => passion = 3),
-			};
+					new FloatMenuOption(GetPassionText(0), () => passion = 0),
+					new FloatMenuOption(GetPassionText(1), () => passion = 1),
+					new FloatMenuOption(GetPassionText(2), () => passion = 2),
+					new FloatMenuOption(GetPassionText(3), () => passion = 3),
+				};
 				MainTabWindow_List.DoFloatMenu(options);
 			}
 			rect.x += 100;
@@ -78,6 +78,7 @@ namespace List_Everything
 			Sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
+
 		public override string NameFor(TraitDef def) =>
 			def.degreeDatas.Count == 1
 				? def.degreeDatas.First().label.CapitalizeFirst()
@@ -110,9 +111,8 @@ namespace List_Everything
 				: base.Options();
 
 		public override bool Ordered => true;
-		protected override void Callback(TraitDef o)
+		protected override void PostChosen()
 		{
-			Sel = o;
 			traitDegree = Sel.degreeDatas.First().degree;
 		}
 
@@ -140,6 +140,7 @@ namespace List_Everything
 			Sel = ThoughtDefOf.AteWithoutTable;
 			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
+
 		public override string NameFor(ThoughtDef def)
 		{
 			string label =
@@ -185,10 +186,10 @@ namespace List_Everything
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(ThoughtsForThing)
 				: base.Options();
+
 		public override bool Ordered => true;
-		protected override void Callback(ThoughtDef o)
+		protected override void PostChosen()
 		{
-			Sel = o;
 			stageRange = new IntRange(0, 0);
 		}
 		public override bool DrawSpecial(Rect rect, WidgetRow row) => false;//Too big for one line
@@ -344,10 +345,10 @@ namespace List_Everything
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
 				: base.Options();
+
 		public override bool Ordered => true;
-		protected override void Callback(HediffDef o)
+		protected override void PostChosen()
 		{
-			Sel = o;
 			severityRange = SeverityRangeFor(Sel);
 		}
 
@@ -477,7 +478,9 @@ namespace List_Everything
 			ContentsUtility.onlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def)
 				: base.Options();
+
 		public override bool Ordered => true;
+
 		public override string NullOption() => "None".Translate();
 
 		public override int ExtraOptionsCount => 1;
@@ -538,6 +541,7 @@ namespace List_Everything
 
 		public override string NameFor(JobDef o) =>
 			Regex.Replace(o.reportString.Replace(".",""), "Target(A|B|C)", "...");
+
 		public override string NullOption() => "None".Translate();
 
 		public override IEnumerable<JobDef> Options() =>
@@ -612,10 +616,9 @@ namespace List_Everything
 			}
 			return false;
 		}
-
-		protected override void Callback(RacePropsFilter o)
+	
+		protected override void PostChosen()
 		{
-			Sel = o;
 			switch (Sel)
 			{
 				case RacePropsFilter.Intelligence: intelligence = Intelligence.Humanlike; return;
@@ -624,7 +627,6 @@ namespace List_Everything
 				case RacePropsFilter.Trainability: trainability = TrainabilityDefOf.Advanced; return;
 			}
 		}
-	
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
