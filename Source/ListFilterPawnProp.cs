@@ -17,7 +17,7 @@ namespace List_Everything
 		int passion = 3;
 
 		static string[] passionText = new string[] { "PassionNone", "PassionMinor", "PassionMajor", "TD.AnyOption" };//notranslate
-		public static string GetPassionText(int x) => passionText[x].Translate().ToString().Split('\n')[0];
+		public static string GetPassionText(int x) => passionText[x].Translate().ToString().Split(' ')[0];
 
 		public ListFilterSkill()
 		{
