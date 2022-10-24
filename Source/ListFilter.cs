@@ -328,10 +328,8 @@ namespace List_Everything
 		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 	}
 
-	public enum DropDownDrawStyle {NameAndOptions, OptionsAndDrawSpecial}
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
 	{
-		protected DropDownDrawStyle drawStyle;
 		public int extraOption; //0 meaning use T, 1+ defined in subclass
 		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
 		public override string DisableReason => base.DisableReason ?? selectionError;
@@ -372,7 +370,7 @@ namespace List_Everything
 
 			if (Sel != null)
 				return NameFor(Sel);
-					
+
 			return NullOption() ?? "??Null selection??";
 		}
 
@@ -391,7 +389,7 @@ namespace List_Everything
 
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		public override string MakeRefName() => NameFor(Sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
+		public override string MakeRefName() => NameFor(Sel); //refname should not apply for defs or enums so this'll be ^^ o.ToString()
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
@@ -399,7 +397,7 @@ namespace List_Everything
 
 		private void ChooseSelected(T o)
 		{
-			Sel = o;	
+			Sel = o;
 			extraOption = 0;
 			selectionError = null;//Right?
 			PostChosen(); //If null is valid, subclass should know to handle it in PostChosen, and wherever Sel is
@@ -416,29 +414,30 @@ namespace List_Everything
 		{
 			bool changeSelection = false;
 			bool changed = false;
-			switch(drawStyle)
+			if (HasSpecial)
 			{
-				case DropDownDrawStyle.NameAndOptions:
-					base.DrawOption(rect);
-					changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
-					break;
-				case DropDownDrawStyle.OptionsAndDrawSpecial:
-					WidgetRow row = new WidgetRow(rect.x, rect.y);
-					changeSelection = row.ButtonText(GetLabel());
+				// No label, selected option button on left, special on right
+				WidgetRow row = new WidgetRow(rect.x, rect.y);
+				changeSelection = row.ButtonText(GetLabel());
 
-					rect.xMin = row.FinalX;
-					changed = DrawSpecial(rect, row);
-					break;
+				rect.xMin = row.FinalX;
+				changed = DrawSpecial(rect, row);
+			}
+			else
+			{
+				//Just the label on left, and selected option button on right
+				base.DrawOption(rect);
+				changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
 			}
 			if (changeSelection)
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 
 				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default(T)) ));
+					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default(T))));
 
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOption(NameFor(o), () => ChooseSelected(o) ));
+					options.Add(new FloatMenuOption(NameFor(o), () => ChooseSelected(o)));
 
 				foreach (int ex in ExtraOptions())
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => ChooseExtra(ex)));
@@ -450,8 +449,27 @@ namespace List_Everything
 			return changed;
 		}
 
-		//Use either rect or WidgetRow
+		// Subclass can override DrawSpecial to draw anything custom
+		// (otherwise it's just label and option selection button)
+		// Use either rect or WidgetRow in the implementation
 		public virtual bool DrawSpecial(Rect rect, WidgetRow row) => throw new NotImplementedException();
+
+		// Auto detection of subclasses that use it:
+		private static readonly HashSet<Type> specialDrawers = null;
+		private bool HasSpecial => specialDrawers?.Contains(GetType()) ?? false;
+		static ListFilterDropDown()//<T>	//Remember there's a specialDrawers for each <T> but functionally that doesn't change anything
+		{
+			foreach (Type subclass in typeof(ListFilterDropDown<T>).AllSubclassesNonAbstract())
+			{
+				if (subclass.GetMethod(nameof(DrawSpecial)).DeclaringType == subclass)
+				{
+					if(specialDrawers == null)
+						specialDrawers = new HashSet<Type>();
+
+					specialDrawers.Add(subclass);
+				}
+			}
+		}
 	}
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>

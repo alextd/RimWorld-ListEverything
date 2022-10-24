@@ -22,7 +22,6 @@ namespace List_Everything
 		public ListFilterSkill()
 		{
 			Sel = SkillDefOf.Animals;
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 
 		public override void ExposeData()
@@ -73,10 +72,10 @@ namespace List_Everything
 	class ListFilterTrait : ListFilterDropDown<TraitDef>
 	{
 		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
+
 		public ListFilterTrait()
 		{
 			Sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 
 		public override string NameFor(TraitDef def) =>
@@ -135,10 +134,10 @@ namespace List_Everything
 	class ListFilterThought: ListFilterDropDown<ThoughtDef>
 	{
 		IntRange stageRange;
+
 		public ListFilterThought()
 		{
 			Sel = ThoughtDefOf.AteWithoutTable;
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 
 		public override string NameFor(ThoughtDef def)
@@ -271,10 +270,10 @@ namespace List_Everything
 	class ListFilterNeed : ListFilterDropDown<NeedDef>
 	{
 		FloatRange needRange = new FloatRange(0, 0.5f);
+
 		public ListFilterNeed()
 		{
 			Sel = NeedDefOf.Food;
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 		}
 
 		public override void ExposeData()
@@ -310,11 +309,6 @@ namespace List_Everything
 	class ListFilterHealth : ListFilterDropDown<HediffDef>
 	{
 		FloatRange? severityRange;
-
-		public ListFilterHealth()
-		{
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
-		}
 
 		public override void ExposeData()
 		{
@@ -565,11 +559,6 @@ namespace List_Everything
 		FloatRange petness;
 		TrainabilityDef trainability;
 
-		public ListFilterRaceProps()
-		{
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
-		}
-
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -695,7 +684,6 @@ namespace List_Everything
 		{
 			Sel = null;
 			extraOption = 1;
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
 			countRange = new IntRange(0, Max());
 		}
 
@@ -855,11 +843,6 @@ namespace List_Everything
 	class ListFilterProductProgress : ListFilterDropDown<ProgressType>
 	{
 		protected FloatRange progressRange = new FloatRange(0, 1);
-
-		public ListFilterProductProgress()
-		{
-			drawStyle = DropDownDrawStyle.OptionsAndDrawSpecial;
-		}
 
 		public override void ExposeData()
 		{
