@@ -32,7 +32,7 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing t) => 
 			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) : 
-			filters.All(f => f.Enabled && f.AppliesTo(t));
+			filters.All(f => !f.Enabled || f.AppliesTo(t));
 
 		public override void ExposeData()
 		{
