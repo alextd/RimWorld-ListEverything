@@ -76,6 +76,11 @@ namespace List_Everything
 
 		public abstract bool FilterApplies(Thing thing);
 
+
+		private bool shouldFocus;
+		public void Focus() => shouldFocus = true;
+		protected virtual void DoFocus() { }
+
 		public bool Listing(Listing_StandardIndent listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
@@ -139,10 +144,6 @@ namespace List_Everything
 			return false;
 		}
 		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
-
-		private bool shouldFocus;
-		public void Focus() => shouldFocus = true;
-		protected virtual void DoFocus() { }
 
 		public virtual void ExposeData() => BaseExposeData();
 		protected void BaseExposeData()
