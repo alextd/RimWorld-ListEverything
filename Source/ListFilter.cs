@@ -158,7 +158,8 @@ namespace List_Everything
 
 			if (RootFindDesc.locked)
 			{
-				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate());
+				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
+					tooltip: "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
 			}
 			else
 			{
