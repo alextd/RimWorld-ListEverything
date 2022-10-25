@@ -10,7 +10,7 @@ namespace List_Everything
 {
 	public class ListFilterSelection : ListFilterWithOption<ListFilter>
 	{
-		public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).subFilters;
+		public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).SubFilters;
 
 		public override void PostMake() => SetSelectedFilter(SubFilters.First());
 

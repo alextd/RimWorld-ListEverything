@@ -29,7 +29,9 @@ namespace List_Everything
 	// Then only the filters not nested under a list will be globally listed
 	public class ListFilterListDef : ListFilterDef
 	{
-		public List<ListFilterDef> subFilters;
+		private List<ListFilterDef> subFilters = null;
+		public IEnumerable<ListFilterDef> SubFilters =>
+			subFilters ?? Enumerable.Empty<ListFilterDef>();
 
 		public override void PostLoad()
 		{
@@ -69,7 +71,7 @@ namespace List_Everything
 		{
 			rootFilters = DefDatabase<ListFilterDef>.AllDefs.ToList();
 			foreach (var listDef in DefDatabase<ListFilterListDef>.AllDefs)
-				foreach (var subDef in listDef.subFilters ?? Enumerable.Empty<ListFilterDef>())	// ?? because game explodes on config error
+				foreach (var subDef in listDef.SubFilters)	// ?? because game explodes on config error
 					rootFilters.Remove(subDef);
 		}
 
