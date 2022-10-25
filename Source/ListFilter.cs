@@ -52,7 +52,7 @@ namespace List_Everything
 		public static ListFilterDef Filter_Name;
 		public static ListFilterDef Filter_Group;
 
-		public static ListFilter MakeFilter(ListFilterDef def, FindDescription owner)
+		public static ListFilter MakeFilter(ListFilterDef def, IFilterOwner owner)
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
@@ -60,6 +60,7 @@ namespace List_Everything
 			filter.PostMake();
 			return filter;
 		}
+
 		public static ListFilter NameFilter(FindDescription owner) =>
 			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
 
@@ -79,42 +80,47 @@ namespace List_Everything
 			rootFilters.Where(d => (Prefs.DevMode || !d.devOnly));
 	}
 
+
+	public interface IFilterOwner
+	{
+		public FindDescription RootFindDesc { get; }
+	}
+	public interface IFilterOwnerAdder : IFilterOwner
+	{
+		public void Add(ListFilter newFilter);
+	}
 	public abstract class ListFilter : IExposable
 	{
 		public ListFilterDef def;
-		public FindDescription owner;
+		public IFilterOwner owner;
+		public FindDescription RootFindDesc => owner.RootFindDesc;
+		private bool TopLevel => owner is FindDescription;
+
 
 		protected int id; //For Widgets.draggingId purposes
 		private static int nextID = 1;
-		protected ListFilter()  // Of course protected here doesn't make subclasses protected sooo ?
-		{
-			id = nextID++;
-		}
+		protected ListFilter() { id = nextID++; }
+
 
 		private bool enabled = true; //simply turn off but keep in list
 		public bool Enabled => enabled && DisableReason == null;
 
 		private bool include = true; //or exclude
 
-		// Top level, as in, it's a root filter, it's not nested under another filter
-		public bool topLevel = true;
-
 		public virtual void ExposeData()
 		{
 			Scribe_Defs.Look(ref def, "def");
 			Scribe_Values.Look(ref enabled, "enabled", true);
 			Scribe_Values.Look(ref include, "include", true);
-			Scribe_Values.Look(ref topLevel, "topLevel", true);
 		}
 
 		//Clone, and resolve references if map specified
-		public virtual ListFilter Clone(Map map, FindDescription newOwner)
+		public virtual ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
 			clone.enabled = enabled;
 			clone.include = include;
-			clone.topLevel = topLevel;
-			//clone.owner = newOwner; //No - MakeFilter sets it.
+			//clone.owner = newOwner; //No - MakeFilter just set it.
 			return clone;
 		}
 
@@ -150,7 +156,7 @@ namespace List_Everything
 			bool changed = false;
 			bool delete = false;
 
-			if (owner.locked)
+			if (RootFindDesc.locked)
 			{
 				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate());
 			}
@@ -202,7 +208,7 @@ namespace List_Everything
 
 		public virtual bool DrawMain(Rect rect)
 		{
-			if (topLevel) Widgets.Label(rect, def.LabelCap);
+			if (TopLevel) Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
 		public virtual bool DrawUnder(Listing_StandardIndent listing) => false;
@@ -213,7 +219,7 @@ namespace List_Everything
 		public virtual bool ValidForAllMaps => true;
 
 		public virtual string DisableReason =>
-			!ValidForAllMaps && owner.allMaps
+			!ValidForAllMaps && RootFindDesc.allMaps
 				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
 				: null;
 	}
@@ -321,7 +327,7 @@ namespace List_Everything
 			else
 				Scribe_Values.Look(ref sel, "sel");
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map, newOwner);
 
@@ -371,7 +377,7 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref extraOption, "ex");
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map, newOwner);
 			clone.extraOption = extraOption;
@@ -947,7 +953,7 @@ namespace List_Everything
 			}
 
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterModded clone = (ListFilterModded)base.Clone(map, newOwner);
 			clone.packageId = packageId;

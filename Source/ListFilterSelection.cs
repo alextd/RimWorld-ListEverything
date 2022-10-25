@@ -8,7 +8,7 @@ using RimWorld;
 
 namespace List_Everything
 {
-	public class ListFilterSelection : ListFilterWithOption<ListFilter>
+	public class ListFilterSelection : ListFilterWithOption<ListFilter>, IFilterOwner
 	{
 		public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).SubFilters;
 
@@ -17,18 +17,16 @@ namespace List_Everything
 		public void SetSelectedFilter(ListFilterDef def)
 		{
 			sel = ListFilterMaker.MakeFilter(def, owner);
-			sel.topLevel = false;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
 			sel.FilterApplies(thing);
 
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
 
-			clone.sel = sel.Clone(map, newOwner);
-			//clone.owner = newOwner; //No - MakeFilter sets it.
+			clone.sel = sel.Clone(map, clone);
 
 			return clone;
 		}

@@ -272,7 +272,7 @@ namespace List_Everything
 			return changed;
 		}
 
-		public static void DrawAddRow(Listing_StandardIndent listing, FindDescription owner, List<ListFilter> filters = null)
+		public static void DrawAddRow(Listing_StandardIndent listing, IFilterOwnerAdder owner)
 		{
 			Rect addRow = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
@@ -286,15 +286,17 @@ namespace List_Everything
 			Widgets.DrawHighlightIfMouseover(addRow);
 
 			if (Widgets.ButtonInvisible(addRow))
-				AddFilterFloat(owner, filters);
-		}
-
-		public static void AddFilterFloat(FindDescription owner, List<ListFilter> filters = null)
-		{
-			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterDef def in ListFilterMaker.SelectableList)
-				options.Add(new FloatMenuOption(def.LabelCap, () => (filters ?? owner.filters).Add(ListFilterMaker.MakeFilter(def, owner))));
-			DoFloatMenu(options);
+			{
+				List<FloatMenuOption> options = new List<FloatMenuOption>();
+				foreach (ListFilterDef def in ListFilterMaker.SelectableList)
+				{
+					options.Add(new FloatMenuOption(
+						def.LabelCap,
+						() => owner.Add(ListFilterMaker.MakeFilter(def, owner))
+					));
+				}
+				DoFloatMenu(options);
+			}
 		}
 
 

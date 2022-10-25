@@ -7,13 +7,21 @@ using RimWorld;
 
 namespace List_Everything
 {
-	public class FindDescription : IExposable
+	// The FindDescription is the root owner of a set of filters.
+	// (It's a little more than a mere ListFilterGroup)
+	// - Get() method to actually perform the search
+	// - BaseListType which narrows what that things to look at
+	// - Checkbox bools that apply to all nested filters
+	// - Apparently support for alerts which I'll probably separate out
+	public class FindDescription : IExposable, IFilterOwnerAdder
 	{
 		public string name = "TD.NewFindFilters".Translate();
+
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
 		public int countToAlert;
 		public CompareType countComp;
+
 		public bool allMaps = false;
 		public bool locked = false;
 
@@ -122,6 +130,14 @@ namespace List_Everything
 			Scribe_Values.Look(ref locked, "locked");
 
 			//Should we set filters owner to this? Only map clones that are copied need it, and they get it in the clone.
+		}
+
+
+		public FindDescription RootFindDesc => this;
+
+		public void Add(ListFilter newFilter)
+		{
+			filters.Add(newFilter);
 		}
 	}
 

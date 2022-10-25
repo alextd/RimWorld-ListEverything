@@ -25,7 +25,8 @@ namespace List_Everything
 		public static readonly Texture2D LessThan = ContentFinder<Texture2D>.Get("LessThan", true);
 		public static readonly Texture2D GreaterThan = ContentFinder<Texture2D>.Get("GreaterThan", true);
 	}
-	public class ListFilterGroup : ListFilter
+
+	public class ListFilterGroup : ListFilter, IFilterOwnerAdder
 	{
 		protected List<ListFilter> filters = new List<ListFilter>() { };
 		protected bool any = true; // or all
@@ -40,10 +41,10 @@ namespace List_Everything
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref any, "any", true);
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterGroup clone = (ListFilterGroup)base.Clone(map, newOwner);
-			clone.filters = filters.Select(f => f.Clone(map, newOwner)).ToList();
+			clone.filters = filters.Select(f => f.Clone(map, clone)).ToList();
 			clone.any = any;
 			//clone.owner = newOwner; //No - MakeFilter sets it.
 			return clone;
@@ -70,11 +71,16 @@ namespace List_Everything
 
 			//Draw filters
 			bool changed = MainTabWindow_List.DoFilters(listing, filters);
-			if (!owner.locked)
-				MainTabWindow_List.DrawAddRow(listing, owner, filters);
+			if (!RootFindDesc.locked)
+				MainTabWindow_List.DrawAddRow(listing, this);
 
 			listing.NestedOutdent();
 			return changed;
+		}
+
+		public void Add(ListFilter newFilter)
+		{
+			filters.Add(newFilter);
 		}
 	}
 
@@ -105,7 +111,7 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref parent, "parent", true);
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterInventory clone = (ListFilterInventory)base.Clone(map, newOwner);
 			clone.parent = parent;
@@ -152,7 +158,7 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterNearby clone = (ListFilterNearby)base.Clone(map, newOwner);
 			clone.range = range;
