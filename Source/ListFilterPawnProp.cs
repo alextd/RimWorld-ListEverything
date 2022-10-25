@@ -44,7 +44,7 @@ namespace List_Everything
 				!rec.TotallyDisabled &&
 				skillRange.Includes(rec.Level) && (passion == 3 || (int)rec.passion == passion);
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			if (row.ButtonText(GetPassionText(passion)))
 			{
@@ -115,7 +115,7 @@ namespace List_Everything
 			traitDegree = sel.degreeDatas.First().degree;
 		}
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			if (sel.degreeDatas.Count > 1 &&
 				row.ButtonText(sel.DataAtDegree(traitDegree).label.CapitalizeFirst()))
@@ -191,9 +191,9 @@ namespace List_Everything
 		{
 			stageRange = new IntRange(0, 0);
 		}
-		public override bool DrawSpecial(Rect rect, WidgetRow row) => false;//Too big for one line
+		public override bool DrawCustom(Rect rect, WidgetRow row) => false;//Too big for one line
 
-		public override bool DrawMore(Listing_StandardIndent listing)
+		public override bool DrawUnder(Listing_StandardIndent listing)
 		{
 			if (sel.stages.Count <= 1) return false;
 
@@ -293,7 +293,7 @@ namespace List_Everything
 			(!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
 				pawn.needs?.TryGetNeed(sel) is Need need && needRange.Includes(need.CurLevelPercentage);
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			FloatRange newRange = needRange;
 			Widgets.FloatRange(rect, id, ref newRange, valueStyle: ToStringStyle.PercentOne);
@@ -349,7 +349,7 @@ namespace List_Everything
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			if (sel != null && severityRange.HasValue)
 			{
@@ -436,7 +436,7 @@ namespace List_Everything
 
 	class ListFilterRestricted : ListFilterDropDown<Area>
 	{
-		public override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(string refName, Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
@@ -617,7 +617,7 @@ namespace List_Everything
 			}
 		}
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			switch (sel)
@@ -719,7 +719,7 @@ namespace List_Everything
 		}
 
 		public abstract int Max();
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
 			if (extraOption == 0 && sel == null) return false;
@@ -901,7 +901,7 @@ namespace List_Everything
 				return progressRange.Includes(progress);
 		}
 
-		public override bool DrawSpecial(Rect rect, WidgetRow row)
+		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			if (sel == ProgressType.Milkable || sel == ProgressType.Shearable)
 				return false;

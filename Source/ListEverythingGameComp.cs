@@ -42,11 +42,7 @@ namespace List_Everything
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				if (tab.IsOpen)
-				{
 					tab.RemakeList();
-
-					Log.Message("CONTINUOUS REFRESH!");
-				}
 			}
 		}
 

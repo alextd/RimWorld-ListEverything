@@ -250,11 +250,17 @@ namespace List_Everything
 		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters)
 		{
 			bool changed = false;
+			HashSet<ListFilter> removedFilters = new();
 			foreach (ListFilter filter in filters)
 			{
 				Rect highlightRect = listing.GetRect(0);
 				float heightBefore = listing.CurHeight;
-				changed |= filter.Listing(listing);
+				(bool ch, bool d) = filter.Listing(listing);
+				changed |= ch;
+				if (d)
+					removedFilters.Add(filter);
+
+				// Highlight the filters that pass for selected objects (useful for "any" filters)
 				if (!(filter is ListFilterGroup) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
 				{
 					highlightRect.height = listing.CurHeight - heightBefore;
@@ -262,7 +268,7 @@ namespace List_Everything
 				}
 			}
 
-			filters.RemoveAll(f => f.delete);
+			filters.RemoveAll(f => removedFilters.Contains(f));
 			return changed;
 		}
 

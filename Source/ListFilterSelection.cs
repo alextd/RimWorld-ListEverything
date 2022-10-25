@@ -33,7 +33,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
 			if (row.ButtonText(sel.def.LabelCap))
@@ -46,10 +46,10 @@ namespace List_Everything
 				return true;
 			}
 			rect.xMin += row.FinalX;
-			return sel.DrawOption(rect);
+			return sel.DrawMain(rect);
 		}
-		public override bool DrawMore(Listing_StandardIndent listing) =>
-			sel.DrawMore(listing);
+		public override bool DrawUnder(Listing_StandardIndent listing) =>
+			sel.DrawUnder(listing);
 
 		public override bool ValidForAllMaps => 
 			sel.ValidForAllMaps;

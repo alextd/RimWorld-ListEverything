@@ -49,7 +49,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -63,7 +63,7 @@ namespace List_Everything
 			return changed;
 		}
 
-		public override bool DrawMore(Listing_StandardIndent listing)
+		public override bool DrawUnder(Listing_StandardIndent listing)
 		{
 			listing.Gap();
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
@@ -112,7 +112,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -159,7 +159,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);

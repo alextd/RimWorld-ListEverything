@@ -81,26 +81,43 @@ namespace List_Everything
 
 	public abstract class ListFilter : IExposable
 	{
-		public int id; //For Widgets.draggingId purposes
-		public static int nextID = 1;
 		public ListFilterDef def;
 		public FindDescription owner;
 
+		protected int id; //For Widgets.draggingId purposes
+		private static int nextID = 1;
 		protected ListFilter()  // Of course protected here doesn't make subclasses protected sooo ?
 		{
 			id = nextID++;
 		}
 
 		private bool enabled = true; //simply turn off but keep in list
-		public bool Enabled
-		{
-			get => enabled && DisableReason == null;
-		}
-		public bool include = true; //or exclude
+		public bool Enabled => enabled && DisableReason == null;
+
+		private bool include = true; //or exclude
 
 		// Top level, as in, it's a root filter, it's not nested under another filter
 		public bool topLevel = true;
-		public bool delete;
+
+		public virtual void ExposeData()
+		{
+			Scribe_Defs.Look(ref def, "def");
+			Scribe_Values.Look(ref enabled, "enabled", true);
+			Scribe_Values.Look(ref include, "include", true);
+			Scribe_Values.Look(ref topLevel, "topLevel", true);
+		}
+
+		//Clone, and resolve references if map specified
+		public virtual ListFilter Clone(Map map, FindDescription newOwner)
+		{
+			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
+			clone.enabled = enabled;
+			clone.include = include;
+			clone.topLevel = topLevel;
+			//clone.owner = newOwner; //No - MakeFilter sets it.
+			return clone;
+		}
+
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
@@ -125,12 +142,13 @@ namespace List_Everything
 		public void Focus() => shouldFocus = true;
 		protected virtual void DoFocus() { }
 
-		public bool Listing(Listing_StandardIndent listing)
+		public (bool, bool) Listing(Listing_StandardIndent listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
 
 			bool changed = false;
+			bool delete = false;
 
 			if (owner.locked)
 			{
@@ -163,8 +181,8 @@ namespace List_Everything
 
 			//Draw option row
 			rowRect.width -= (rowRect.xMax - row.FinalX);
-			changed |= DrawOption(rowRect);
-			changed |= DrawMore(listing);
+			changed |= DrawMain(rowRect);
+			changed |= DrawUnder(listing);
 			if (shouldFocus)
 			{
 				DoFocus();
@@ -178,38 +196,16 @@ namespace List_Everything
 			}
 
 			listing.Gap(listing.verticalSpacing);
-			return changed;
+			return (changed, delete);
 		}
 
 
-		public virtual bool DrawOption(Rect rect)
+		public virtual bool DrawMain(Rect rect)
 		{
 			if (topLevel) Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
-		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
-
-		public virtual void ExposeData()
-		{
-			Scribe_Defs.Look(ref def, "def");
-			Scribe_Values.Look(ref enabled, "enabled", true);
-			Scribe_Values.Look(ref include, "include", true);
-			Scribe_Values.Look(ref topLevel, "topLevel", true);
-		}
-
-		//Clone, and resolve references if map specified
-		public virtual ListFilter Clone(Map map, FindDescription newOwner) =>
-			BaseClone(map, newOwner);
-
-		protected ListFilter BaseClone(Map map, FindDescription newOwner)
-		{
-			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
-			clone.enabled = enabled;
-			clone.include = include;
-			clone.topLevel = topLevel;
-			//clone.owner = newOwner; //No - MakeFilter sets it.
-			return clone;
-		}
+		public virtual bool DrawUnder(Listing_StandardIndent listing) => false;
 
 		// PostMake called after the subclass constructor if you need the Def.
 		public virtual void PostMake() { }
@@ -230,7 +226,7 @@ namespace List_Everything
 			//thing.Label.Contains(sel, CaseInsensitiveComparer.DefaultInvariant);	//Contains doesn't accept comparer with strings. okay.
 			sel == "" || thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			if (GUI.GetNameOfFocusedControl() == $"LIST_FILTER_NAME_INPUT{id}" &&
 				Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 1)
@@ -333,19 +329,17 @@ namespace List_Everything
 			{
 				if (map == null)//SAVING: I don't have refName, but I make it and tell saved clone
 				{
-					clone.refName = sel == null ? "null" : MakeRefName();
+					clone.refName = MakeRefName();
 				}
 				else //LOADING: use my refName to resolve loaded clone's reference
 				{
-					if (refName == "null")
+					if (refName == SaveLoadXmlConstants.IsNullAttributeName)
 					{
 						clone.sel = default(T);
 					}
+					else
 					{
-						if (refName == null)
-							clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
-						else
-							clone.ResolveReference(refName, map);
+						clone.ResolveReference(refName ?? MakeRefName(), map);
 
 						if (clone.sel == null)
 							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
@@ -357,14 +351,18 @@ namespace List_Everything
 
 			return clone;
 		}
-		public virtual string MakeRefName() => sel.ToString();
-		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
+		protected virtual string MakeRefName() =>
+			sel != null ? sel.ToString() :
+			SaveLoadXmlConstants.IsNullAttributeName;
+
+		protected virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 	}
 
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
 	{
 		public int extraOption; //0 meaning use T, 1+ defined in subclass
 		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
+
 		public override string DisableReason => base.DisableReason ?? selectionError;
 
 		// A subclass with extra fields needs to override ExposeData and Clone to copy them, like extraOption:
@@ -375,10 +373,7 @@ namespace List_Everything
 		}
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
-			ListFilterDropDown<T> clone =
-				extraOption == 0 ?
-				(ListFilterDropDown<T>)base.Clone(map, newOwner) ://ListFilterwithOption handles sel, and refName for sel if needed
-				(ListFilterDropDown<T>)BaseClone(map, newOwner);  //This is not needed with extraOption, so bypass ListFilterWithOption<T> to ListFilter
+			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map, newOwner);
 			clone.extraOption = extraOption;
 			clone.selectionError = selectionError;
 			return clone;
@@ -422,7 +417,8 @@ namespace List_Everything
 
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		public override string MakeRefName() => NameFor(sel); //refname should not apply for defs or enums so this'll be ^^ o.ToString()
+		protected override string MakeRefName() =>
+			sel != null ? NameFor(sel) : base.MakeRefName();
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
@@ -443,7 +439,7 @@ namespace List_Everything
 			selectionError = null;//Right?
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
 			bool changeSelection = false;
 			bool changed = false;
@@ -454,12 +450,12 @@ namespace List_Everything
 				changeSelection = row.ButtonText(GetLabel());
 
 				rect.xMin = row.FinalX;
-				changed = DrawSpecial(rect, row);
+				changed = DrawCustom(rect, row);
 			}
 			else
 			{
 				//Just the label on left, and selected option button on right
-				base.DrawOption(rect);
+				base.DrawMain(rect);
 				changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
 			}
 			if (changeSelection)
@@ -482,19 +478,19 @@ namespace List_Everything
 			return changed;
 		}
 
-		// Subclass can override DrawSpecial to draw anything custom
+		// Subclass can override DrawCustom to draw anything custom
 		// (otherwise it's just label and option selection button)
 		// Use either rect or WidgetRow in the implementation
-		public virtual bool DrawSpecial(Rect rect, WidgetRow row) => throw new NotImplementedException();
+		public virtual bool DrawCustom(Rect rect, WidgetRow row) => throw new NotImplementedException();
 
-		// Auto detection of subclasses that use it:
+		// Auto detection of subclasses that use DrawCustom:
 		private static readonly HashSet<Type> specialDrawers = null;
 		private bool HasSpecial => specialDrawers?.Contains(GetType()) ?? false;
 		static ListFilterDropDown()//<T>	//Remember there's a specialDrawers for each <T> but functionally that doesn't change anything
 		{
 			foreach (Type subclass in typeof(ListFilterDropDown<T>).AllSubclassesNonAbstract())
 			{
-				if (subclass.GetMethod(nameof(DrawSpecial)).DeclaringType == subclass)
+				if (subclass.GetMethod(nameof(DrawCustom)).DeclaringType == subclass)
 				{
 					if(specialDrawers == null)
 						specialDrawers = new HashSet<Type>();
@@ -551,9 +547,9 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing) =>
 			thing is Plant p && sel.Includes(p.Growth);
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
-			base.DrawOption(rect);
+			base.DrawMain(rect);
 			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (sel != newRange)
@@ -702,9 +698,9 @@ namespace List_Everything
 			return pct != null && sel.Includes(pct.Value);
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
-			base.DrawOption(rect);
+			base.DrawMain(rect);
 			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (sel != newRange)
@@ -724,9 +720,9 @@ namespace List_Everything
 			thing.TryGetQuality(out QualityCategory qc) &&
 			sel.Includes(qc);
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect)
 		{
-			base.DrawOption(rect);
+			base.DrawMain(rect);
 			QualityRange newRange = sel;
 			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
 			if (sel != newRange)
@@ -801,7 +797,7 @@ namespace List_Everything
 			extraOption = 1;
 		}
 
-		public override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(string refName, Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
@@ -849,7 +845,7 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		public override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(string refName, Map map) =>
 			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 
 		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
