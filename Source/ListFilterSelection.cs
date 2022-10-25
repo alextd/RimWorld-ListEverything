@@ -10,7 +10,9 @@ namespace List_Everything
 {
 	public class ListFilterSelection : ListFilterWithOption<ListFilter>
 	{
-		public override void PostMake() => SetSelectedFilter(def.subFilters.First());
+		public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).subFilters;
+
+		public override void PostMake() => SetSelectedFilter(SubFilters.First());
 
 		public void SetSelectedFilter(ListFilterDef def)
 		{
@@ -37,7 +39,7 @@ namespace List_Everything
 			if (row.ButtonText(Sel.def.LabelCap))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (ListFilterDef def in def.subFilters)
+				foreach (ListFilterDef def in SubFilters)
 					options.Add(new FloatMenuOption(def.LabelCap, () => SetSelectedFilter(def)));
 				MainTabWindow_List.DoFloatMenu(options);
 

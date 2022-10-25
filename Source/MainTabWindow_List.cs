@@ -286,7 +286,7 @@ namespace List_Everything
 		public static void AddFilterFloat(FindDescription owner, List<ListFilter> filters = null)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs.Where(d => d.parent == null && (Prefs.DevMode || !d.devOnly)))
+			foreach (ListFilterDef def in ListFilterMaker.SelectableList)
 				options.Add(new FloatMenuOption(def.LabelCap, () => (filters ?? owner.filters).Add(ListFilterMaker.MakeFilter(def, owner))));
 			DoFloatMenu(options);
 		}

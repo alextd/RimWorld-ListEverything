@@ -11,21 +11,40 @@ namespace List_Everything
 {
 	public class ListFilterDef : Def
 	{
-		public ListFilterDef parent;
 		public Type filterClass;
 		public bool devOnly;
-		public List<ListFilterDef> subFilters = new List<ListFilterDef>();
 
-		public override void ResolveReferences()
+		public override IEnumerable<string> ConfigErrors()
 		{
-			base.ResolveReferences();
-			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs)
-				if (def.subFilters?.Contains(this) ?? false)
-					parent = def;
+			if (GetType() != typeof(ListFilterListDef) && filterClass == typeof(ListFilterSelection))
+				yield return "ListFilterSelection should be a ListFilterListDef";
+
+			if (filterClass == null)
+				yield return "ListFilterDef needs filterClass set";
+		}
+	}
+
+	// There are too many filter subclasses to globally list them
+	// So group them in lists (which is itself a subclass)
+	// Then only the filters not nested under a list will be globally listed
+	public class ListFilterListDef : ListFilterDef
+	{
+		public List<ListFilterDef> subFilters;
+
+		public override void PostLoad()
+		{
+			filterClass = typeof(ListFilterSelection);
+		}
+
+		public override IEnumerable<string> ConfigErrors()
+		{
+			if (subFilters.NullOrEmpty())
+				yield return "ListFilterListDef needs to set subFilters";
 		}
 	}
 
 	[DefOf]
+	[StaticConstructorOnStartup]
 	public static class ListFilterMaker
 	{
 		public static ListFilterDef Filter_Name;
@@ -41,9 +60,23 @@ namespace List_Everything
 		}
 		public static ListFilter NameFilter(FindDescription owner) =>
 			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
+
+
+		// Filters that aren't grouped under a ListFilterListDef
+		private static readonly List<ListFilterDef> rootFilters;
+
+		static ListFilterMaker()
+		{
+			rootFilters = DefDatabase<ListFilterDef>.AllDefs.ToList();
+			foreach (var listDef in DefDatabase<ListFilterListDef>.AllDefs)
+				foreach (var subDef in listDef.subFilters ?? Enumerable.Empty<ListFilterDef>())	// ?? because game explodes on config error
+					rootFilters.Remove(subDef);
+		}
+
+		public static IEnumerable<ListFilterDef> SelectableList =>
+			rootFilters.Where(d => (Prefs.DevMode || !d.devOnly));
 	}
 
-	[StaticConstructorOnStartup]
 	public abstract class ListFilter : IExposable
 	{
 		public int id;//For window focus purposes
@@ -62,6 +95,8 @@ namespace List_Everything
 			get => enabled && DisableReason == null;
 		}
 		public bool include = true; //or exclude
+
+		// Top level, as in, it's a root filter, it's not nested under another filter
 		public bool topLevel = true;
 		public bool delete;
 
@@ -175,8 +210,11 @@ namespace List_Everything
 			return clone;
 		}
 
+		// PostMake called after the subclass constructor if you need the Def.
 		public virtual void PostMake() { }
+
 		public virtual bool ValidForAllMaps => true;
+
 		public virtual string DisableReason =>
 			!ValidForAllMaps && owner.allMaps
 				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
