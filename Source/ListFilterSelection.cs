@@ -16,18 +16,18 @@ namespace List_Everything
 
 		public void SetSelectedFilter(ListFilterDef def)
 		{
-			Sel = ListFilterMaker.MakeFilter(def, owner);
-			Sel.topLevel = false;
+			sel = ListFilterMaker.MakeFilter(def, owner);
+			sel.topLevel = false;
 		}
 
 		public override bool FilterApplies(Thing thing) =>
-			Sel.FilterApplies(thing);
+			sel.FilterApplies(thing);
 
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
 			ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
 
-			clone.Sel = Sel.Clone(map, newOwner);
+			clone.sel = sel.Clone(map, newOwner);
 			//clone.owner = newOwner; //No - MakeFilter sets it.
 
 			return clone;
@@ -36,7 +36,7 @@ namespace List_Everything
 		public override bool DrawOption(Rect rect)
 		{
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			if (row.ButtonText(Sel.def.LabelCap))
+			if (row.ButtonText(sel.def.LabelCap))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (ListFilterDef def in SubFilters)
@@ -46,12 +46,12 @@ namespace List_Everything
 				return true;
 			}
 			rect.xMin += row.FinalX;
-			return Sel.DrawOption(rect);
+			return sel.DrawOption(rect);
 		}
 		public override bool DrawMore(Listing_StandardIndent listing) =>
-			Sel.DrawMore(listing);
+			sel.DrawMore(listing);
 
 		public override bool ValidForAllMaps => 
-			Sel.ValidForAllMaps;
+			sel.ValidForAllMaps;
 	}
 }

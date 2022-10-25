@@ -21,7 +21,7 @@ namespace List_Everything
 
 		public ListFilterSkill()
 		{
-			Sel = SkillDefOf.Animals;
+			sel = SkillDefOf.Animals;
 		}
 
 		public override void ExposeData()
@@ -40,7 +40,7 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn &&
-				pawn.skills?.GetSkill(Sel) is SkillRecord rec &&
+				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
 				skillRange.Includes(rec.Level) && (passion == 3 || (int)rec.passion == passion);
 
@@ -75,7 +75,7 @@ namespace List_Everything
 
 		public ListFilterTrait()
 		{
-			Sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
+			sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
 		}
 
 		public override string NameFor(TraitDef def) =>
@@ -100,7 +100,7 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return pawn.story?.traits.GetTrait(Sel) is Trait trait &&
+			return pawn.story?.traits.GetTrait(sel) is Trait trait &&
 				trait.Degree == traitDegree;
 		}
 
@@ -112,16 +112,16 @@ namespace List_Everything
 		public override bool Ordered => true;
 		protected override void PostChosen()
 		{
-			traitDegree = Sel.degreeDatas.First().degree;
+			traitDegree = sel.degreeDatas.First().degree;
 		}
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
-			if (Sel.degreeDatas.Count > 1 &&
-				row.ButtonText(Sel.DataAtDegree(traitDegree).label.CapitalizeFirst()))
+			if (sel.degreeDatas.Count > 1 &&
+				row.ButtonText(sel.DataAtDegree(traitDegree).label.CapitalizeFirst()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (TraitDegreeData deg in Sel.degreeDatas)
+				foreach (TraitDegreeData deg in sel.degreeDatas)
 				{
 					options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
 				}
@@ -137,7 +137,7 @@ namespace List_Everything
 
 		public ListFilterThought()
 		{
-			Sel = ThoughtDefOf.AteWithoutTable;
+			sel = ThoughtDefOf.AteWithoutTable;
 		}
 
 		public override string NameFor(ThoughtDef def)
@@ -169,13 +169,13 @@ namespace List_Everything
 			if (pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
 			{
 				//memories
-				if (mood.thoughts.memories.Memories.Any(t => t.def == Sel && stageRange.Includes(t.CurStageIndex)))
+				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
 					return true;
 
 				//situational
 				List<Thought> thoughts = new List<Thought>();
 				mood.thoughts.situational.AppendMoodThoughts(thoughts);
-				if (thoughts.Any(t => t.def == Sel && stageRange.Includes(t.CurStageIndex)))
+				if (thoughts.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
 					return true;
 			}
 			return false;
@@ -195,7 +195,7 @@ namespace List_Everything
 
 		public override bool DrawMore(Listing_StandardIndent listing)
 		{
-			if (Sel.stages.Count <= 1) return false;
+			if (sel.stages.Count <= 1) return false;
 
 			//Buttons apparently are too tall for the line height?
 			listing.Gap(listing.verticalSpacing);
@@ -218,16 +218,16 @@ namespace List_Everything
 
 		private void DoStageDropdown(WidgetRow row, int setI, Action<int> selectedAction)
 		{
-			if (row.ButtonText(Sel.stages[setI]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate()))
+			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
-					ContentsUtility.AvailableInGame(t => ThoughtStagesForThing(t, Sel)) :
-					Enumerable.Range(0, Sel.stages.Count);
-				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (Sel.stages[i]?.visible ?? false)))
+					ContentsUtility.AvailableInGame(t => ThoughtStagesForThing(t, sel)) :
+					Enumerable.Range(0, sel.stages.Count);
+				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
 				{
 					int localI = i;
-					options.Add(new FloatMenuOption(Sel.stages[i]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate(), () => selectedAction(localI)));
+					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate(), () => selectedAction(localI)));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
@@ -273,7 +273,7 @@ namespace List_Everything
 
 		public ListFilterNeed()
 		{
-			Sel = NeedDefOf.Food;
+			sel = NeedDefOf.Food;
 		}
 
 		public override void ExposeData()
@@ -291,7 +291,7 @@ namespace List_Everything
 		public override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn &&
 			(!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
-				pawn.needs?.TryGetNeed(Sel) is Need need && needRange.Includes(need.CurLevelPercentage);
+				pawn.needs?.TryGetNeed(sel) is Need need && needRange.Includes(need.CurLevelPercentage);
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
@@ -329,8 +329,8 @@ namespace List_Everything
 
 			return
 				extraOption == 1 ? pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
-				Sel == null ? !pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
-				(pawn.health.hediffSet.GetFirstHediffOfDef(Sel, !DebugSettings.godMode) is Hediff hediff &&
+				sel == null ? !pawn.health.hediffSet.hediffs.Any(h => h.Visible || DebugSettings.godMode) :
+				(pawn.health.hediffSet.GetFirstHediffOfDef(sel, !DebugSettings.godMode) is Hediff hediff &&
 				(!severityRange.HasValue || severityRange.Value.Includes(hediff.Severity)));
 		}
 
@@ -343,7 +343,7 @@ namespace List_Everything
 		public override bool Ordered => true;
 		protected override void PostChosen()
 		{
-			severityRange = SeverityRangeFor(Sel);
+			severityRange = SeverityRangeFor(sel);
 		}
 
 		public override int ExtraOptionsCount => 1;
@@ -351,12 +351,12 @@ namespace List_Everything
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
-			if (Sel != null && severityRange.HasValue)
+			if (sel != null && severityRange.HasValue)
 			{
 				Rect rangeRect = rect;
 				rangeRect.xMin = row.FinalX;
 				FloatRange newRange = severityRange.Value;
-				FloatRange boundRange = SeverityRangeFor(Sel).Value;
+				FloatRange boundRange = SeverityRangeFor(sel).Value;
 				Widgets.FloatRange(rangeRect, id, ref newRange, boundRange.min, boundRange.max, valueStyle: ToStringStyle.FloatOne);
 				if (newRange != severityRange.Value)
 				{
@@ -392,8 +392,8 @@ namespace List_Everything
 
 			return 
 				extraOption == 1 ? pawn.CombinedDisabledWorkTags != WorkTags.None :
-				Sel == WorkTags.None ? pawn.CombinedDisabledWorkTags == WorkTags.None :
-				pawn.WorkTagIsDisabled(Sel);
+				sel == WorkTags.None ? pawn.CombinedDisabledWorkTags == WorkTags.None :
+				pawn.WorkTagIsDisabled(sel);
 		}
 
 		public override int ExtraOptionsCount => 1;
@@ -410,7 +410,7 @@ namespace List_Everything
 			float temp = pawn.AmbientTemperature;
 			FloatRange safeRange = pawn.SafeTemperatureRange();
 			FloatRange comfRange = pawn.ComfortableTemperatureRange();
-			switch (Sel)
+			switch (sel)
 			{
 				case TemperatureFilter.Cold: return temp < safeRange.min;
 				case TemperatureFilter.Cool: return temp >= safeRange.min && temp < comfRange.min;
@@ -437,13 +437,13 @@ namespace List_Everything
 	class ListFilterRestricted : ListFilterDropDown<Area>
 	{
 		public override void ResolveReference(string refName, Map map) =>
-			Sel = map.areaManager.GetLabeled(refName);
+			sel = map.areaManager.GetLabeled(refName);
 
-		public override bool ValidForAllMaps => extraOption > 0 || Sel == null;
+		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
 		public override bool FilterApplies(Thing thing)
 		{
-			Area selectedArea = extraOption == 1 ? thing.MapHeld.areaManager.Home : Sel;
+			Area selectedArea = extraOption == 1 ? thing.MapHeld.areaManager.Home : sel;
 			return thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == selectedArea;
 		}
 
@@ -464,8 +464,8 @@ namespace List_Everything
 
 			return
 				extraOption == 1 ? pawn.MentalState != null: 
-				Sel == null ? pawn.MentalState == null : 
-				pawn.MentalState?.def is MentalStateDef def && def == Sel;
+				sel == null ? pawn.MentalState == null : 
+				pawn.MentalState?.def is MentalStateDef def && def == sel;
 		}
 
 		public override IEnumerable<MentalStateDef> Options() =>
@@ -483,7 +483,7 @@ namespace List_Everything
 
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
 	{
-		public ListFilterPrisoner() => Sel = PrisonerInteractionModeDefOf.NoInteraction;
+		public ListFilterPrisoner() => sel = PrisonerInteractionModeDefOf.NoInteraction;
 
 		public override bool FilterApplies(Thing thing)
 		{
@@ -497,7 +497,7 @@ namespace List_Everything
 			if (extraOption == 1)
 				return pawn.IsPrisoner;
 
-			return pawn.IsPrisoner && pawn.guest?.interactionMode == Sel;
+			return pawn.IsPrisoner && pawn.guest?.interactionMode == sel;
 		}
 		
 		public override int ExtraOptionsCount => 2;
@@ -513,7 +513,7 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			switch (Sel)
+			switch (sel)
 			{
 				case DraftFilter.Drafted: return pawn.Drafted;
 				case DraftFilter.Undrafted: return pawn.drafter != null && !pawn.Drafted;
@@ -530,7 +530,7 @@ namespace List_Everything
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
-			return pawn.CurJobDef == Sel;
+			return pawn.CurJobDef == sel;
 		}
 
 		public override string NameFor(JobDef o) =>
@@ -548,7 +548,7 @@ namespace List_Everything
 	class ListFilterGuestStatus : ListFilterDropDown<GuestStatus>
 	{
 		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn && pawn.GuestStatus is GuestStatus status && status == Sel;
+			thing is Pawn pawn && pawn.GuestStatus is GuestStatus status && status == sel;
 	}
 
 	enum RacePropsFilter { Predator, Prey, Herd, Pack, Wildness, Petness, Trainability, Intelligence }
@@ -585,7 +585,7 @@ namespace List_Everything
 			RaceProperties props = pawn.RaceProps;
 			if (props == null) return false;
 
-			switch (Sel)
+			switch (sel)
 			{
 				case RacePropsFilter.Intelligence: return props.intelligence == intelligence;
 				case RacePropsFilter.Herd: 
@@ -608,7 +608,7 @@ namespace List_Everything
 	
 		protected override void PostChosen()
 		{
-			switch (Sel)
+			switch (sel)
 			{
 				case RacePropsFilter.Intelligence: intelligence = Intelligence.Humanlike; return;
 				case RacePropsFilter.Wildness: wild = new FloatRange(0.25f, 0.75f); return;
@@ -620,7 +620,7 @@ namespace List_Everything
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			switch (Sel)
+			switch (sel)
 			{
 				case RacePropsFilter.Intelligence:
 					if (row.ButtonText(intelligence.TranslateEnum()))
@@ -636,7 +636,7 @@ namespace List_Everything
 				case RacePropsFilter.Wildness:
 				case RacePropsFilter.Petness:
 					ref FloatRange oldRange = ref wild;
-					if (Sel == RacePropsFilter.Petness)
+					if (sel == RacePropsFilter.Petness)
 						oldRange = ref petness;
 
 					FloatRange newRange = oldRange;
@@ -666,9 +666,9 @@ namespace List_Everything
 	class ListFilterGender : ListFilterDropDown<Gender>
 	{
 		public override bool FilterApplies(Thing thing) =>
-			thing is Pawn pawn && pawn.gender == Sel;
+			thing is Pawn pawn && pawn.gender == sel;
 
-		public ListFilterGender() => Sel = Gender.Male;
+		public ListFilterGender() => sel = Gender.Male;
 	}
 
 	// -------------------------
@@ -682,7 +682,7 @@ namespace List_Everything
 
 		public ListFilterProduct()
 		{
-			Sel = null;
+			sel = null;
 			extraOption = 1;
 			countRange = new IntRange(0, Max());
 		}
@@ -709,10 +709,10 @@ namespace List_Everything
 
 			ThingDef productDef = DefFor(pawn);
 
-			if (extraOption == 0 && Sel == null)
+			if (extraOption == 0 && sel == null)
 				return productDef == null;
 
-			if(extraOption == 1 ? productDef != null : Sel == productDef)
+			if(extraOption == 1 ? productDef != null : sel == productDef)
 				return countRange.Includes(CountFor(pawn));
 
 			return false;
@@ -722,7 +722,7 @@ namespace List_Everything
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
 			//TODO: write 'IsNull' method to handle confusing extraOption == 1 but Sel == null
-			if (extraOption == 0 && Sel == null) return false;
+			if (extraOption == 0 && sel == null) return false;
 
 			IntRange newRange = countRange;
 			
@@ -858,7 +858,7 @@ namespace List_Everything
 
 		public float ProgressFor(Thing thing) =>
 			(float)
-			(Sel switch
+			(sel switch
 			{
 				ProgressType.EggProgress => thing.TryGetComp<CompEggLayer>()?.eggProgress,
 				ProgressType.EggHatch => thing.TryGetComp<CompHatcher>()?.gestateProgress,
@@ -871,7 +871,7 @@ namespace List_Everything
 
 		public override bool FilterApplies(Thing thing)
 		{
-			if (!thing.def.HasComp(Sel switch
+			if (!thing.def.HasComp(sel switch
 			{
 				ProgressType.EggProgress => typeof(CompEggLayer),
 				ProgressType.EggHatch => typeof(CompHatcher),
@@ -883,19 +883,19 @@ namespace List_Everything
 			}))
 				return false;
 
-			if (Sel == ProgressType.EggProgress)
+			if (sel == ProgressType.EggProgress)
 			{
 				if (thing.def.GetCompProperties<CompProperties_EggLayer>().eggLayFemaleOnly && (thing as Pawn).gender != Gender.Female)
 					return false;
 			}
-			if (Sel == ProgressType.MilkFullness || Sel == ProgressType.Milkable)
+			if (sel == ProgressType.MilkFullness || sel == ProgressType.Milkable)
 			{
 				if (thing.def.GetCompProperties<CompProperties_Milkable>().milkFemaleOnly && (thing as Pawn).gender != Gender.Female)
 					return false;
 			}
 
 			float progress = ProgressFor(thing);
-			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+			if (sel == ProgressType.Milkable || sel == ProgressType.Shearable)
 				return progress == 1;
 			else
 				return progressRange.Includes(progress);
@@ -903,7 +903,7 @@ namespace List_Everything
 
 		public override bool DrawSpecial(Rect rect, WidgetRow row)
 		{
-			if (Sel == ProgressType.Milkable || Sel == ProgressType.Shearable)
+			if (sel == ProgressType.Milkable || sel == ProgressType.Shearable)
 				return false;
 
 			FloatRange newRange = progressRange;
