@@ -79,7 +79,7 @@ namespace List_Everything
 
 	public abstract class ListFilter : IExposable
 	{
-		public int id;//For window focus purposes
+		public int id; //For Widgets.draggingId purposes
 		public static int nextID = 1;
 		public ListFilterDef def;
 		public FindDescription owner;
