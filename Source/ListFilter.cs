@@ -187,8 +187,7 @@ namespace List_Everything
 		}
 		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
 
-		public virtual void ExposeData() => BaseExposeData();
-		protected void BaseExposeData()
+		public virtual void ExposeData()
 		{
 			Scribe_Defs.Look(ref def, "def");
 			Scribe_Values.Look(ref enabled, "enabled", true);
@@ -941,7 +940,7 @@ namespace List_Everything
 
 	class ListFilterModded : ListFilterDropDown<ModContentPack>
 	{
-		private string packageId = "ludeon.rimworld";	//kept in case loaded from a missing mod, so it can be saved back out.
+		private string packageId;	//kept in case loaded from a missing mod, so it can be saved back out.
 
 		public ListFilterModded()
 		{
@@ -950,19 +949,19 @@ namespace List_Everything
 
 		public override void ExposeData()
 		{
-			BaseExposeData();
+			base.ExposeData();
 
-			if (Scribe.mode == LoadSaveMode.Saving && Sel != null)
-				packageId = Sel.PackageId;
-
-			Scribe_Values.Look(ref packageId, "sel");
-
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			if (Sel == null)
 			{
-				Sel = LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageId == packageId);
-				if (Sel == null)
+				// If loading, save the requested string directly into packageId
+				// If saving and it was null, it must be loaded missing mod. packageId was saved so save that string directly.
+				Scribe_Values.Look(ref packageId, "sel");
+
+				// Also if loading, show error state
+				if (Scribe.mode == LoadSaveMode.LoadingVars)
 					selectionError = $"Missing: {packageId}?";
 			}
+
 		}
 		public override ListFilter Clone(Map map, FindDescription newOwner)
 		{
@@ -978,6 +977,15 @@ namespace List_Everything
 			LoadedModManager.RunningMods.Where(mod => mod.AllDefs.Any(d => d is ThingDef));
 
 		public override string NameFor(ModContentPack o) => o.Name;
+
+
+		static ListFilterModded()
+		{
+			ParseHelper.Parsers<ModContentPack>.Register(ParseModContentPack);
+		}
+
+		public static ModContentPack ParseModContentPack(string packageId) =>
+			LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageIdPlayerFacing == packageId);
 	}
 
 }
