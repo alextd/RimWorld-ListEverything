@@ -148,6 +148,8 @@ namespace List_Everything
 		public void Focus() => shouldFocus = true;
 		protected virtual void DoFocus() { }
 
+		// Seems to be GameFont.Small on load so we're good
+		public static float IncExcWidth = Mathf.Max(Text.CalcSize("TD.IncludeShort".Translate()).x, Text.CalcSize("TD.ExcludeShort".Translate()).x);
 		public (bool, bool) Listing(Listing_StandardIndent listing)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
@@ -159,7 +161,8 @@ namespace List_Everything
 			if (RootFindDesc.locked)
 			{
 				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
-					tooltip: "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
+					IncExcWidth, "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
+				row.Gap(4);
 			}
 			else
 			{
@@ -178,7 +181,9 @@ namespace List_Everything
 				}
 
 				//Include/Exclude
-				if (row.ButtonText(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(), "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate()))
+				if (row.ButtonText(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
+					"TD.IncludeOrExcludeThingsMatchingThisFilter".Translate(),
+					fixedWidth: IncExcWidth))
 				{
 					include = !include;
 					changed = true;
