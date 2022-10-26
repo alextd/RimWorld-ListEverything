@@ -41,13 +41,17 @@ namespace List_Everything
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref any, "any", true);
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterGroup clone = (ListFilterGroup)base.Clone(map, newOwner);
-			clone.filters = filters.Select(f => f.Clone(map, clone)).ToList();
+			ListFilterGroup clone = (ListFilterGroup)base.Clone(newOwner);
+			clone.filters = filters.Select(f => f.Clone(clone)).ToList();
 			clone.any = any;
 			//clone.owner = newOwner; //No - MakeFilter sets it.
 			return clone;
+		}
+		public override void DoResolveReference(Map map)
+		{
+			filters.ForEach(f => f.DoResolveReference(map));
 		}
 
 		protected override bool DrawMain(Rect rect)
@@ -111,9 +115,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref parent, "parent", true);
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterInventory clone = (ListFilterInventory)base.Clone(map, newOwner);
+			ListFilterInventory clone = (ListFilterInventory)base.Clone(newOwner);
 			clone.parent = parent;
 			return clone;
 		}
@@ -158,9 +162,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterNearby clone = (ListFilterNearby)base.Clone(map, newOwner);
+			ListFilterNearby clone = (ListFilterNearby)base.Clone(newOwner);
 			clone.range = range;
 			return clone;
 		}

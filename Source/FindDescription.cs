@@ -41,7 +41,9 @@ namespace List_Everything
 				allMaps = allMaps,
 				locked = locked
 			};
-			newDesc.filters = filters.Select(f => f.Clone(map, newDesc)).ToList();
+			newDesc.filters = filters.Select(f => f.Clone(newDesc)).ToList();
+			if(map != null)
+				newDesc.filters.ForEach(f => f.DoResolveReference(map));
 			return newDesc;
 		}
 

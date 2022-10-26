@@ -114,7 +114,7 @@ namespace List_Everything
 			Scribe_Values.Look(ref include, "include", true);
 		}
 
-		public virtual ListFilter Clone(Map map, IFilterOwner newOwner)
+		public virtual ListFilter Clone(IFilterOwner newOwner)
 		{
 			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
 			clone.enabled = enabled;
@@ -122,6 +122,7 @@ namespace List_Everything
 			//clone.owner = newOwner; //No - MakeFilter just set it.
 			return clone;
 		}
+		public virtual void DoResolveReference(Map map) { }
 
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
@@ -329,13 +330,15 @@ namespace List_Everything
 		public virtual bool UsesRefName => IsRef;
 		protected virtual string MakeRefName() => sel?.ToString() ?? SaveLoadXmlConstants.IsNullAttributeName;
 
-		// Subclasses that UsesRefName need to declare how to find and set sel based on refName in ResolveReference()
-		// (sel will not be null)
-		protected virtual void ResolveReference(Map map) => throw new NotImplementedException();
+		// Subclasses that UsesRefName need to implement ResolveReference()
+		// return matching object based on refName (sel will not be null)
+		protected virtual T ResolveReference(Map map) => throw new NotImplementedException();
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
+
+			//avoid using property 'sel' so it doesn't MakeRefName()
 
 			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
 			if (IsDef)
@@ -343,13 +346,13 @@ namespace List_Everything
 				//From Scribe_Collections:
 				if (Scribe.mode == LoadSaveMode.Saving)
 				{
-					Def temp = sel as Def;
+					Def temp = _sel as Def;
 					Scribe_Defs.Look(ref temp, "sel");
 				}
 				else if (Scribe.mode == LoadSaveMode.LoadingVars)
 				{
 					//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
-					sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
+					_sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
 				}
 			}
 			else if (UsesRefName)
@@ -361,42 +364,38 @@ namespace List_Everything
 			}
 			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
 			{
+				//This might just be to handle ListFilterSelection
 				Scribe_Deep.Look(ref _sel, "sel");
 			}
 			else
 				Scribe_Values.Look(ref _sel, "sel");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map, newOwner);
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(newOwner);
 
 			if (UsesRefName)
-			{
 				clone.refName = refName;
-				if (map == null)
-				{
-					//SAVING: just copied refName is fine
-				}
-				else
-				{
-					//LOADING: use the refName to resolve loaded clone's reference
-					if (refName == SaveLoadXmlConstants.IsNullAttributeName)
-					{
-						clone.sel = default(T);
-					}
-					else
-					{
-						clone.ResolveReference(map);
-
-						if (clone.sel == null)
-							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
-					}
-				}
-			}
 			else
-				clone.sel = sel;
+				clone._sel = _sel;
 
 			return clone;
+		}
+		public override void DoResolveReference(Map map)
+		{
+			if (!UsesRefName) return;
+
+			if (refName == SaveLoadXmlConstants.IsNullAttributeName)
+			{
+				_sel = default; //can't null because generic T isn't bound as reftype
+			}
+			else
+			{
+				_sel = ResolveReference(map);
+
+				if (_sel == null) //can null because we checked T is reftype
+					Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
+			}
 		}
 	}
 
@@ -413,9 +412,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref extraOption, "ex");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(map, newOwner);
+			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(newOwner);
 			clone.extraOption = extraOption;
 			clone.selectionError = selectionError;
 			return clone;
@@ -504,7 +503,7 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 
 				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default(T))));
+					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default))); //can't null because T isn't bound as reftype
 
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
 					options.Add(new FloatMenuOption(NameFor(o), () => ChooseSelected(o)));
@@ -836,8 +835,8 @@ namespace List_Everything
 			extraOption = 1;
 		}
 
-		protected override void ResolveReference(Map map) =>
-			sel = map.areaManager.GetLabeled(refName);
+		protected override Area ResolveReference(Map map) =>
+			map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
@@ -884,8 +883,8 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		protected override void ResolveReference(Map map) =>
-			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
+		protected override Zone ResolveReference(Map map) =>
+			map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 
 		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
 
@@ -986,9 +985,9 @@ namespace List_Everything
 			}
 
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterModded clone = (ListFilterModded)base.Clone(map, newOwner);
+			ListFilterModded clone = (ListFilterModded)base.Clone(newOwner);
 			clone.packageId = packageId;
 			return clone;
 		}

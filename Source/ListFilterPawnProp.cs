@@ -30,9 +30,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref skillRange, "skillRange");
 			Scribe_Values.Look(ref passion, "passion");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterSkill clone = (ListFilterSkill)base.Clone(map, newOwner);
+			ListFilterSkill clone = (ListFilterSkill)base.Clone(newOwner);
 			clone.skillRange = skillRange;
 			clone.passion = passion;
 			return clone;
@@ -88,9 +88,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterTrait clone = (ListFilterTrait)base.Clone(map, newOwner);
+			ListFilterTrait clone = (ListFilterTrait)base.Clone(newOwner);
 			clone.traitDegree = traitDegree;
 			return clone;
 		}
@@ -154,9 +154,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterThought clone = (ListFilterThought)base.Clone(map, newOwner);
+			ListFilterThought clone = (ListFilterThought)base.Clone(newOwner);
 			clone.stageRange = stageRange;
 			return clone;
 		}
@@ -281,9 +281,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref needRange, "needRange");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterNeed clone = (ListFilterNeed)base.Clone(map, newOwner);
+			ListFilterNeed clone = (ListFilterNeed)base.Clone(newOwner);
 			clone.needRange = needRange;
 			return clone;
 		}
@@ -315,9 +315,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref severityRange, "severityRange");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterHealth clone = (ListFilterHealth)base.Clone(map, newOwner);
+			ListFilterHealth clone = (ListFilterHealth)base.Clone(newOwner);
 			clone.severityRange = severityRange;
 			return clone;
 		}
@@ -436,8 +436,8 @@ namespace List_Everything
 
 	class ListFilterRestricted : ListFilterDropDown<Area>
 	{
-		protected override void ResolveReference(Map map) =>
-			sel = map.areaManager.GetLabeled(refName);
+		protected override Area ResolveReference(Map map) =>
+			map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
@@ -567,9 +567,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref petness, "petness");
 			Scribe_Defs.Look(ref trainability, "trainability");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterRaceProps clone = (ListFilterRaceProps)base.Clone(map, newOwner);
+			ListFilterRaceProps clone = (ListFilterRaceProps)base.Clone(newOwner);
 			clone.intelligence = intelligence;
 			clone.wild = wild;
 			clone.petness = petness;
@@ -692,9 +692,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref countRange, "countRange");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterProduct clone = (ListFilterProduct)base.Clone(map, newOwner);
+			ListFilterProduct clone = (ListFilterProduct)base.Clone(newOwner);
 			clone.countRange = countRange;
 			return clone;
 		}
@@ -849,9 +849,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref progressRange, "progressRange");
 		}
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterOwner newOwner)
 		{
-			ListFilterProductProgress clone = (ListFilterProductProgress)base.Clone(map, newOwner);
+			ListFilterProductProgress clone = (ListFilterProductProgress)base.Clone(newOwner);
 			clone.progressRange = progressRange;
 			return clone;
 		}

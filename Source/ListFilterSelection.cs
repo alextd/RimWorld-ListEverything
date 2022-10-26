@@ -24,13 +24,17 @@ namespace List_Everything
 			protected override bool FilterApplies(Thing thing) =>
 				sel.FilterApplies(thing);
 
-			public override ListFilter Clone(Map map, IFilterOwner newOwner)
+			public override ListFilter Clone(IFilterOwner newOwner)
 			{
-				ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
+				ListFilterSelection clone = (ListFilterSelection)base.Clone(newOwner);
 
-				clone.sel = sel.Clone(map, clone);
+				clone.sel = sel.Clone(clone);
 
 				return clone;
+			}
+			public override void DoResolveReference(Map map)
+			{
+				sel.DoResolveReference(map);
 			}
 
 			protected override bool DrawMain(Rect rect)
