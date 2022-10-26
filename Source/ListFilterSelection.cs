@@ -8,48 +8,51 @@ using RimWorld;
 
 namespace List_Everything
 {
-	public class ListFilterSelection : ListFilterWithOption<ListFilter>, IFilterOwner
+	partial class ListFilter	// so I can grab at private fields inside sel below
 	{
-		public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).SubFilters;
-
-		public override void PostMake() => SetSelectedFilter(SubFilters.First());
-
-		public void SetSelectedFilter(ListFilterDef def)
+		public class ListFilterSelection : ListFilterWithOption<ListFilter>, IFilterOwner
 		{
-			sel = ListFilterMaker.MakeFilter(def, owner);
-		}
+			public IEnumerable<ListFilterDef> SubFilters => (def as ListFilterListDef).SubFilters;
 
-		public override bool FilterApplies(Thing thing) =>
-			sel.FilterApplies(thing);
+			public override void PostMake() => SetSelectedFilter(SubFilters.First());
 
-		public override ListFilter Clone(Map map, IFilterOwner newOwner)
-		{
-			ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
-
-			clone.sel = sel.Clone(map, clone);
-
-			return clone;
-		}
-
-		public override bool DrawMain(Rect rect)
-		{
-			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			if (row.ButtonText(sel.def.LabelCap))
+			public void SetSelectedFilter(ListFilterDef def)
 			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (ListFilterDef def in SubFilters)
-					options.Add(new FloatMenuOption(def.LabelCap, () => SetSelectedFilter(def)));
-				MainTabWindow_List.DoFloatMenu(options);
-
-				return true;
+				sel = ListFilterMaker.MakeFilter(def, owner);
 			}
-			rect.xMin += row.FinalX;
-			return sel.DrawMain(rect);
-		}
-		public override bool DrawUnder(Listing_StandardIndent listing) =>
-			sel.DrawUnder(listing);
 
-		public override bool ValidForAllMaps => 
-			sel.ValidForAllMaps;
+			protected override bool FilterApplies(Thing thing) =>
+				sel.FilterApplies(thing);
+
+			public override ListFilter Clone(Map map, IFilterOwner newOwner)
+			{
+				ListFilterSelection clone = (ListFilterSelection)base.Clone(map, newOwner);
+
+				clone.sel = sel.Clone(map, clone);
+
+				return clone;
+			}
+
+			protected override bool DrawMain(Rect rect)
+			{
+				WidgetRow row = new WidgetRow(rect.x, rect.y);
+				if (row.ButtonText(sel.def.LabelCap))
+				{
+					List<FloatMenuOption> options = new List<FloatMenuOption>();
+					foreach (ListFilterDef def in SubFilters)
+						options.Add(new FloatMenuOption(def.LabelCap, () => SetSelectedFilter(def)));
+					MainTabWindow_List.DoFloatMenu(options);
+
+					return true;
+				}
+				rect.xMin += row.FinalX;
+				return sel.DrawMain(rect);
+			}
+			protected override bool DrawUnder(Listing_StandardIndent listing) =>
+				sel.DrawUnder(listing);
+
+			public override bool ValidForAllMaps =>
+				sel.ValidForAllMaps;
+		}
 	}
 }

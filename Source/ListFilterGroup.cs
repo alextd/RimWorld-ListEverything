@@ -31,7 +31,7 @@ namespace List_Everything
 		protected List<ListFilter> filters = new List<ListFilter>() { };
 		protected bool any = true; // or all
 
-		public override bool FilterApplies(Thing t) => 
+		protected override bool FilterApplies(Thing t) => 
 			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) : 
 			filters.All(f => !f.Enabled || f.AppliesTo(t));
 
@@ -50,7 +50,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -64,7 +64,7 @@ namespace List_Everything
 			return changed;
 		}
 
-		public override bool DrawUnder(Listing_StandardIndent listing)
+		protected override bool DrawUnder(Listing_StandardIndent listing)
 		{
 			listing.Gap();
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
@@ -88,7 +88,7 @@ namespace List_Everything
 	{
 		protected bool parent;//or child
 
-		public override bool FilterApplies(Thing t)
+		protected override bool FilterApplies(Thing t)
 		{
 			if (parent)
 			{
@@ -118,7 +118,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -142,7 +142,7 @@ namespace List_Everything
 	{
 		int range;
 
-		public override bool FilterApplies(Thing t)
+		protected override bool FilterApplies(Thing t)
 		{
 			IntVec3 pos = t.PositionHeld;
 			Map map = t.MapHeld;
@@ -165,7 +165,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);

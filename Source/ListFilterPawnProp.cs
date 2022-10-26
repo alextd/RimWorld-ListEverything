@@ -38,7 +38,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn &&
 				pawn.skills?.GetSkill(sel) is SkillRecord rec &&
 				!rec.TotallyDisabled &&
@@ -95,7 +95,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -161,7 +161,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -193,7 +193,7 @@ namespace List_Everything
 		}
 		public override bool DrawCustom(Rect rect, WidgetRow row) => false;//Too big for one line
 
-		public override bool DrawUnder(Listing_StandardIndent listing)
+		protected override bool DrawUnder(Listing_StandardIndent listing)
 		{
 			if (sel.stages.Count <= 1) return false;
 
@@ -288,7 +288,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn &&
 			(!pawn.RaceProps.Animal || pawn.Faction != null || DebugSettings.godMode) &&
 				pawn.needs?.TryGetNeed(sel) is Need need && needRange.Includes(need.CurLevelPercentage);
@@ -322,7 +322,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -385,7 +385,7 @@ namespace List_Everything
 		public override string NameFor(WorkTags tags) =>
 			tags.LabelTranslated().CapitalizeFirst();
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -403,7 +403,7 @@ namespace List_Everything
 	enum TemperatureFilter { Cold, Cool, Okay, Warm, Hot }
 	class ListFilterTemp : ListFilterDropDown<TemperatureFilter>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -441,7 +441,7 @@ namespace List_Everything
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Area selectedArea = extraOption == 1 ? thing.MapHeld.areaManager.Home : sel;
 			return thing is Pawn pawn && pawn.playerSettings is Pawn_PlayerSettings set && set.AreaRestriction == selectedArea;
@@ -457,7 +457,7 @@ namespace List_Everything
 
 	class ListFilterMentalState : ListFilterDropDown<MentalStateDef>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -485,7 +485,7 @@ namespace List_Everything
 	{
 		public ListFilterPrisoner() => sel = PrisonerInteractionModeDefOf.NoInteraction;
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			if (extraOption == 2)
 				return thing.GetRoom()?.IsPrisonCell ?? false;
@@ -508,7 +508,7 @@ namespace List_Everything
 	enum DraftFilter { Drafted, Undrafted, Controllable }
 	class ListFilterDrafted : ListFilterDropDown<DraftFilter>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -525,7 +525,7 @@ namespace List_Everything
 
 	class ListFilterJob : ListFilterDropDown<JobDef>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -547,7 +547,7 @@ namespace List_Everything
 
 	class ListFilterGuestStatus : ListFilterDropDown<GuestStatus>
 	{
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.GuestStatus is GuestStatus status && status == sel;
 	}
 
@@ -577,7 +577,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -665,7 +665,7 @@ namespace List_Everything
 
 	class ListFilterGender : ListFilterDropDown<Gender>
 	{
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.gender == sel;
 
 		public ListFilterGender() => sel = Gender.Male;
@@ -702,7 +702,7 @@ namespace List_Everything
 		public abstract ThingDef DefFor(Pawn pawn);
 		public abstract int CountFor(Pawn pawn);
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
@@ -869,7 +869,7 @@ namespace List_Everything
 				_ => 0,
 			});
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			if (!thing.def.HasComp(sel switch
 			{
