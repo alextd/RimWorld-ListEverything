@@ -71,11 +71,15 @@ namespace List_Everything
 
 	class ListFilterTrait : ListFilterDropDown<TraitDef>
 	{
-		int traitDegree = TraitDefOf.Beauty.degreeDatas.First().degree;
+		int traitDegree;
 
 		public ListFilterTrait()
 		{
 			sel = TraitDefOf.Beauty;  //Todo: beauty shows even if it's not on map
+		}
+		protected override void PostSelected()
+		{
+			traitDegree = sel.degreeDatas.First().degree;
 		}
 
 		public override string NameFor(TraitDef def) =>
@@ -110,10 +114,6 @@ namespace List_Everything
 				: base.Options();
 
 		public override bool Ordered => true;
-		protected override void PostChosen()
-		{
-			traitDegree = sel.degreeDatas.First().degree;
-		}
 
 		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
@@ -138,6 +138,10 @@ namespace List_Everything
 		public ListFilterThought()
 		{
 			sel = ThoughtDefOf.AteWithoutTable;
+		}
+		protected override void PostSelected()
+		{
+			stageRange = new IntRange(0, 0);
 		}
 
 		public override string NameFor(ThoughtDef def)
@@ -187,10 +191,6 @@ namespace List_Everything
 				: base.Options();
 
 		public override bool Ordered => true;
-		protected override void PostChosen()
-		{
-			stageRange = new IntRange(0, 0);
-		}
 		public override bool DrawCustom(Rect rect, WidgetRow row) => false;//Too big for one line
 
 		protected override bool DrawUnder(Listing_StandardIndent listing)
@@ -310,6 +310,15 @@ namespace List_Everything
 	{
 		FloatRange? severityRange;
 
+		public ListFilterHealth()
+		{
+			sel = null;
+		}
+		protected override void PostSelected()
+		{
+			severityRange = SeverityRangeFor(sel);
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -341,10 +350,6 @@ namespace List_Everything
 				: base.Options();
 
 		public override bool Ordered => true;
-		protected override void PostChosen()
-		{
-			severityRange = SeverityRangeFor(sel);
-		}
 
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
@@ -370,6 +375,7 @@ namespace List_Everything
 		public static FloatRange? SeverityRangeFor(HediffDef hediffDef)
 		{
 			if (hediffDef == null) return null;
+
 			float min = hediffDef.minSeverity;
 			float max = hediffDef.maxSeverity;
 			if (hediffDef.lethalSeverity != -1f)
@@ -483,7 +489,10 @@ namespace List_Everything
 
 	class ListFilterPrisoner : ListFilterDropDown<PrisonerInteractionModeDef>
 	{
-		public ListFilterPrisoner() => sel = PrisonerInteractionModeDefOf.NoInteraction;
+		public ListFilterPrisoner()
+		{
+			sel = PrisonerInteractionModeDefOf.NoInteraction;
+		}
 
 		protected override bool FilterApplies(Thing thing)
 		{
@@ -559,6 +568,17 @@ namespace List_Everything
 		FloatRange petness;
 		TrainabilityDef trainability;
 
+		protected override void PostSelected()
+		{
+			switch (sel)
+			{
+				case RacePropsFilter.Intelligence: intelligence = Intelligence.Humanlike; return;
+				case RacePropsFilter.Wildness: wild = new FloatRange(0.25f, 0.75f); return;
+				case RacePropsFilter.Petness: petness = new FloatRange(0.25f, 0.75f); return;
+				case RacePropsFilter.Trainability: trainability = TrainabilityDefOf.Advanced; return;
+			}
+		}
+
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -604,17 +624,6 @@ namespace List_Everything
 					return props.trainability == trainability;
 			}
 			return false;
-		}
-	
-		protected override void PostChosen()
-		{
-			switch (sel)
-			{
-				case RacePropsFilter.Intelligence: intelligence = Intelligence.Humanlike; return;
-				case RacePropsFilter.Wildness: wild = new FloatRange(0.25f, 0.75f); return;
-				case RacePropsFilter.Petness: petness = new FloatRange(0.25f, 0.75f); return;
-				case RacePropsFilter.Trainability: trainability = TrainabilityDefOf.Advanced; return;
-			}
 		}
 
 		public override bool DrawCustom(Rect rect, WidgetRow row)
@@ -665,10 +674,11 @@ namespace List_Everything
 
 	class ListFilterGender : ListFilterDropDown<Gender>
 	{
+		public ListFilterGender() => sel = Gender.Male;
+
 		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.gender == sel;
 
-		public ListFilterGender() => sel = Gender.Male;
 	}
 
 	// -------------------------
@@ -682,9 +692,8 @@ namespace List_Everything
 
 		public ListFilterProduct()
 		{
-			sel = null;
 			extraOption = 1;
-			countRange = new IntRange(0, Max());
+			countRange = new IntRange(0, Max());	//Not PostChosen as this depends on subclass, not selection
 		}
 
 		public override void ExposeData()

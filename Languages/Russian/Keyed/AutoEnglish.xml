@@ -19,7 +19,6 @@
   <TD.EnableThisFilter>Включить фильтр</TD.EnableThisFilter>
   <TD.IncludeOrExcludeThingsMatchingThisFilter>Включить или Исключить вещи подходящие под этот фильтр</TD.IncludeOrExcludeThingsMatchingThisFilter>
   <TD.ThisFilterDoesntWorkWithAllMaps>Этот фильтр не работает на любой карте</TD.ThisFilterDoesntWorkWithAllMaps>
-  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>Пытался загрузить {0} фильтр названный ({1}), но текущая карта не имеет ничего с таким именем</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
   <TD.Spoils>Портится</TD.Spoils>
   <TD.Refrigerated>Охлажденный</TD.Refrigerated>
   <TD.Frozen>Замерзший</TD.Frozen>

@@ -28,6 +28,7 @@ namespace List_Everything
 			{
 				ListFilterSelection clone = (ListFilterSelection)base.Clone(newOwner);
 
+				//todo: this is wrong, setting sel property. Remove ListFilterSelection and just make it a seb-floatmenu popup.
 				clone.sel = sel.Clone(clone);
 
 				return clone;

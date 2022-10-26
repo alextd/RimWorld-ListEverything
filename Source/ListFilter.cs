@@ -292,7 +292,13 @@ namespace List_Everything
 	{
 		// selection
 		private T _sel;
-		protected string refName;
+		protected string refName;// if UsesRefName,  = SaveLoadXmlConstants.IsNullAttributeName;
+		private int _extraOption; //0 meaning use _sel, what 1+ means is defined in subclass
+
+		// A subclass with extra fields needs to override ExposeData and Clone to copy them
+
+		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
+		public override string DisableReason => base.DisableReason ?? selectionError;
 
 		protected T sel
 		{
@@ -300,7 +306,42 @@ namespace List_Everything
 			set
 			{
 				_sel = value;
+				_extraOption = 0;
+				selectionError = null;
 				if (UsesRefName) refName = MakeRefName();
+				PostSelected();
+			}
+		}
+
+		// A subclass should often set sel in the constructor
+		// If the default is null, and there's no PostSelected to do,
+		// then it's fine to skip defining a constructor
+		protected ListFilterWithOption()
+		{
+			if (UsesRefName)
+				refName = SaveLoadXmlConstants.IsNullAttributeName;
+		}
+		protected virtual void PostSelected()
+		{
+			// A subclass with fields whose validity depends on the selection should override this
+			// Most common usage is to set a default value that is valid for the selection
+			// e.g. the skill filter has a range 0-20, but that's valid for all skills, so no need to reset here
+			// e.g. the hediff filter has a range too, but that depends on the selected hediff, so the selected range needs to be set here
+		}
+
+		// This method works double duty:
+		// Both telling if Sel can be set to null, and the string to show for null selection
+		public virtual string NullOption() => null;
+
+		protected int extraOption
+		{
+			get => _extraOption;
+			set
+			{
+				_extraOption = value;
+				_sel = default;
+				selectionError = null;
+				refName = null;
 			}
 		}
 
@@ -327,40 +368,51 @@ namespace List_Everything
 		protected readonly static bool IsRef = typeof(ILoadReferenceable).IsAssignableFrom(typeof(T));
 		protected readonly static bool IsEnum = typeof(T).IsEnum;
 
-		public virtual bool UsesRefName => IsRef;
+		public virtual bool UsesRefName => IsRef || IsDef;
 		protected virtual string MakeRefName() => sel?.ToString() ?? SaveLoadXmlConstants.IsNullAttributeName;
 
 		// Subclasses that UsesRefName need to implement ResolveReference()
-		// return matching object based on refName (sel will not be null)
-		protected virtual T ResolveReference(Map map) => throw new NotImplementedException();
+		// return matching object based on refName (refName will not be null)
+		protected virtual T ResolveReference(Map map)
+		{
+			if (IsDef)
+			{
+				//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
+				//_sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
+
+				//DefFromNodeUnsafe also doesn't work since it logs errors - so here's custom code copied to remove the logging:
+
+				return (T)(object)GenDefDatabase.GetDefSilentFail(typeof(T), refName, false);
+			}
+
+			throw new NotImplementedException();
+		}
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
 
-			//avoid using property 'sel' so it doesn't MakeRefName()
+			Scribe_Values.Look(ref _extraOption, "ex");
+			if (_extraOption > 0)
+			{
+				if (Scribe.mode == LoadSaveMode.LoadingVars)
+					extraOption = _extraOption;	// property setter to set other fields null
+
+				// No need to worry about sel or refname, we're done!
+				return;
+			}
 
 			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
-			if (IsDef)
-			{
-				//From Scribe_Collections:
-				if (Scribe.mode == LoadSaveMode.Saving)
-				{
-					Def temp = _sel as Def;
-					Scribe_Defs.Look(ref temp, "sel");
-				}
-				else if (Scribe.mode == LoadSaveMode.LoadingVars)
-				{
-					//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
-					_sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
-				}
-			}
-			else if (UsesRefName)
+			//(avoid using property 'sel' so it doesn't MakeRefName())
+			if (UsesRefName)
 			{
 				// Of course between games you can't get references so just save by name should be good enough
-				// (even if it's from the same game, it'll just resolve that reference here)
+				// (even if it's from the same game, it can still resolve the reference all the same)
+
+				// Saving a null refName saves "IsNull"
 				Scribe_Values.Look(ref refName, "refName");
-				// And Clone will handle references when loaded for actual use
+
+				// ResolveReferences() will be called when loaded onto a map for actual use
 			}
 			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
 			{
@@ -374,10 +426,14 @@ namespace List_Everything
 		{
 			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(newOwner);
 
+			clone.extraOption = extraOption;
+			if (extraOption > 0)
+				return clone;
+
 			if (UsesRefName)
 				clone.refName = refName;
 			else
-				clone._sel = _sel;
+				clone._sel = _sel;	//todo handle if sel needs to be deep-copied. Perhaps sel should be const
 
 			return clone;
 		}
@@ -387,52 +443,27 @@ namespace List_Everything
 
 			if (refName == SaveLoadXmlConstants.IsNullAttributeName)
 			{
-				_sel = default; //can't null because generic T isn't bound as reftype
+				_sel = default; //can't use null because generic T isn't bound as reftype
 			}
 			else
 			{
 				_sel = ResolveReference(map);
 
-				if (_sel == null) //can null because we checked T is reftype
-					Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
+				if (_sel == null)
+				{
+					selectionError = $"Missing {def.LabelCap}: {refName}?";
+					Messages.Message("TD.TriedToLoad0FilterNamed1ButCouldNotBeFound".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
+				}
 			}
 		}
 	}
 
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
 	{
-		public int extraOption; //0 meaning use T, 1+ defined in subclass
-		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
-
-		public override string DisableReason => base.DisableReason ?? selectionError;
-
-		// A subclass with extra fields needs to override ExposeData and Clone to copy them, like extraOption:
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref extraOption, "ex");
-		}
-		public override ListFilter Clone(IFilterOwner newOwner)
-		{
-			ListFilterDropDown<T> clone = (ListFilterDropDown<T>)base.Clone(newOwner);
-			clone.extraOption = extraOption;
-			clone.selectionError = selectionError;
-			return clone;
-		}
-		protected virtual void PostChosen()
-		{
-			// A subclass with fields whose validity depends on the selection should override this
-			// Most common usage is to set a default value that is valid for the selection
-			// e.g. the skill filter has a range 0-20, but that's valid for all skills, so no need to reset here
-			// e.g. the hediff filter has a range too, but that depends on the selected hediff, so the selected range needs to be set here
-
-			// extraOption is set = 0 before PostChosen() is called, so subclasses need not base.PostChosen() just for that.
-		}
-
 		private string GetLabel()
 		{
 			if (selectionError != null)
-				return selectionError;
+				return refName;
 
 			if (extraOption > 0)
 				return NameForExtra(extraOption);
@@ -442,10 +473,6 @@ namespace List_Everything
 
 			return NullOption() ?? "??Null selection??";
 		}
-
-		// This method works double duty:
-		// Both telling if Sel can be set to null, and the string to show for null selection
-		public virtual string NullOption() => null;
 
 		public virtual IEnumerable<T> Options()
 		{
@@ -458,26 +485,17 @@ namespace List_Everything
 
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		protected override string MakeRefName() => sel != null ? NameFor(sel) : base.MakeRefName();
+		protected override string MakeRefName()
+		{
+			if (sel is Def def)
+				return def.defName;
+
+			return sel != null ? NameFor(sel) : base.MakeRefName();
+		}
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
 		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
-
-		private void ChooseSelected(T o)
-		{
-			sel = o;
-			extraOption = 0;
-			selectionError = null;//Right?
-			PostChosen(); //If null is valid, subclass should know to handle it in PostChosen, and wherever Sel is
-		}
-
-		private void ChooseExtra(int ex)
-		{
-			sel = default;
-			extraOption = ex;
-			selectionError = null;//Right?
-		}
 
 		protected override bool DrawMain(Rect rect)
 		{
@@ -503,13 +521,13 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 
 				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => ChooseSelected(default))); //can't null because T isn't bound as reftype
+					options.Add(new FloatMenuOption(nullOption, () => sel = default)); //can't null because T isn't bound as reftype
 
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOption(NameFor(o), () => ChooseSelected(o)));
+					options.Add(new FloatMenuOption(NameFor(o), () => sel = o));
 
 				foreach (int ex in ExtraOptions())
-					options.Add(new FloatMenuOption(NameForExtra(ex), () => ChooseExtra(ex)));
+					options.Add(new FloatMenuOption(NameForExtra(ex), () => extraOption = ex));
 
 				MainTabWindow_List.DoFloatMenu(options);
 			}
