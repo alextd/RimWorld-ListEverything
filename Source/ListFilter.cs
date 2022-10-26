@@ -485,8 +485,6 @@ namespace List_Everything
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => ChooseExtra(ex)));
 
 				MainTabWindow_List.DoFloatMenu(options);
-
-				changed = true;
 			}
 			return changed;
 		}
