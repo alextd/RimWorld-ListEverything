@@ -10,9 +10,12 @@ namespace List_Everything
 {
 	public static class AlertByFind
 	{
+		// Vanilla game works by statically listing all alerts
 		private static List<Alert> AllAlerts =>
 			((Find.UIRoot as UIRoot_Play)?.alerts as AlertsReadout)?.AllAlerts;
 
+		// ... and copying them to activeAlerts to be displayed
+		// (We only need this to remove from it)
 		private static List<Alert> activeAlerts =>
 			((Find.UIRoot as UIRoot_Play)?.alerts as AlertsReadout)?.activeAlerts;
 

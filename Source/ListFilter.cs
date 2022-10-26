@@ -114,7 +114,6 @@ namespace List_Everything
 			Scribe_Values.Look(ref include, "include", true);
 		}
 
-		//Clone, and resolve references if map specified
 		public virtual ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
@@ -290,24 +289,56 @@ namespace List_Everything
 	//automated ExposeData + Clone 
 	public abstract class ListFilterWithOption<T> : ListFilter
 	{
-		protected T sel;//selection
+		// selection
+		private T _sel;
+		protected string refName;
 
-		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
-		//(probably could be in ListFilter)
-		//ExposeData saves refName instead of sel
-		//Only saved lists get ExposeData called, so only saved lists have refName set
-		//(The in-game list will NOT have this set; The saved lists will have this set)
-		//Saving the list will generate refName from the current filter on Clone(null) via MakeRefName()
-		//Loading will use refName from the saved list to resolve references in Clone(map) via ResolveReference()
-		//Cloning between two reference types makes the ref from current map and resolves on the new map
-		string refName;
+		protected T sel
+		{
+			get => _sel;
+			set
+			{
+				_sel = value;
+				if (UsesRefName) refName = MakeRefName();
+			}
+		}
+
+		//Okay, so, references.
+		//A simple filter e.g. string search is usable everywhere.
+		//In-game, as an alert, as a saved filter to load in, saved to file to load into another game, etc.
+		//ExposeData and Clone can just copy T sel, because a string is the same everywhere.
+		//But a filter that references in-game things can't be used universally
+		//When such a filter is run in-game, it does of course set 'sel' and reference it like normal
+		//But when such a filter is saved, or stored for later use, it cannot be bound to an instance
+		//So ExposeData saves and loads 'string refName' instead of the 'T sel'
+		//When showing that filter as an option to load, that's fine, the ListFilter exists, sel isn't set but refName is.
+		//When the filter is selected, it is cloned into a map with Clone(map),
+		// -> Clone will copy refName then resolve the reference for the map.
+		//When an active filter is saved, it uses Clone(null), it will copy refName and ignore sel.
+
+		//TL;DR there are two 'modes' a ListFilter can be: active or inactive.
+		//When active, it's bound to a map, ready to do actual filtering based on sel
+		//When inactive, it's in storage - it only knows the name of sel
+		//When loading an inactive filter, the name+map are used to find and set sel
+		//When saving an active filter, just name is saved
+
+		protected readonly static bool IsDef = typeof(Def).IsAssignableFrom(typeof(T));
+		protected readonly static bool IsRef = typeof(ILoadReferenceable).IsAssignableFrom(typeof(T));
+		protected readonly static bool IsEnum = typeof(T).IsEnum;
+
+		public virtual bool UsesRefName => IsRef;
+		protected virtual string MakeRefName() => sel?.ToString() ?? SaveLoadXmlConstants.IsNullAttributeName;
+
+		// Subclasses that UsesRefName need to declare how to find and set sel based on refName in ResolveReference()
+		// (sel will not be null)
+		protected virtual void ResolveReference(Map map) => throw new NotImplementedException();
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
 
 			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
-			if (typeof(Def).IsAssignableFrom(typeof(T)))
+			if (IsDef)
 			{
 				//From Scribe_Collections:
 				if (Scribe.mode == LoadSaveMode.Saving)
@@ -321,38 +352,41 @@ namespace List_Everything
 					sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
 				}
 			}
-			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+			else if (UsesRefName)
 			{
-				//Of course between games you can't get references so just save by name should be good enough.
-				//objects saved here need to be copies made with Clone(null)
-				Scribe_Values.Look(ref refName, "refName"); //And Clone will handle references
+				// Of course between games you can't get references so just save by name should be good enough
+				// (even if it's from the same game, it'll just resolve that reference here)
+				Scribe_Values.Look(ref refName, "refName");
+				// And Clone will handle references when loaded for actual use
 			}
 			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
 			{
-				Scribe_Deep.Look(ref sel, "sel");
+				Scribe_Deep.Look(ref _sel, "sel");
 			}
 			else
-				Scribe_Values.Look(ref sel, "sel");
+				Scribe_Values.Look(ref _sel, "sel");
 		}
 		public override ListFilter Clone(Map map, IFilterOwner newOwner)
 		{
 			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map, newOwner);
 
-			if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+			if (UsesRefName)
 			{
-				if (map == null)//SAVING: I don't have refName, but I make it and tell saved clone
+				clone.refName = refName;
+				if (map == null)
 				{
-					clone.refName = MakeRefName();
+					//SAVING: just copied refName is fine
 				}
-				else //LOADING: use my refName to resolve loaded clone's reference
+				else
 				{
+					//LOADING: use the refName to resolve loaded clone's reference
 					if (refName == SaveLoadXmlConstants.IsNullAttributeName)
 					{
 						clone.sel = default(T);
 					}
 					else
 					{
-						clone.ResolveReference(refName ?? MakeRefName(), map);
+						clone.ResolveReference(map);
 
 						if (clone.sel == null)
 							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
@@ -364,11 +398,6 @@ namespace List_Everything
 
 			return clone;
 		}
-		protected virtual string MakeRefName() =>
-			sel != null ? sel.ToString() :
-			SaveLoadXmlConstants.IsNullAttributeName;
-
-		protected virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
 	}
 
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
@@ -421,17 +450,16 @@ namespace List_Everything
 
 		public virtual IEnumerable<T> Options()
 		{
-			if (typeof(T).IsEnum)
+			if (IsEnum)
 				return Enum.GetValues(typeof(T)).OfType<T>();
-			if (typeof(Def).IsAssignableFrom(typeof(T)))
+			if (IsDef)
 				return GenDefDatabase.GetAllDefsInDatabaseForDef(typeof(T)).Cast<T>();
 			throw new NotImplementedException();
 		}
 
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		protected override string MakeRefName() =>
-			sel != null ? NameFor(sel) : base.MakeRefName();
+		protected override string MakeRefName() => sel != null ? NameFor(sel) : base.MakeRefName();
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
@@ -808,7 +836,7 @@ namespace List_Everything
 			extraOption = 1;
 		}
 
-		protected override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
@@ -856,7 +884,7 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		protected override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(Map map) =>
 			sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 
 		public override bool ValidForAllMaps => extraOption != 0 || sel == null;

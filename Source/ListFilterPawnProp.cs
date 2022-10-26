@@ -436,7 +436,7 @@ namespace List_Everything
 
 	class ListFilterRestricted : ListFilterDropDown<Area>
 	{
-		protected override void ResolveReference(string refName, Map map) =>
+		protected override void ResolveReference(Map map) =>
 			sel = map.areaManager.GetLabeled(refName);
 
 		public override bool ValidForAllMaps => extraOption > 0 || sel == null;

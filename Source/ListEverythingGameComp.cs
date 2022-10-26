@@ -63,13 +63,12 @@ namespace List_Everything
 
 			Map map = desc.allMaps ? null : Find.CurrentMap;
 			
-			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
-			//This was a good idea at one point but now I don't care to consolidate them into one ist
-			FindDescription refDesc = desc.Clone(null); //This one has ref string
-			refDesc.name = name;
-			FindDescription alertDesc = refDesc.Clone(map); //This one re-resolves reference for this map.
+			// Copy from the edit dialog into the actual alert,
+			// so editing it doesn't create live changes until saved.
+			FindDescription refDesc = desc.Clone(map);
+			var newAlert = new FindAlertData(map, refDesc);
 
-			AlertByFind.AddAlert(new FindAlertData(map, alertDesc), okAction: () => savedAlerts[name] = new FindAlertData(map, refDesc));
+			AlertByFind.AddAlert(newAlert, okAction: () => savedAlerts[name] = newAlert);
 		}
 
 		public FindDescription LoadAlert(string name)
@@ -126,9 +125,11 @@ namespace List_Everything
 			{
 				if (savedAlerts == null)	
 					savedAlerts = new Dictionary<string, FindAlertData>();
-				foreach (var kvp in savedAlerts)
+
+				foreach (FindAlertData alert in savedAlerts.Values)
 				{
-					AlertByFind.AddAlert(new FindAlertData(kvp.Value.map, kvp.Value.desc.Clone(kvp.Value.map)), overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
+					alert.desc = alert.desc.Clone(alert.map);
+					AlertByFind.AddAlert(alert, overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
 				}
 			}
 		}
