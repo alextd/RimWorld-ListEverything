@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Reflection;
-using static System.Reflection.BindingFlags;
 using Verse;
 using RimWorld;
 using UnityEngine;
@@ -12,27 +10,11 @@ namespace List_Everything
 {
 	public static class AlertByFind
 	{
-		private static FieldInfo AllAlertsInfo = typeof(AlertsReadout).GetField("AllAlerts", NonPublic | Instance);
-		private static List<Alert> AllAlerts
-		{
-			get
-			{
-				if ((Find.UIRoot as UIRoot_Play).alerts is AlertsReadout readout)
-					return (List<Alert>)AllAlertsInfo.GetValue(readout);
-				return null;
-			}
-		}
+		private static List<Alert> AllAlerts =>
+			((Find.UIRoot as UIRoot_Play)?.alerts as AlertsReadout)?.AllAlerts;
 
-		private static FieldInfo activeAlertsInfo = typeof(AlertsReadout).GetField("activeAlerts", NonPublic | Instance);
-		private static List<Alert> activeAlerts
-		{
-			get
-			{
-				if ((Find.UIRoot as UIRoot_Play).alerts is AlertsReadout readout)
-					return (List<Alert>)activeAlertsInfo.GetValue(readout);
-				return null;
-			}
-		}
+		private static List<Alert> activeAlerts =>
+			((Find.UIRoot as UIRoot_Play)?.alerts as AlertsReadout)?.activeAlerts;
 
 		private static Alert_Find GetAlert(string name) =>
 			AllAlerts.FirstOrDefault(a => a is Alert_Find af && af.GetLabel() == name) as Alert_Find;
