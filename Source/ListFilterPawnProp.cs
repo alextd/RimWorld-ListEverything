@@ -216,9 +216,6 @@ namespace List_Everything
 		{
 			base.ExposeData();
 
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-				MakeOrderedStages();
-
 			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
 		public override ListFilter Clone(IFilterOwner newOwner)
@@ -226,6 +223,11 @@ namespace List_Everything
 			ListFilterThought clone = (ListFilterThought)base.Clone(newOwner);
 			clone.stageRange = stageRange;
 			return clone;
+		}
+		public override void DoResolveReference(Map map)
+		{
+			base.DoResolveReference(map);
+			MakeOrderedStages();
 		}
 
 		protected override bool FilterApplies(Thing thing)
