@@ -200,7 +200,9 @@ namespace List_Everything
 			//Buttons apparently are too tall for the line height?
 			listing.Gap(listing.verticalSpacing);
 
+			listing.NestedIndent(Listing_Standard.DefaultIndent);
 			Rect nextRect = listing.GetRect(Text.LineHeight);
+			listing.NestedOutdent();
 
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
 			//Actually Range from 1 to 2 is fine cause it can match both 
