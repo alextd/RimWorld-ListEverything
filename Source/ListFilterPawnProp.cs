@@ -133,29 +133,92 @@ namespace List_Everything
 
 	class ListFilterThought: ListFilterDropDown<ThoughtDef>
 	{
-		IntRange stageRange;
+		IntRange stageRange;	//Indexes of orderedStages
+		List<int> orderedStages = new();
+
+		// There is a confusing translation between stage index and ordered index.
+		// The xml defines stages inconsistently so we order them to orderedStages
+		// The selection is done with the ordered index
+		// But of course this has to be translated from and to the actual stage index
 
 		public ListFilterThought()
 		{
 			sel = ThoughtDefOf.AteWithoutTable;
 		}
+
+
+		// stageI = orderedStages[orderI], so
+		// gotta reverse index search to find orderI from stageI
+		private int OrderedIndex(int stageI) =>
+			orderedStages.IndexOf(stageI);
+
+		private bool Includes(int stageI) =>
+			stageRange.Includes(OrderedIndex(stageI));
+
+
+		// Multistage UI is only shown when when there's >1 stage
+		// Some hidden stages are not shown (unless you have godmode on)
+		public static bool VisibleStage(ThoughtStage stage) =>
+			DebugSettings.godMode || (stage?.visible ?? false);
+
+		public static bool ShowMultistage(ThoughtDef def) =>
+			def.stages.Count(VisibleStage) > 1;
+
+		public IEnumerable<int> SelectableStages =>
+			orderedStages.Where(i => VisibleStage(sel.stages[i]));
+
+
+		// How to order the stages: by mood/opinion/xml-order
+		public class CompareThoughtStage : IComparer<int>
+		{
+			ThoughtDef tDef;
+			public CompareThoughtStage(ThoughtDef d) => tDef = d;
+
+			//Implementing the Compare method
+			public int Compare(int l, int r)
+			{
+				ThoughtStage stageL = tDef.stages[l];
+				ThoughtStage stageR = tDef.stages[r];
+				float moodL = stageL?.baseMoodEffect ?? 0;
+				float moodR = stageR?.baseMoodEffect ?? 0;
+
+				if (moodL > moodR)
+					return 1;
+				if (moodL < moodR)
+					return -1;
+
+				float offsL = stageL?.baseOpinionOffset ?? 0;
+				float offsR = stageR?.baseOpinionOffset ?? 0;
+				if (offsL > offsR)
+					return 1;
+				if (offsL < offsR)
+					return -1;
+
+				return l - r;
+			}
+		}
+
+		private void MakeOrderedStages()
+		{
+			orderedStages.Clear();
+			orderedStages.AddRange(Enumerable.Range(0, sel.stages.Count).OrderBy(i => i, new CompareThoughtStage(sel)));
+		}
+
 		protected override void PostSelected()
 		{
-			stageRange = new IntRange(0, 0);
+			//Whether it's multistage, visible, or not, alls doesn't matter, just order them ffs.
+			MakeOrderedStages();
+
+			stageRange = new IntRange(0, SelectableStages.Count() - 1);
 		}
 
-		public override string NameFor(ThoughtDef def)
-		{
-			string label =
-				def.label?.CapitalizeFirst() ??
-				def.stages.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
-				def.stages.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
-
-			return def.stages.Count > 1 ? label + "*" : label;
-		}
 		public override void ExposeData()
 		{
 			base.ExposeData();
+
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+				MakeOrderedStages();
+
 			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
 		public override ListFilter Clone(IFilterOwner newOwner)
@@ -173,16 +236,26 @@ namespace List_Everything
 			if (pawn.needs?.TryGetNeed<Need_Mood>() is Need_Mood mood)
 			{
 				//memories
-				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
+				if (mood.thoughts.memories.Memories.Any(t => t.def == sel && Includes(t.CurStageIndex)))
 					return true;
 
 				//situational
 				List<Thought> thoughts = new List<Thought>();
 				mood.thoughts.situational.AppendMoodThoughts(thoughts);
-				if (thoughts.Any(t => t.def == sel && stageRange.Includes(t.CurStageIndex)))
+				if (thoughts.Any(t => t.def == sel && Includes(t.CurStageIndex)))
 					return true;
 			}
 			return false;
+		}
+
+		public override string NameFor(ThoughtDef def)
+		{
+			string label =
+				def.label?.CapitalizeFirst() ??
+				def.stages.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
+				def.stages.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
+
+			return ShowMultistage(def) ? label + "*" : label;
 		}
 
 		public override IEnumerable<ThoughtDef> Options() =>
@@ -191,11 +264,27 @@ namespace List_Everything
 				: base.Options();
 
 		public override bool Ordered => true;
-		public override bool DrawCustom(Rect rect, WidgetRow row) => false;//Too big for one line
+
+		private string NameForStage(int stageI)
+		{
+			ThoughtStage stage = sel.stages[stageI];
+			if (stage == null || !stage.visible)
+				return "TD.Invisible".Translate();
+
+			StringBuilder str = new(stage.label.CapitalizeFirst().Replace("{0}", "_").Replace("{1}", "_"));
+
+			if (stage.baseMoodEffect != 0)
+				str.Append($" : ({stage.baseMoodEffect})");
+
+			if (stage.baseOpinionOffset != 0)
+				str.Append($" : ({stage.baseOpinionOffset})");
+
+			return str.ToString();
+		}
 
 		protected override bool DrawUnder(Listing_StandardIndent listing)
 		{
-			if (sel.stages.Count <= 1) return false;
+			if (!ShowMultistage(sel)) return false;
 
 			//Buttons apparently are too tall for the line height?
 			listing.Gap(listing.verticalSpacing);
@@ -205,31 +294,25 @@ namespace List_Everything
 			listing.NestedOutdent();
 
 			WidgetRow row = new WidgetRow(nextRect.x, nextRect.y);
-			//Actually Range from 1 to 2 is fine cause it can match both 
-			//if(sel.stages.Count == 2)
-			//	DoStageDropdown(row, stageRange.min, i => { stageRange.min = i; stageRange.max = i; });
-			//else
-			{
-				row.Label("TD.From".Translate());
-				DoStageDropdown(row, stageRange.min, i => stageRange.min = i);
-				row.Label("RangeTo".Translate());
-				DoStageDropdown(row, stageRange.max, i => stageRange.max = i);
-			}
+			
+			row.Label("TD.From".Translate());
+			DoStageDropdown(row, stageRange.min, i => stageRange.min = i);
+
+			row.Label("RangeTo".Translate());
+			DoStageDropdown(row, stageRange.max, i => stageRange.max = i);
+			
 			return false;
 		}
 
 		private void DoStageDropdown(WidgetRow row, int setI, Action<int> selectedAction)
 		{
-			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate()))
+			if (row.ButtonText(NameForStage(orderedStages[setI])))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				IEnumerable<int> stageIndices = ContentsUtility.OnlyAvailable ?
-					ContentsUtility.AvailableInGame(t => ThoughtStagesForThing(t, sel)) :
-					Enumerable.Range(0, sel.stages.Count);
-				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
+				foreach (int stageI in SelectableStages)
 				{
-					int localI = i;
-					options.Add(new FloatMenuOption(sel.stages[i]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate(), () => selectedAction(localI)));
+					int localI = OrderedIndex(stageI);
+					options.Add(new FloatMenuOption(NameForStage(stageI), () => selectedAction(localI)));
 				}
 				MainTabWindow_List.DoFloatMenu(options);
 			}
@@ -240,32 +323,15 @@ namespace List_Everything
 			Pawn pawn = t as Pawn;
 			if (pawn == null) yield break;
 
-			IEnumerable<ThoughtDef> memories = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.CurStage.visible).Select(th => th.def);
+			IEnumerable<ThoughtDef> memories = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => VisibleStage(th.CurStage)).Select(th => th.def);
 			if (memories != null)
 				foreach (ThoughtDef def in memories)
 					yield return def;
 
 			List<Thought> thoughts = new List<Thought>();
 			pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.situational.AppendMoodThoughts(thoughts);
-			foreach (Thought thought in thoughts)
+			foreach (Thought thought in thoughts.Where(th => VisibleStage(th.CurStage)))
 				yield return thought.def;
-		}
-
-		public static IEnumerable<int> ThoughtStagesForThing(Thing t, ThoughtDef def)
-		{
-			Pawn pawn = t as Pawn;
-			if (pawn == null) yield break;
-
-			IEnumerable<int> stages = pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.memories.Memories.Where(th => th.def == def && th.CurStage.visible).Select(th => th.CurStageIndex);
-			if (stages != null)
-				foreach (int stage in stages)
-					yield return stage;
-
-			List<Thought> thoughts = new List<Thought>();
-			pawn.needs?.TryGetNeed<Need_Mood>()?.thoughts.situational.AppendMoodThoughts(thoughts);
-			foreach (Thought thought in thoughts)
-				if (thought.def == def)
-					yield return thought.CurStageIndex;
 		}
 	}
 
