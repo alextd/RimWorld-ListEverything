@@ -140,12 +140,6 @@
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
-		<defName>Filter_RaceProps</defName>
-		<label>race</label>
-		<filterClass>List_Everything.ListFilterRaceProps</filterClass>
-	</List_Everything.ListFilterDef>
-
-	<List_Everything.ListFilterDef>
 		<defName>Filter_Gender</defName>
 		<label>gender</label>
 		<filterClass>List_Everything.ListFilterGender</filterClass>
@@ -172,6 +166,12 @@
 			<li>Filter_ProductProgress</li>
 		</subFilters>
 	</List_Everything.ListFilterCategoryDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_RaceProps</defName>
+		<label>race</label>
+		<filterClass>List_Everything.ListFilterRaceProps</filterClass>
+	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Meat</defName>
@@ -220,6 +220,7 @@
 			<!-- though anything could be CompQuality, only items seem to have it -->
 			<li>Filter_Stuff</li>
 			<li>Filter_SpecialFilter</li>
+			<li>Filter_Forbidden</li>
 		</subFilters>
 	</List_Everything.ListFilterCategoryDef>
 
@@ -227,18 +228,6 @@
 		<defName>Filter_ItemCategory</defName>
 		<label>item grouping</label>
 		<filterClass>List_Everything.ListFilterItemCategory</filterClass>
-	</List_Everything.ListFilterDef>
-
-	<List_Everything.ListFilterDef>
-		<defName>Filter_SpecialFilter</defName>
-		<label>special filter</label>
-		<filterClass>List_Everything.ListFilterSpecialFilter</filterClass>
-	</List_Everything.ListFilterDef>
-
-	<List_Everything.ListFilterDef>
-		<defName>Filter_HP</defName>
-		<label>health %</label>
-		<filterClass>List_Everything.ListFilterHP</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
@@ -253,18 +242,10 @@
 		<filterClass>List_Everything.ListFilterStuff</filterClass>
 	</List_Everything.ListFilterDef>
 
-	
-	<!-- other filters-->
 	<List_Everything.ListFilterDef>
-		<defName>Filter_Inventory</defName>
-		<label>inventory</label>
-		<filterClass>List_Everything.ListFilterInventory</filterClass>
-	</List_Everything.ListFilterDef>
-	
-	<List_Everything.ListFilterDef>
-		<defName>Filter_Mineable</defName>
-		<label>mineable</label>
-		<filterClass>List_Everything.ListFilterMineable</filterClass>
+		<defName>Filter_SpecialFilter</defName>
+		<label>special filter</label>
+		<filterClass>List_Everything.ListFilterSpecialFilter</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
@@ -273,13 +254,30 @@
 		<filterClass>List_Everything.ListFilterForbidden</filterClass>
 	</List_Everything.ListFilterDef>
 
+
+	<!--Building filters-->
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_BuildingInfo</defName>
+		<label>building info</label>
+		<subFilters>
+			<li>Filter_Mineable</li>
+			<li>Filter_Door</li>
+		</subFilters>
+	</List_Everything.ListFilterCategoryDef>
+
 	<List_Everything.ListFilterDef>
-		<defName>Filter_Designation</defName>
-		<label>designated</label>
-		<filterClass>List_Everything.ListFilterDesignation</filterClass>
+		<defName>Filter_Mineable</defName>
+		<label>mineable</label>
+		<filterClass>List_Everything.ListFilterMineable</filterClass>
+	</List_Everything.ListFilterDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_Door</defName>
+		<label>Door Status</label>
+		<filterClass>List_Everything.ListFilterDoorOpen</filterClass>
 	</List_Everything.ListFilterDef>
 	
-
+	
 	<!-- Plant stuff-->
 	<List_Everything.ListFilterCategoryDef>
 		<defName>Category_Plants</defName>
@@ -315,8 +313,8 @@
 		<label>dies to cold</label>
 		<filterClass>List_Everything.ListFilterPlantDies</filterClass>
 	</List_Everything.ListFilterDef>
-	
-	
+
+
 	<!-- location based filters -->
 	<List_Everything.ListFilterCategoryDef>
 		<defName>Category_Location</defName>
@@ -353,18 +351,30 @@
 		<filterClass>List_Everything.ListFilterDeterioration</filterClass>
 	</List_Everything.ListFilterDef>
 
-	<!-- -->
 
+	<!-- other filters-->
+	<List_Everything.ListFilterDef>
+		<defName>Filter_HP</defName>
+		<label>health %</label>
+		<filterClass>List_Everything.ListFilterHP</filterClass>
+	</List_Everything.ListFilterDef>
+	
+	<List_Everything.ListFilterDef>
+		<defName>Filter_Inventory</defName>
+		<label>inventory</label>
+		<filterClass>List_Everything.ListFilterInventory</filterClass>
+	</List_Everything.ListFilterDef>
+
+	<List_Everything.ListFilterDef>
+		<defName>Filter_Designation</defName>
+		<label>designated</label>
+		<filterClass>List_Everything.ListFilterDesignation</filterClass>
+	</List_Everything.ListFilterDef>
+	
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Faction</defName>
 		<label>faction</label>
 		<filterClass>List_Everything.ListFilterFaction</filterClass>
-	</List_Everything.ListFilterDef>
-
-	<List_Everything.ListFilterDef>
-		<defName>Filter_Door</defName>
-		<label>Door Status</label>
-		<filterClass>List_Everything.ListFilterDoorOpen</filterClass>
 	</List_Everything.ListFilterDef>
 
 	<List_Everything.ListFilterDef>
