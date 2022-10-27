@@ -680,7 +680,14 @@ namespace List_Everything
 
 		protected override bool FilterApplies(Thing thing) =>
 			thing is Pawn pawn && pawn.gender == sel;
+	}
 
+	class ListFilterDevelopmentalStage : ListFilterDropDown<DevelopmentalStage>
+	{
+		public ListFilterDevelopmentalStage() => sel = DevelopmentalStage.Adult;
+
+		protected override bool FilterApplies(Thing thing) =>
+			thing is Pawn pawn && pawn.DevelopmentalStage == sel;
 	}
 
 	// -------------------------
