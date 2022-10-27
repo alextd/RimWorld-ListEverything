@@ -373,6 +373,7 @@ namespace List_Everything
 
 		// Subclasses that UsesRefName need to implement ResolveReference()
 		// return matching object based on refName (refName will not be null)
+		// returning null produces a selection error and the filter will be disabled
 		protected virtual T ResolveReference(Map map)
 		{
 			if (IsDef)
@@ -980,35 +981,17 @@ namespace List_Everything
 
 	class ListFilterModded : ListFilterDropDown<ModContentPack>
 	{
-		private string packageId;	//kept in case loaded from a missing mod, so it can be saved back out.
-
 		public ListFilterModded()
 		{
 			sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
 		}
 
-		public override void ExposeData()
-		{
-			base.ExposeData();
 
-			if (sel == null)
-			{
-				// If loading, save the requested string directly into packageId
-				// If saving and it was null, it must be loaded missing mod. packageId was saved so save that string directly.
-				Scribe_Values.Look(ref packageId, "sel");
+		public override bool UsesRefName => true;
 
-				// Also if loading, show error state
-				if (Scribe.mode == LoadSaveMode.LoadingVars)
-					selectionError = $"Missing: {packageId}?";
-			}
+		protected override ModContentPack ResolveReference(Map map) =>
+			LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageIdPlayerFacing == refName);
 
-		}
-		public override ListFilter Clone(IFilterOwner newOwner)
-		{
-			ListFilterModded clone = (ListFilterModded)base.Clone(newOwner);
-			clone.packageId = packageId;
-			return clone;
-		}
 
 		protected override bool FilterApplies(Thing thing) =>
 			sel == thing.ContentSource;
@@ -1017,15 +1000,6 @@ namespace List_Everything
 			LoadedModManager.RunningMods.Where(mod => mod.AllDefs.Any(d => d is ThingDef));
 
 		public override string NameFor(ModContentPack o) => o.Name;
-
-
-		static ListFilterModded()
-		{
-			ParseHelper.Parsers<ModContentPack>.Register(ParseModContentPack);
-		}
-
-		public static ModContentPack ParseModContentPack(string packageId) =>
-			LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageIdPlayerFacing == packageId);
 	}
 
 }
