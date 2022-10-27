@@ -282,6 +282,9 @@ namespace List_Everything
 			return str.ToString();
 		}
 
+		private string TipForStage(int stageI) =>
+			sel.stages[stageI]?.description;
+
 		protected override bool DrawUnder(Listing_StandardIndent listing)
 		{
 			if (!ShowMultistage(sel)) return false;
@@ -306,7 +309,8 @@ namespace List_Everything
 
 		private void DoStageDropdown(WidgetRow row, int setI, Action<int> selectedAction)
 		{
-			if (row.ButtonText(NameForStage(orderedStages[setI])))
+			int setStageI = orderedStages[setI];
+			if (row.ButtonText(NameForStage(setStageI), TipForStage(setStageI)))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (int stageI in SelectableStages)
