@@ -603,6 +603,12 @@ namespace List_Everything
 			thing is Plant plant && plant.HarvestableNow;
 	}
 
+	class ListFilterPlantCrop : ListFilter
+	{
+		protected override bool FilterApplies(Thing thing) =>
+			thing is Plant plant && plant.IsCrop;
+	}
+
 	class ListFilterPlantDies : ListFilter
 	{
 		protected override bool FilterApplies(Thing thing) =>
