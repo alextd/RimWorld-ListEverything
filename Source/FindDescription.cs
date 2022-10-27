@@ -52,11 +52,8 @@ namespace List_Everything
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch (baseType)
 			{
-				case BaseListType.Selectable:
+				case BaseListType.Selectable:	//Known as "Map"
 					allThings = map.listerThings.AllThings.Where(t => t.def.selectable);
-					break;
-				case BaseListType.All:
-					allThings = ContentsUtility.AllKnownThings(map);
 					break;
 				case BaseListType.Buildings:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
@@ -87,8 +84,11 @@ namespace List_Everything
 				case BaseListType.Animals:
 					allThings = map.mapPawns.AllPawnsSpawned.Where(p => !p.RaceProps.Humanlike).Cast<Thing>();
 					break;
+				case BaseListType.All:
+					allThings = ContentsUtility.AllKnownThings(map);
+					break;
 
-					//Devmode options:
+				//Devmode options:
 				case BaseListType.Haulables:
 					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
 					break;
@@ -146,15 +146,15 @@ namespace List_Everything
 	public enum BaseListType
 	{
 		Selectable,
-		All,
-		Items,
 		Everyone,
 		Colonists,
 		Animals,
+		Items,
 		Buildings,
 		Natural,
 		Plants,
 		Inventory,
+		All,
 		Haulables,
 		Mergables,
 		FilthInHomeArea
@@ -163,7 +163,7 @@ namespace List_Everything
 	public static class BaseListNormalTypes
 	{
 		public static readonly BaseListType[] normalTypes =
-			{ BaseListType.Selectable, BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
-			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory};
+			{ BaseListType.Selectable, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals, BaseListType.Items,
+			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory, BaseListType.All};
 	}
 }
