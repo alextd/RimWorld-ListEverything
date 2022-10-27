@@ -81,6 +81,17 @@ namespace List_Everything
 
 		private bool include = true; //or exclude
 
+
+		// The basic gist here is:
+		// ExposeData saves any filter fine.
+		// After ExposeData loading, they need to be cloned
+		// After Cloning, they get DoResolveReference
+
+		// ExposeData+Clone overrides should copy data but not process much.
+		// If there's proessing to do, do it in ResolveReference. 
+		// e.g. refName in ListFilterWithOption is set in clone, not the actual selection
+		// So don't use it in Clone! Use it in ResolveReference.
+
 		public virtual void ExposeData()
 		{
 			Scribe_Defs.Look(ref def, "def");
