@@ -303,7 +303,7 @@ namespace List_Everything
 					));
 				if (def is ListFilterCategoryDef cDef)
 					options.Add(new FloatMenuOption(
-						cDef.LabelCap,
+						"+ " + cDef.LabelCap,
 						() => DoFloatAllCategory(owner, cDef)
 					));
 			}
