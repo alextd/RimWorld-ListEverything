@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Verse;
 using RimWorld;
+using UnityEngine;
 
 namespace List_Everything
 {
@@ -29,6 +30,7 @@ namespace List_Everything
 		}
 
 		public static bool onlyAvailable = true;
+		public static bool OnlyAvailable => onlyAvailable != Event.current.shift;
 		public static HashSet<T> AvailableInGame<T>(Func<Thing, IEnumerable<T>> validGetter)
 		{
 			HashSet<T> ret = new HashSet<T>();

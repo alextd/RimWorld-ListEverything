@@ -58,7 +58,7 @@
 	<TD.MakeAlert>Make Alert</TD.MakeAlert>
 	<TD.LoadAlert>Load Alert</TD.LoadAlert>
 	<TD.ManageAlerts>Manage Alerts</TD.ManageAlerts>
-	<TD.OnlyShowFilterOptionsForAvailableThings>Only show filter options for available things</TD.OnlyShowFilterOptionsForAvailableThings>
+	<TD.OnlyShowFilterOptionsForAvailableThings>Only show existing things as an option (shift invert)</TD.OnlyShowFilterOptionsForAvailableThings>
 	<TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
 	<TD.AddNewFilter...>Add new filter...</TD.AddNewFilter...>
 	<TD.SelectAllGameAllowsUpTo80>Select All ( game allows up to 80 )</TD.SelectAllGameAllowsUpTo80>

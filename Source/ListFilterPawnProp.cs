@@ -109,7 +109,7 @@ namespace List_Everything
 		}
 
 		public override IEnumerable<TraitDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.story?.traits.allTraits.Select(tr => tr.def) ?? Enumerable.Empty<TraitDef>())
 				: base.Options();
 
@@ -186,7 +186,7 @@ namespace List_Everything
 		}
 
 		public override IEnumerable<ThoughtDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(ThoughtsForThing)
 				: base.Options();
 
@@ -223,7 +223,7 @@ namespace List_Everything
 			if (row.ButtonText(sel.stages[setI]?.label.CapitalizeFirst() ?? "TD.Invisible".Translate()))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				IEnumerable<int> stageIndices = ContentsUtility.onlyAvailable ?
+				IEnumerable<int> stageIndices = ContentsUtility.OnlyAvailable ?
 					ContentsUtility.AvailableInGame(t => ThoughtStagesForThing(t, sel)) :
 					Enumerable.Range(0, sel.stages.Count);
 				foreach (int i in stageIndices.Where(i => DebugSettings.godMode || (sel.stages[i]?.visible ?? false)))
@@ -347,7 +347,7 @@ namespace List_Everything
 
 		public override string NullOption() => "None".Translate();
 		public override IEnumerable<HediffDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.health.hediffSet.hediffs.Select(h => h.def) ?? Enumerable.Empty<HediffDef>())
 				: base.Options();
 
@@ -477,7 +477,7 @@ namespace List_Everything
 		}
 
 		public override IEnumerable<MentalStateDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.MentalState?.def)
 				: base.Options();
 
@@ -550,7 +550,7 @@ namespace List_Everything
 		public override string NullOption() => "None".Translate();
 
 		public override IEnumerable<JobDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => (t as Pawn)?.CurJobDef)
 			: base.Options();
 		public override bool Ordered => true;
@@ -756,7 +756,7 @@ namespace List_Everything
 		public abstract IEnumerable<ThingDef> AllOptions();
 		public override IEnumerable<ThingDef> Options()
 		{
-			if (ContentsUtility.onlyAvailable)
+			if (ContentsUtility.OnlyAvailable)
 			{
 				HashSet<ThingDef> ret = new HashSet<ThingDef>();
 				foreach (Map map in Find.Maps)

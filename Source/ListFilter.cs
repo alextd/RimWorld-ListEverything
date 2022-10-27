@@ -548,7 +548,7 @@ namespace List_Everything
 
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<DesignationDef> Options() =>
-			ContentsUtility.onlyAvailable ?
+			ContentsUtility.OnlyAvailable ?
 				Find.CurrentMap.designationManager.AllDesignations.Select(d => d.def).Distinct() :
 				base.Options();
 
@@ -624,7 +624,7 @@ namespace List_Everything
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
 		public override IEnumerable<Type> Options() =>
-			ContentsUtility.onlyAvailable ?
+			ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(t => t.GetType()).OrderBy(NameFor).ToList() : 
 				types;
 	}
@@ -658,7 +658,7 @@ namespace List_Everything
 			thing.def.IsWithinCategory(sel);
 
 		public override IEnumerable<ThingCategoryDef> Options() =>
-			ContentsUtility.onlyAvailable ?
+			ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(ThingCategoryDefsOfThing) :
 				base.Options();
 
@@ -790,7 +790,7 @@ namespace List_Everything
 		
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<ThingDef> Options() => 
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
 		
@@ -821,7 +821,7 @@ namespace List_Everything
 
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<BodyPartDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
 				: base.Options();
@@ -956,7 +956,7 @@ namespace List_Everything
 			sel == thing.def;
 
 		public override IEnumerable<ThingDef> Options() =>
-			(ContentsUtility.onlyAvailable ?
+			(ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(t => t.def) :
 				base.Options())
 			.Where(def => FindDescription.ValidDef(def));
