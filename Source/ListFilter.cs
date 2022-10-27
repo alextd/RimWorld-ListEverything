@@ -9,39 +9,14 @@ using UnityEngine;
 
 namespace List_Everything
 {
-	public class ListFilterDef : Def
+	public class ListFilterDef : ListFilterSelectableDef
 	{
 		public Type filterClass;
-		public bool devOnly;
 
 		public override IEnumerable<string> ConfigErrors()
 		{
-			if (GetType() != typeof(ListFilterListDef) && filterClass == typeof(ListFilter.ListFilterSelection))
-				yield return "ListFilterSelection should not be specified: use a ListFilterListDef";
-
 			if (filterClass == null)
 				yield return "ListFilterDef needs filterClass set";
-		}
-	}
-
-	// There are too many filter subclasses to globally list them
-	// So group them in lists (which is itself a subclass)
-	// Then only the filters not nested under a list will be globally listed
-	public class ListFilterListDef : ListFilterDef
-	{
-		private List<ListFilterDef> subFilters = null;
-		public IEnumerable<ListFilterDef> SubFilters =>
-			subFilters ?? Enumerable.Empty<ListFilterDef>();
-
-		public override void PostLoad()
-		{
-			filterClass = typeof(ListFilter.ListFilterSelection);
-		}
-
-		public override IEnumerable<string> ConfigErrors()
-		{
-			if (subFilters.NullOrEmpty())
-				yield return "ListFilterListDef needs to set subFilters";
 		}
 	}
 
@@ -65,19 +40,19 @@ namespace List_Everything
 			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
 
 
-		// Filters that aren't grouped under a ListFilterListDef
-		private static readonly List<ListFilterDef> rootFilters;
+		// Categories and Filters that aren't grouped under a Category
+		private static readonly List<ListFilterSelectableDef> rootFilters;
 
 		static ListFilterMaker()
 		{
-			rootFilters = DefDatabase<ListFilterDef>.AllDefs.ToList();
-			foreach (var listDef in DefDatabase<ListFilterListDef>.AllDefs)
+			rootFilters = DefDatabase<ListFilterSelectableDef>.AllDefs.ToList();
+			foreach (var listDef in DefDatabase<ListFilterCategoryDef>.AllDefs)
 				foreach (var subDef in listDef.SubFilters)	// ?? because game explodes on config error
 					rootFilters.Remove(subDef);
 		}
 
-		public static IEnumerable<ListFilterDef> SelectableList =>
-			rootFilters.Where(d => (Prefs.DevMode || !d.devOnly));
+		public static IEnumerable<ListFilterSelectableDef> SelectableList =>
+			rootFilters.Where(d => (DebugSettings.godMode || !d.devOnly));
 	}
 
 
@@ -94,7 +69,6 @@ namespace List_Everything
 		public ListFilterDef def;
 		public IFilterOwner owner;
 		public FindDescription RootFindDesc => owner.RootFindDesc;
-		private bool TopLevel => owner is FindDescription;
 
 
 		protected int id; //For Widgets.draggingId purposes
@@ -215,7 +189,7 @@ namespace List_Everything
 
 		protected virtual bool DrawMain(Rect rect)
 		{
-			if (TopLevel) Widgets.Label(rect, def.LabelCap);
+			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
 		protected virtual bool DrawUnder(Listing_StandardIndent listing) => false;
@@ -443,7 +417,7 @@ namespace List_Everything
 		}
 		public override void DoResolveReference(Map map)
 		{
-			if (!UsesRefName) return;
+			if (!UsesRefName || extraOption > 0) return;
 
 			if (refName == SaveLoadXmlConstants.IsNullAttributeName)
 			{
@@ -509,6 +483,7 @@ namespace List_Everything
 			{
 				// No label, selected option button on left, special on right
 				WidgetRow row = new WidgetRow(rect.x, rect.y);
+				row.Label(def.LabelCap);
 				changeSelection = row.ButtonText(GetLabel());
 
 				rect.xMin = row.FinalX;
@@ -548,9 +523,10 @@ namespace List_Everything
 		private bool HasSpecial => specialDrawers?.Contains(GetType()) ?? false;
 		static ListFilterDropDown()//<T>	//Remember there's a specialDrawers for each <T> but functionally that doesn't change anything
 		{
-			foreach (Type subclass in typeof(ListFilterDropDown<T>).AllSubclassesNonAbstract())
+			Type baseType = typeof(ListFilterDropDown<T>);
+			foreach (Type subclass in baseType.AllSubclassesNonAbstract())
 			{
-				if (subclass.GetMethod(nameof(DrawCustom)).DeclaringType == subclass)
+				if (subclass.GetMethod(nameof(DrawCustom)).DeclaringType != baseType)
 				{
 					if(specialDrawers == null)
 						specialDrawers = new HashSet<Type>();

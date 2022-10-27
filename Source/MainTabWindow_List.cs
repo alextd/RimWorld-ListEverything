@@ -287,17 +287,43 @@ namespace List_Everything
 
 			if (Widgets.ButtonInvisible(addRow))
 			{
-				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				foreach (ListFilterDef def in ListFilterMaker.SelectableList)
-				{
-					options.Add(new FloatMenuOption(
-						def.LabelCap,
-						() => owner.Add(ListFilterMaker.MakeFilter(def, owner))
-					));
-				}
-				DoFloatMenu(options);
+				DoFloatAllFilters(owner);
 			}
 		}
+
+		public static void DoFloatAllFilters(IFilterOwnerAdder owner)
+		{
+			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			foreach (ListFilterSelectableDef def in ListFilterMaker.SelectableList)
+			{
+				if (def is ListFilterDef fDef)
+					options.Add(new FloatMenuOption(
+						fDef.LabelCap,
+						() => owner.Add(ListFilterMaker.MakeFilter(fDef, owner))
+					));
+				if (def is ListFilterCategoryDef cDef)
+					options.Add(new FloatMenuOption(
+						cDef.LabelCap,
+						() => DoFloatAllCategory(owner, cDef)
+					));
+			}
+			DoFloatMenu(options);
+		}
+
+		public static void DoFloatAllCategory(IFilterOwnerAdder owner, ListFilterCategoryDef cDef)
+		{
+			List<FloatMenuOption> options = new List<FloatMenuOption>();
+			foreach (ListFilterDef def in cDef.SubFilters)
+			{
+				// I don't think we need to worry about double-nested filters
+				options.Add(new FloatMenuOption(
+					def.LabelCap,
+					() => owner.Add(ListFilterMaker.MakeFilter(def, owner))
+				));
+			}
+			DoFloatMenu(options);
+		}
+
 
 
 		public static string LabelCountThings(List<Thing> things) =>

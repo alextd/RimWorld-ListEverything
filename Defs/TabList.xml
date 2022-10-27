@@ -38,8 +38,8 @@
 
 	
 	<!-- pawn properties -->
-	<List_Everything.ListFilterListDef>
-		<defName>Filter_PawnProp</defName>
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_PawnProp</defName>
 		<label>personal details</label>
 		<subFilters>
 			<li>Filter_Skill</li>
@@ -59,7 +59,7 @@
 			<li>Filter_MissingBodyPart</li>
 			<!-- Seems like it should be here but it also includes "holder has" which is an item detail - shrug. <li>Filter_Inventory</li>-->
 		</subFilters>
-	</List_Everything.ListFilterListDef>
+	</List_Everything.ListFilterCategoryDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Skill</defName>
@@ -159,8 +159,8 @@
 
 
 	<!-- animal properties -->
-	<List_Everything.ListFilterListDef>
-		<defName>Filter_AnimalProp</defName>
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_AnimalProp</defName>
 		<label>animal details</label>
 		<subFilters>
 			<li>Filter_RaceProps</li>
@@ -171,7 +171,7 @@
 			<li>Filter_Wool</li>
 			<li>Filter_ProductProgress</li>
 		</subFilters>
-	</List_Everything.ListFilterListDef>
+	</List_Everything.ListFilterCategoryDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Meat</defName>
@@ -211,8 +211,8 @@
 
 	
 	<!--Item filters-->
-	<List_Everything.ListFilterListDef>
-		<defName>Filter_ItemInfo</defName>
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_ItemInfo</defName>
 		<label>item info</label>
 		<subFilters>
 			<li>Filter_ItemCategory</li>
@@ -221,7 +221,7 @@
 			<li>Filter_Stuff</li>
 			<li>Filter_SpecialFilter</li>
 		</subFilters>
-	</List_Everything.ListFilterListDef>
+	</List_Everything.ListFilterCategoryDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_ItemCategory</defName>
@@ -281,8 +281,8 @@
 	
 
 	<!-- Plant stuff-->
-	<List_Everything.ListFilterListDef>
-		<defName>Filter_Plants</defName>
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_Plants</defName>
 		<label>plants and food</label>
 		<subFilters>
 			<li>Filter_Harvestable</li>
@@ -290,7 +290,7 @@
 			<li>Filter_Freshness</li>
 			<li>Filter_DiesLeafless</li>
 		</subFilters>
-	</List_Everything.ListFilterListDef>
+	</List_Everything.ListFilterCategoryDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Harvestable</defName>
@@ -318,8 +318,8 @@
 	
 	
 	<!-- location based filters -->
-	<List_Everything.ListFilterListDef>
-		<defName>Filter_Location</defName>
+	<List_Everything.ListFilterCategoryDef>
+		<defName>Category_Location</defName>
 		<label>location</label>
 		<subFilters>
 			<li>Filter_Area</li>
@@ -327,7 +327,7 @@
 			<li>Filter_Nearby</li>
 			<li>Filter_Deterioration</li>
 		</subFilters>
-	</List_Everything.ListFilterListDef>
+	</List_Everything.ListFilterCategoryDef>
 
 	<List_Everything.ListFilterDef>
 		<defName>Filter_Area</defName>
