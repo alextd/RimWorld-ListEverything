@@ -19,7 +19,7 @@
 	<TD.EnableThisFilter>Enable this filter</TD.EnableThisFilter>
 	<TD.IncludeOrExcludeThingsMatchingThisFilter>Include or Exclude things matching this filter</TD.IncludeOrExcludeThingsMatchingThisFilter>
 	<TD.ThisFilterDoesntWorkWithAllMaps>This filter doesn't work with all maps</TD.ThisFilterDoesntWorkWithAllMaps>
-	<TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>Tried to load {0} filter named ({1}) but none could be found</TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>
+	<TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>Tried to load "{0}" filter named "{1}" but none could be found</TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>
 	<TD.Spoils>Spoils</TD.Spoils>
 	<TD.Refrigerated>Refrigerated</TD.Refrigerated>
 	<TD.Frozen>Frozen</TD.Frozen>
