@@ -351,18 +351,20 @@ namespace List_Everything
 		//ExposeData and Clone can just copy T sel, because a string is the same everywhere.
 		//But a filter that references in-game things can't be used universally
 		//When such a filter is run in-game, it does of course set 'sel' and reference it like normal
-		//But when such a filter is saved, or stored for later use, it cannot be bound to an instance
+		//But when such a filter is saved, it cannot be bound to an instance
 		//So ExposeData saves and loads 'string refName' instead of the 'T sel'
-		//When showing that filter as an option to load, that's fine, the ListFilter exists, sel isn't set but refName is.
-		//When the filter is selected, it is cloned into a map with Clone(map),
-		// -> Clone will copy refName then resolve the reference for the map.
-		//When an active filter is saved, it uses Clone(null), it will copy refName and ignore sel.
+		//When showing that filter as an option to load, that's fine, sel isn't set but refName is.
+		//When the filter is copied, loaded or saved in any way, it is cloned with Clone(), which will copy refName but not sel
+		//When loading or copying into a map, whoever called Clone will also call ResolveReference(Map) to bind to that map
+		//(even if a copy ends up referencing the same thing, the reference is re-resolved for simplicity's sake)
 
 		//TL;DR there are two 'modes' a ListFilter can be: active or inactive.
 		//When active, it's bound to a map, ready to do actual filtering based on sel
 		//When inactive, it's in storage - it only knows the name of sel
-		//When loading an inactive filter, the name+map are used to find and set sel
-		//When saving an active filter, just name is saved
+		//When loading an inactive filter, the refname+map are used to find and set sel
+		//When saving an active filter, just refname is saved
+		//When copinying an active filter, refname is copied and sel is found again
+		//(Of course if you don't use refname, the filter just copies sel around)
 
 		protected readonly static bool IsDef = typeof(Def).IsAssignableFrom(typeof(T));
 		protected readonly static bool IsRef = typeof(ILoadReferenceable).IsAssignableFrom(typeof(T));
@@ -371,8 +373,9 @@ namespace List_Everything
 		public virtual bool UsesRefName => IsRef || IsDef;
 		protected virtual string MakeRefName() => sel?.ToString() ?? SaveLoadXmlConstants.IsNullAttributeName;
 
-		// Subclasses that UsesRefName need to implement ResolveReference()
-		// return matching object based on refName (refName will not be null)
+		// Subclasses where UsesRefName==true need to implement ResolveReference()
+		// (unless it's just a Def)
+		// return matching object based on refName (refName will not be "null")
 		// returning null produces a selection error and the filter will be disabled
 		protected virtual T ResolveReference(Map map)
 		{
@@ -434,7 +437,7 @@ namespace List_Everything
 			if (UsesRefName)
 				clone.refName = refName;
 			else
-				clone._sel = _sel;	//todo handle if sel needs to be deep-copied. Perhaps sel should be const
+				clone._sel = _sel;	//todo handle if sel needs to be deep-copied. Perhaps sel should be T const * sel...
 
 			return clone;
 		}
