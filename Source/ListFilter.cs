@@ -213,8 +213,19 @@ namespace List_Everything
 			//thing.Label.Contains(sel, CaseInsensitiveComparer.DefaultInvariant);	//Contains doesn't accept comparer with strings. okay.
 			sel == "" || thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
+		public static readonly string namedLabel = "Named: ";
+		public static readonly float namedLabelWidth = Text.CalcSize(namedLabel).x;
 		protected override bool DrawMain(Rect rect)
 		{
+			Widgets.Label(rect, namedLabel);
+			rect.xMin += namedLabelWidth;
+
+			if(RootFindDesc.locked)
+			{
+				Widgets.Label(rect, '"' + sel + '"');
+				return false;
+			}
+
 			if (GUI.GetNameOfFocusedControl() == $"LIST_FILTER_NAME_INPUT{id}" &&
 				Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 1)
 			{
