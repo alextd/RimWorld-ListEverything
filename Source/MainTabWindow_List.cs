@@ -97,7 +97,7 @@ namespace List_Everything
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
-				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
+				foreach (BaseListType type in DebugSettings.godMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
 					types.Add(new FloatMenuOption(type.TranslateEnum(), () => findDesc.BaseType = type));
 
 				Find.WindowStack.Add(new FloatMenu(types));
