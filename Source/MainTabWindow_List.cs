@@ -146,16 +146,10 @@ namespace List_Everything
 
 
 			//Extra options:
-			bool newMaps = findDesc.allMaps;
-			listing.CheckboxLabeled(
+			changed |= listing.CheckboxLabeledChanged(
 				"TD.AllMaps".Translate(),
-				ref newMaps,
+				ref findDesc.allMaps,
 				"TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap".Translate());
-			if (findDesc.allMaps != newMaps)
-			{
-				findDesc.allMaps = newMaps;
-				changed = true;
-			}
 
 			listing.GapLine();
 

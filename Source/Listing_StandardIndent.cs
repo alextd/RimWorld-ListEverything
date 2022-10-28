@@ -75,5 +75,17 @@ namespace List_Everything
 			Widgets.EndScrollView();
 			End();
 		}
+
+		public bool CheckboxLabeledChanged(string label, ref bool checkOn, string tooltip = null, float height = 0f, float labelPct = 1f)
+		{
+			bool prev = checkOn;
+
+			CheckboxLabeled(
+				"TD.AllMaps".Translate(),
+				ref checkOn,
+				"TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap".Translate());
+
+			return prev != checkOn;
+		}
 	}
 }
