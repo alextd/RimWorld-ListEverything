@@ -20,40 +20,6 @@ namespace List_Everything
 		}
 	}
 
-	[DefOf]
-	[StaticConstructorOnStartup]
-	public static class ListFilterMaker
-	{
-		public static ListFilterDef Filter_Name;
-		public static ListFilterDef Filter_Group;
-
-		public static ListFilter MakeFilter(ListFilterDef def, IFilterOwner owner)
-		{
-			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
-			filter.def = def;
-			filter.owner = owner;
-			return filter;
-		}
-
-		public static ListFilter NameFilter(FindDescription owner) =>
-			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
-
-
-		// Categories and Filters that aren't grouped under a Category
-		private static readonly List<ListFilterSelectableDef> rootFilters;
-
-		static ListFilterMaker()
-		{
-			rootFilters = DefDatabase<ListFilterSelectableDef>.AllDefs.ToList();
-			foreach (var listDef in DefDatabase<ListFilterCategoryDef>.AllDefs)
-				foreach (var subDef in listDef.SubFilters)  // ?? because game explodes on config error
-					rootFilters.Remove(subDef);
-		}
-
-		public static IEnumerable<ListFilterSelectableDef> SelectableList =>
-			rootFilters.Where(d => (DebugSettings.godMode || !d.devOnly));
-	}
-
 	public abstract partial class ListFilter : IExposable
 	{
 		public ListFilterDef def;
@@ -300,7 +266,8 @@ namespace List_Everything
 		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
 		public override string DisableReason => base.DisableReason ?? selectionError;
 
-		protected T sel
+		// would like this to be T const * sel;
+		public T sel
 		{
 			get => _sel;
 			set

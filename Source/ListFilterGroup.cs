@@ -83,7 +83,7 @@ namespace List_Everything
 			return changed;
 		}
 
-		public void Add(ListFilter newFilter, bool remake)
+		public void Add(ListFilter newFilter, bool remake = false)
 		{
 			filters.Add(newFilter);
 			if(remake)	RootFindDesc.RemakeList();

@@ -11,7 +11,7 @@ namespace List_Everything
 	public interface IFilterOwner
 	{
 		public FindDescription RootFindDesc { get; }
-		public void Add(ListFilter newFilter, bool remake);
+		public void Add(ListFilter newFilter, bool remake = false);
 		public IEnumerable<ListFilter> Filters { get; }
 		public void RemoveAll(HashSet<ListFilter> removedFilters);
 	}

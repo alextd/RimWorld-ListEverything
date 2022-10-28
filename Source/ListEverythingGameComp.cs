@@ -25,10 +25,16 @@ namespace List_Everything
 			if (ListDefOf.OpenFindTab.IsDownEvent && Event.current.control)
 			{
 				FindDescription desc = new FindDescription();
-				ListFilter filter = ListFilterMaker.NameFilter(desc);
+
+				ListFilter filter = ListFilterMaker.FilterForSelected(desc);
+				bool selectedFilter = filter != null;
+
+				if (!selectedFilter)
+					filter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, desc);
+
 				desc.Add(filter);
 				filter.Focus();
-				MainTabWindow_List.OpenWith(desc);
+				MainTabWindow_List.OpenWith(desc, selectedFilter);
 			}
 		}
 
