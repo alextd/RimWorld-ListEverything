@@ -54,7 +54,7 @@ namespace List_Everything
 			filters.ForEach(f => f.DoResolveReference(map));
 		}
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -68,14 +68,14 @@ namespace List_Everything
 			return changed;
 		}
 
-		protected override bool DrawUnder(Listing_StandardIndent listing)
+		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
 		{
 			listing.Gap();
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
 
 			//Draw filters
-			bool changed = MainTabWindow_List.DoFilters(listing, filters);
-			if (!RootFindDesc.locked)
+			bool changed = MainTabWindow_List.DoFilters(listing, filters, locked);
+			if (!locked)
 				MainTabWindow_List.DrawAddRow(listing, this);
 
 			listing.NestedOutdent();
@@ -122,7 +122,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -169,7 +169,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);

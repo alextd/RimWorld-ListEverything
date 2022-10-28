@@ -136,7 +136,7 @@ namespace List_Everything
 
 		// Seems to be GameFont.Small on load so we're good
 		public static float IncExcWidth = Mathf.Max(Text.CalcSize("TD.IncludeShort".Translate()).x, Text.CalcSize("TD.ExcludeShort".Translate()).x);
-		public (bool, bool) Listing(Listing_StandardIndent listing)
+		public (bool, bool) Listing(Listing_StandardIndent listing, bool locked)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
@@ -144,7 +144,7 @@ namespace List_Everything
 			bool changed = false;
 			bool delete = false;
 
-			if (RootFindDesc.locked)
+			if (locked)
 			{
 				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
 					IncExcWidth, "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
@@ -179,8 +179,8 @@ namespace List_Everything
 
 			//Draw option row
 			rowRect.width -= (rowRect.xMax - row.FinalX);
-			changed |= DrawMain(rowRect);
-			changed |= DrawUnder(listing);
+			changed |= DrawMain(rowRect, locked);
+			changed |= DrawUnder(listing, locked);
 			if (shouldFocus)
 			{
 				DoFocus();
@@ -198,12 +198,12 @@ namespace List_Everything
 		}
 
 
-		protected virtual bool DrawMain(Rect rect)
+		protected virtual bool DrawMain(Rect rect, bool locked)
 		{
 			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
-		protected virtual bool DrawUnder(Listing_StandardIndent listing) => false;
+		protected virtual bool DrawUnder(Listing_StandardIndent listing, bool locked) => false;
 
 		// PostMake called after the subclass constructor if you need the Def.
 		public virtual void PostMake() { }
@@ -226,12 +226,12 @@ namespace List_Everything
 
 		public static readonly string namedLabel = "Named: ";
 		public static readonly float namedLabelWidth = Text.CalcSize(namedLabel).x;
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
 			Widgets.Label(rect, namedLabel);
 			rect.xMin += namedLabelWidth;
 
-			if(RootFindDesc.locked)
+			if(locked)
 			{
 				Widgets.Label(rect, '"' + sel + '"');
 				return false;
@@ -497,7 +497,7 @@ namespace List_Everything
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
 		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changeSelection = false;
 			bool changed = false;
@@ -514,7 +514,7 @@ namespace List_Everything
 			else
 			{
 				//Just the label on left, and selected option button on right
-				base.DrawMain(rect);
+				base.DrawMain(rect, locked);
 				changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
 			}
 			if (changeSelection)
@@ -605,9 +605,9 @@ namespace List_Everything
 
 		protected override bool FilterApplies(Thing thing) =>
 			thing is Plant p && sel.Includes(p.Growth);
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawMain(rect);
+			base.DrawMain(rect, locked);
 			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (sel != newRange)
@@ -762,9 +762,9 @@ namespace List_Everything
 			return pct != null && sel.Includes(pct.Value);
 		}
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawMain(rect);
+			base.DrawMain(rect, locked);
 			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
 			if (sel != newRange)
@@ -784,9 +784,9 @@ namespace List_Everything
 			thing.TryGetQuality(out QualityCategory qc) &&
 			sel.Includes(qc);
 
-		protected override bool DrawMain(Rect rect)
+		protected override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawMain(rect);
+			base.DrawMain(rect, locked);
 			QualityRange newRange = sel;
 			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
 			if (sel != newRange)

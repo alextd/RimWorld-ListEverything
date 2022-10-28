@@ -10,6 +10,9 @@ namespace List_Everything
 {
 	public class MainTabWindow_List : MainTabWindow
 	{
+		List<Thing> listedThings;
+		bool locked;
+
 		public override Vector2 RequestedTabSize
 		{
 			get
@@ -43,7 +46,6 @@ namespace List_Everything
 		}
 
 
-		List<Thing> listedThings;
 		public static void DoFloatMenu(List<FloatMenuOption> options)
 		{
 			if (options.NullOrEmpty())
@@ -101,10 +103,9 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "ClearAll".Translate().CapitalizeFirst());
 
 			headerButRect.x -= Text.LineHeight;
-			if (Widgets.ButtonImage(headerButRect, findDesc.locked ? TexButton.LockOn : TexButton.LockOff))
-			{
-				findDesc.locked = !findDesc.locked;
-			}
+			if (Widgets.ButtonImage(headerButRect, locked ? TexButton.LockOn : TexButton.LockOff))
+				locked = !locked;
+
 			TooltipHandler.TipRegion(headerButRect, "TD.LockEditing".Translate());
 
 			//Header Title
@@ -145,7 +146,7 @@ namespace List_Everything
 				viewWidth -= 16f;
 
 			//Lock out input to filters.
-			if (findDesc.locked && 
+			if (locked && 
 				Event.current.type != EventType.Repaint &&
 				Event.current.type != EventType.Layout &&
 				Event.current.type != EventType.Ignore &&
@@ -158,10 +159,10 @@ namespace List_Everything
 			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
 
 			//Draw Scrolling list:
-			if (DoFilters(filterListing, findDesc.filters))
+			if (DoFilters(filterListing, findDesc.filters, locked))
 				changed = true;
 
-			if (!findDesc.locked)
+			if (!locked)
 				DrawAddRow(filterListing, findDesc);
 
 			filterListing.EndScrollView(ref scrollViewHeightFilt);
@@ -246,7 +247,7 @@ namespace List_Everything
 				RemakeList();
 		}
 
-		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters)
+		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters, bool locked)
 		{
 			bool changed = false;
 			HashSet<ListFilter> removedFilters = new();
@@ -254,7 +255,7 @@ namespace List_Everything
 			{
 				Rect highlightRect = listing.GetRect(0);
 				float heightBefore = listing.CurHeight;
-				(bool ch, bool d) = filter.Listing(listing);
+				(bool ch, bool d) = filter.Listing(listing, locked);
 				changed |= ch;
 				if (d)
 					removedFilters.Add(filter);

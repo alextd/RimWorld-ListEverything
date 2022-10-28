@@ -287,7 +287,7 @@ namespace List_Everything
 		private string TipForStage(int stageI) =>
 			sel.stages[stageI]?.description;
 
-		protected override bool DrawUnder(Listing_StandardIndent listing)
+		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
 		{
 			if (!ShowMultistage(sel)) return false;
 

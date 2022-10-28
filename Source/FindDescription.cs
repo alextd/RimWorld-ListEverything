@@ -23,7 +23,6 @@ namespace List_Everything
 		public CompareType countComp;
 
 		public bool allMaps = false;
-		public bool locked = false;
 
 		public BaseListType baseType;
 		public List<ListFilter> filters = new List<ListFilter>();
@@ -38,8 +37,7 @@ namespace List_Everything
 				ticksToShowAlert = ticksToShowAlert,
 				countToAlert = countToAlert,
 				countComp = countComp,
-				allMaps = allMaps,
-				locked = locked
+				allMaps = allMaps
 			};
 			newDesc.filters = filters.Select(f => f.Clone(newDesc)).ToList();
 			if(map != null)
@@ -129,7 +127,6 @@ namespace List_Everything
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
 			Scribe_Values.Look(ref countComp, "countComp");
 			Scribe_Values.Look(ref allMaps, "allMaps");
-			Scribe_Values.Look(ref locked, "locked");
 
 			//Should we set filters owner to this? Only map clones that are copied need it, and they get it in the clone.
 		}
