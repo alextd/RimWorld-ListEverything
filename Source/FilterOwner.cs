@@ -32,7 +32,7 @@ namespace List_Everything
 					removedFilters.Add(filter);
 
 				// Highlight the filters that pass for selected objects (useful for "any" filters)
-				if (!(filter is ListFilterGroup) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
+				if (!(filter is IFilterOwner) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
 				{
 					highlightRect.height = listing.CurHeight - heightBefore;
 					Widgets.DrawHighlight(highlightRect);
