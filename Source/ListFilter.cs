@@ -207,7 +207,16 @@ namespace List_Everything
 			if (options.NullOrEmpty())
 				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
 			else
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = () => RootFindDesc.RemakeList() });
+			{
+				foreach (FloatMenuOption opt in options)
+				{
+					// append RootFindDesc.RemakeList to actions
+					Action action = opt.action;
+					opt.action = () => { action(); RootFindDesc.RemakeList(); };
+
+					Find.WindowStack.Add(new FloatMenu(options));
+				}
+			}
 		}
 	}
 
