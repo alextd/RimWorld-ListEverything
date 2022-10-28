@@ -86,6 +86,7 @@ namespace List_Everything
 		public void Add(ListFilter newFilter)
 		{
 			filters.Add(newFilter);
+			RootFindDesc.RemakeList();
 		}
 		public IEnumerable<ListFilter> Filters => filters;
 		public void RemoveAll(HashSet<ListFilter> removedFilters)
