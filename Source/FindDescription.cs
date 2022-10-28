@@ -16,6 +16,7 @@ namespace List_Everything
 	public class FindDescription : IExposable, IFilterOwnerAdder
 	{
 		public string name = "TD.NewFindFilters".Translate();
+		public List<Thing> listedThings;
 
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
@@ -24,14 +25,37 @@ namespace List_Everything
 
 		public bool allMaps = false;
 
-		public BaseListType baseType;
+		private BaseListType _baseType;
+		public BaseListType BaseType
+		{
+			get => _baseType;
+			set
+			{
+				_baseType = value;
+				RemakeList();
+			}
+		}
 		public List<ListFilter> filters = new List<ListFilter>();
+
+		public void RemakeList()
+		{
+			if (allMaps)
+			{
+				listedThings = new List<Thing>();
+				foreach (Map map in Find.Maps)
+					listedThings.AddRange(Get(map));
+			}
+			else
+			{
+				listedThings = Get(Find.CurrentMap).ToList();
+			}
+		}
 
 		public virtual FindDescription Clone(Map map)
 		{
 			FindDescription newDesc = new FindDescription()
 			{
-				baseType = baseType,
+				_baseType = _baseType,
 				name = name,
 				alertPriority = alertPriority,
 				ticksToShowAlert = ticksToShowAlert,
@@ -45,10 +69,10 @@ namespace List_Everything
 			return newDesc;
 		}
 
-		public List<Thing> Get(Map map)
+		public IEnumerable<Thing> Get(Map map)
 		{
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			switch (baseType)
+			switch (BaseType)
 			{
 				case BaseListType.Selectable:	//Known as "Map"
 					allThings = map.listerThings.AllThings.Where(t => t.def.selectable);
@@ -120,7 +144,7 @@ namespace List_Everything
 		public virtual void ExposeData()
 		{
 			Scribe_Values.Look(ref name, "name");
-			Scribe_Values.Look(ref baseType, "baseType");
+			Scribe_Values.Look(ref _baseType, "baseType");
 			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
@@ -137,6 +161,7 @@ namespace List_Everything
 		public void Add(ListFilter newFilter)
 		{
 			filters.Add(newFilter);
+			RemakeList();
 		}
 	}
 

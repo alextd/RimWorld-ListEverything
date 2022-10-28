@@ -75,8 +75,9 @@ namespace List_Everything
 
 			//Draw filters
 			bool changed = MainTabWindow_List.DoFilters(listing, filters, locked);
+
 			if (!locked)
-				MainTabWindow_List.DrawAddRow(listing, this);
+				this.DrawAddRow(listing);
 
 			listing.NestedOutdent();
 			return changed;

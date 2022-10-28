@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace List_Everything
 {
-	
 	class ListFilterSkill : ListFilterDropDown<SkillDef>
 	{
 		IntRange skillRange = new IntRange(0, 20);
@@ -54,7 +53,7 @@ namespace List_Everything
 					new FloatMenuOption(GetPassionText(2), () => passion = 2),
 					new FloatMenuOption(GetPassionText(3), () => passion = 3),
 				};
-				MainTabWindow_List.DoFloatMenu(options);
+				DoFloatOptions(options);
 			}
 			rect.x += 100;
 			rect.width -= 100;
@@ -125,7 +124,7 @@ namespace List_Everything
 				{
 					options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
 				}
-				MainTabWindow_List.DoFloatMenu(options);
+				DoFloatOptions(options);
 			}
 			return false;
 		}
@@ -320,7 +319,7 @@ namespace List_Everything
 					int localI = OrderedIndex(stageI);
 					options.Add(new FloatMenuOption(NameForStage(stageI), () => selectedAction(localI)));
 				}
-				MainTabWindow_List.DoFloatMenu(options);
+				DoFloatOptions(options);
 			}
 		}
 
@@ -712,7 +711,7 @@ namespace List_Everything
 						{
 							options.Add(new FloatMenuOption(intel.TranslateEnum(), () => intelligence = intel));
 						}
-						MainTabWindow_List.DoFloatMenu(options);
+						DoFloatOptions(options);
 					}
 					break;
 
@@ -738,7 +737,7 @@ namespace List_Everything
 						{
 							options.Add(new FloatMenuOption(def.LabelCap, () => trainability = def));
 						}
-						MainTabWindow_List.DoFloatMenu(options);
+						DoFloatOptions(options);
 					}
 					break;
 			}

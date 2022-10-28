@@ -32,7 +32,6 @@ namespace List_Everything
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
 			filter.owner = owner;
-			filter.PostMake();
 			return filter;
 		}
 
@@ -47,7 +46,7 @@ namespace List_Everything
 		{
 			rootFilters = DefDatabase<ListFilterSelectableDef>.AllDefs.ToList();
 			foreach (var listDef in DefDatabase<ListFilterCategoryDef>.AllDefs)
-				foreach (var subDef in listDef.SubFilters)	// ?? because game explodes on config error
+				foreach (var subDef in listDef.SubFilters)  // ?? because game explodes on config error
 					rootFilters.Remove(subDef);
 		}
 
@@ -55,15 +54,6 @@ namespace List_Everything
 			rootFilters.Where(d => (DebugSettings.godMode || !d.devOnly));
 	}
 
-
-	public interface IFilterOwner
-	{
-		public FindDescription RootFindDesc { get; }
-	}
-	public interface IFilterOwnerAdder : IFilterOwner
-	{
-		public void Add(ListFilter newFilter);
-	}
 	public abstract partial class ListFilter : IExposable
 	{
 		public ListFilterDef def;
@@ -205,15 +195,20 @@ namespace List_Everything
 		}
 		protected virtual bool DrawUnder(Listing_StandardIndent listing, bool locked) => false;
 
-		// PostMake called after the subclass constructor if you need the Def.
-		public virtual void PostMake() { }
-
 		public virtual bool ValidForAllMaps => true;
 
 		public virtual string DisableReason =>
 			!ValidForAllMaps && RootFindDesc.allMaps
 				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
 				: null;
+
+		public void DoFloatOptions(List<FloatMenuOption> options)
+		{
+			if (options.NullOrEmpty())
+				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
+			else
+				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = () => RootFindDesc.RemakeList() });
+		}
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
@@ -530,7 +525,7 @@ namespace List_Everything
 				foreach (int ex in ExtraOptions())
 					options.Add(new FloatMenuOption(NameForExtra(ex), () => extraOption = ex));
 
-				MainTabWindow_List.DoFloatMenu(options);
+				DoFloatOptions(options);
 			}
 			return changed;
 		}

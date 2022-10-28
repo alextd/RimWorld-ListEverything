@@ -10,7 +10,7 @@ namespace List_Everything
 {
 	public class MainTabWindow_List : MainTabWindow
 	{
-		List<Thing> listedThings;
+		public FindDescription findDesc;
 		bool locked;
 
 		public override Vector2 RequestedTabSize
@@ -29,7 +29,7 @@ namespace List_Everything
 				findDesc = new FindDescription();
 				findDesc.filters.Add(ListFilterMaker.NameFilter(findDesc));
 			}
-			RemakeList();
+			findDesc.RemakeList();
 		}
 
 		public override void DoWindowContents(Rect fillRect)
@@ -45,38 +45,13 @@ namespace List_Everything
 			DoList(listRect);
 		}
 
-
-		public static void DoFloatMenu(List<FloatMenuOption> options)
-		{
-			if (options.NullOrEmpty())
-				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
-			else
-				Find.WindowStack.Add(new FloatMenu(options) { onCloseCallback = RemakeListPlease });
-		}
-		public static void RemakeListPlease() =>
-			Find.WindowStack.WindowOfType<MainTabWindow_List>()?.RemakeList();
-		public void RemakeList()
-		{
-			if (findDesc.allMaps)
-			{
-				listedThings = new List<Thing>();
-				foreach (Map map in Find.Maps)
-					listedThings.AddRange(findDesc.Get(map));
-			}
-			else
-			{
-				listedThings = findDesc.Get(Find.CurrentMap);
-			}
-		}
-
 		//Filters:
-		public FindDescription findDesc;
 
 		public static void OpenWith(FindDescription desc)
 		{
 			MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 			tab.findDesc = desc;
-			tab.RemakeList();
+			tab.findDesc.RemakeList();
 			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
 
@@ -98,7 +73,7 @@ namespace List_Everything
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 			{
 				findDesc = new FindDescription();
-				changed = true;
+				findDesc.RemakeList();
 			}
 			TooltipHandler.TipRegion(headerButRect, "ClearAll".Translate().CapitalizeFirst());
 
@@ -109,15 +84,15 @@ namespace List_Everything
 			TooltipHandler.TipRegion(headerButRect, "TD.LockEditing".Translate());
 
 			//Header Title
-			Widgets.Label(labelRect, "TD.Listing".Translate() + findDesc.baseType.TranslateEnum());
+			Widgets.Label(labelRect, "TD.Listing".Translate() + findDesc.BaseType.TranslateEnum());
 			Widgets.DrawHighlightIfMouseover(labelRect);
 			if (Widgets.ButtonInvisible(labelRect))
 			{
 				List<FloatMenuOption> types = new List<FloatMenuOption>();
 				foreach (BaseListType type in Prefs.DevMode ? Enum.GetValues(typeof(BaseListType)) : BaseListNormalTypes.normalTypes)
-					types.Add(new FloatMenuOption(type.TranslateEnum(), () => findDesc.baseType = type));
+					types.Add(new FloatMenuOption(type.TranslateEnum(), () => findDesc.BaseType = type));
 
-				Find.WindowStack.Add(new FloatMenu(types) { onCloseCallback = RemakeList });
+				Find.WindowStack.Add(new FloatMenu(types));
 			}
 
 			Listing_StandardIndent listing = new Listing_StandardIndent()
@@ -139,20 +114,22 @@ namespace List_Everything
 			//Draw Filters!!!
 			Rect listRect = listing.GetRect(500);
 			Listing_StandardIndent filterListing = new Listing_StandardIndent()
-			{maxOneColumn = true };
-			
+			{ maxOneColumn = true };
+
 			float viewWidth = listRect.width;
 			if (scrollViewHeightFilt > listRect.height)
 				viewWidth -= 16f;
 
 			//Lock out input to filters.
-			if (locked && 
+			if (locked &&
 				Event.current.type != EventType.Repaint &&
 				Event.current.type != EventType.Layout &&
 				Event.current.type != EventType.Ignore &&
 				Event.current.type != EventType.Used &&
 				Mouse.IsOver(listRect))
+			{
 				Event.current.Use();
+			}
 
 			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
 
@@ -163,7 +140,7 @@ namespace List_Everything
 				changed = true;
 
 			if (!locked)
-				DrawAddRow(filterListing, findDesc);
+				findDesc.DrawAddRow(filterListing);
 
 			filterListing.EndScrollView(ref scrollViewHeightFilt);
 
@@ -196,9 +173,13 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (string name in Mod.settings.SavedNames())
-					options.Add(new FloatMenuOption(name, () => findDesc = Mod.settings.Load(name)));
+					options.Add(new FloatMenuOption(name, () =>
+					{
+						findDesc = Mod.settings.Load(name);
+						findDesc.RemakeList();
+					}));
 
-				DoFloatMenu(options);
+				Find.WindowStack.Add(new FloatMenu(options));
 			}
 
 			savedRect.x += savedRect.width * 2;
@@ -223,9 +204,13 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (string name in comp.AlertNames())
-					options.Add(new FloatMenuOption(name, () => findDesc = comp.LoadAlert(name)));
+					options.Add(new FloatMenuOption(name, () =>
+					{
+						findDesc = comp.LoadAlert(name);
+						findDesc.RemakeList();
+					}));
 
-				DoFloatMenu(options);
+				Find.WindowStack.Add(new FloatMenu(options));
 			}
 
 			alertsRect.x += alertsRect.width * 2;
@@ -244,7 +229,7 @@ namespace List_Everything
 
 			//Update if needed
 			if (changed)
-				RemakeList();
+				findDesc.RemakeList();
 		}
 
 		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters, bool locked)
@@ -272,62 +257,13 @@ namespace List_Everything
 			return changed;
 		}
 
-		public static void DrawAddRow(Listing_StandardIndent listing, IFilterOwnerAdder owner)
+
+
+		public static string LabelCountThings(IEnumerable<Thing> things)
 		{
-			Rect addRow = listing.GetRect(Text.LineHeight);
-			listing.Gap(listing.verticalSpacing);
-
-			Rect butRect = addRow; butRect.width = Text.LineHeight;
-			Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
-
-			Rect textRect = addRow; textRect.xMin += Text.LineHeight + WidgetRow.DefaultGap;
-			Widgets.Label(textRect, "TD.AddNewFilter...".Translate());
-
-			Widgets.DrawHighlightIfMouseover(addRow);
-
-			if (Widgets.ButtonInvisible(addRow))
-			{
-				DoFloatAllFilters(owner);
-			}
+			Log.Message($"Things is {things}: count {things?.Count() ?? -1}");
+			return "TD.LabelCountThings".Translate(things.Sum(t => t.stackCount));
 		}
-
-		public static void DoFloatAllFilters(IFilterOwnerAdder owner)
-		{
-			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterSelectableDef def in ListFilterMaker.SelectableList)
-			{
-				if (def is ListFilterDef fDef)
-					options.Add(new FloatMenuOption(
-						fDef.LabelCap,
-						() => owner.Add(ListFilterMaker.MakeFilter(fDef, owner))
-					));
-				if (def is ListFilterCategoryDef cDef)
-					options.Add(new FloatMenuOption(
-						"+ " + cDef.LabelCap,
-						() => DoFloatAllCategory(owner, cDef)
-					));
-			}
-			DoFloatMenu(options);
-		}
-
-		public static void DoFloatAllCategory(IFilterOwnerAdder owner, ListFilterCategoryDef cDef)
-		{
-			List<FloatMenuOption> options = new List<FloatMenuOption>();
-			foreach (ListFilterDef def in cDef.SubFilters)
-			{
-				// I don't think we need to worry about double-nested filters
-				options.Add(new FloatMenuOption(
-					def.LabelCap,
-					() => owner.Add(ListFilterMaker.MakeFilter(def, owner))
-				));
-			}
-			DoFloatMenu(options);
-		}
-
-
-
-		public static string LabelCountThings(List<Thing> things) =>
-			"TD.LabelCountThings".Translate(things.Sum(t => t.stackCount));
 
 
 		private Vector2 scrollPositionList = Vector2.zero;
@@ -338,17 +274,21 @@ namespace List_Everything
 		public void DoList(Rect listRect)
 		{
 			//Top-row buttons
+			//Select All
 			Rect buttRect = listRect.LeftPartPixels(32);
 			buttRect.height = 32;
 
 			selectAll = Widgets.ButtonImage(buttRect, TexButton.SelectAll);
 			TooltipHandler.TipRegion(buttRect, "TD.SelectAllGameAllowsUpTo80".Translate());
 
+			//Manual refresh
 			buttRect.x += 34;
 			if (Widgets.ButtonImage(buttRect, TexUI.RotRightTex))
-				RemakeList();
+				findDesc.RemakeList();
+
 			TooltipHandler.TipRegion(buttRect, "TD.RefreshTheListIsOnlySavedWhenTheFilterIsChangedOrTheTabIsOpened".Translate());
 
+			//Continuous refresh
 			buttRect.x += 34;
 			ref bool refresh = ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh;
 			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.yellow : Color.white, Color.Lerp(Color.yellow,Color.white, 0.5f)))
@@ -358,7 +298,7 @@ namespace List_Everything
 
 			//Count text
 			Text.Anchor = TextAnchor.UpperRight;
-			Widgets.Label(listRect, LabelCountThings(listedThings));
+			Widgets.Label(listRect, LabelCountThings(findDesc.listedThings));
 			Text.Anchor = TextAnchor.UpperLeft;
 			listRect.yMin += 34;
 
@@ -394,7 +334,7 @@ namespace List_Everything
 			Widgets.BeginScrollView(listRect, ref scrollPositionList, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
 
-			foreach (Thing thing in listedThings)
+			foreach (Thing thing in findDesc.listedThings)
 			{
 				//Be smart about drawing only what's shown.
 				if (thingRect.y + 32 >= scrollPositionList.y)
@@ -407,16 +347,16 @@ namespace List_Everything
 			}
 
 			if (Event.current.type == EventType.Layout)
-				scrollViewHeightList = listedThings.Count() * 34f;
+				scrollViewHeightList = findDesc.listedThings.Count() * 34f;
 
 			//Select all 
 			if (selectAll)
-				foreach (Thing t in listedThings)
+				foreach (Thing t in findDesc.listedThings)
 					TrySelect.Select(t, false);
 
 			//Select all for double-click
 			if (selectAllDef != null)
-				foreach(Thing t in listedThings)
+				foreach(Thing t in findDesc.listedThings)
 					if (t.def == selectAllDef)
 						TrySelect.Select(t, false);
 
