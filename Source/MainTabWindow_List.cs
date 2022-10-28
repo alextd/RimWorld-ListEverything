@@ -231,7 +231,6 @@ namespace List_Everything
 
 		public static string LabelCountThings(IEnumerable<Thing> things)
 		{
-			Log.Message($"Things is {things}: count {things?.Count() ?? -1}");
 			return "TD.LabelCountThings".Translate(things.Sum(t => t.stackCount));
 		}
 
