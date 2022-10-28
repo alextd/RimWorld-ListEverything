@@ -81,7 +81,7 @@ namespace List_Everything
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
 				if (row.ButtonText("Load".Translate()))
-					MainTabWindow_List.OpenWith(desc.Clone(map));
+					MainTabWindow_List.OpenWith(desc.Clone(map), true);
 				
 				if (row.ButtonText("Delete".Translate()))
 					remove = name;

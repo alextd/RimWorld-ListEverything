@@ -10,8 +10,14 @@ namespace List_Everything
 {
 	public class MainTabWindow_List : MainTabWindow
 	{
-		public FindDescription findDesc;
-		bool locked;
+		private FindDescription _findDesc;
+		public FindDescription findDesc => _findDesc;
+		private bool locked;
+		public void SetFindDesc(FindDescription fd = null, bool l = false)
+		{
+			_findDesc = fd ?? new FindDescription();
+			locked = l;
+		}
 
 		public override Vector2 RequestedTabSize
 		{
@@ -26,7 +32,7 @@ namespace List_Everything
 			base.PreOpen();
 			if (findDesc == null)
 			{
-				findDesc = new FindDescription();
+				SetFindDesc(new FindDescription());
 				findDesc.Add(ListFilterMaker.NameFilter(findDesc));
 			}
 			else
@@ -48,10 +54,10 @@ namespace List_Everything
 
 		//Filters:
 
-		public static void OpenWith(FindDescription desc)
+		public static void OpenWith(FindDescription desc, bool locked = false)
 		{
 			MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
-			tab.findDesc = desc;
+			tab.SetFindDesc(desc, locked);
 			tab.findDesc.RemakeList();
 			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
@@ -73,7 +79,7 @@ namespace List_Everything
 
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 			{
-				findDesc = new FindDescription();
+				SetFindDesc();
 				findDesc.RemakeList();
 			}
 			TooltipHandler.TipRegion(headerButRect, "ClearAll".Translate().CapitalizeFirst());
@@ -170,7 +176,7 @@ namespace List_Everything
 				foreach (string name in Mod.settings.SavedNames())
 					options.Add(new FloatMenuOption(name, () =>
 					{
-						findDesc = Mod.settings.Load(name);
+						SetFindDesc(Mod.settings.Load(name), true);
 						findDesc.RemakeList();
 					}));
 
@@ -201,7 +207,7 @@ namespace List_Everything
 				foreach (string name in comp.AlertNames())
 					options.Add(new FloatMenuOption(name, () =>
 					{
-						findDesc = comp.LoadAlert(name);
+						SetFindDesc(comp.LoadAlert(name), true);
 						findDesc.RemakeList();
 					}));
 
