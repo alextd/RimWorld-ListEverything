@@ -11,14 +11,38 @@ namespace List_Everything
 	public interface IFilterOwner
 	{
 		public FindDescription RootFindDesc { get; }
-	}
-	public interface IFilterOwnerAdder : IFilterOwner
-	{
 		public void Add(ListFilter newFilter);
+		public IEnumerable<ListFilter> Filters { get; }
+		public void RemoveAll(HashSet<ListFilter> removedFilters);
 	}
-	public static class IFilterOwnerAdderExtensions
+	public static class IFilterOwnerExtensions
 	{
-		public static void DrawAddRow(this IFilterOwnerAdder owner, Listing_StandardIndent listing)
+		public static bool DoFilters(this IFilterOwner owner, Listing_StandardIndent listing, bool locked)
+		{
+			bool changed = false;
+			HashSet<ListFilter> removedFilters = new();
+			foreach (ListFilter filter in owner.Filters)
+			{
+				Rect highlightRect = listing.GetRect(0);
+				float heightBefore = listing.CurHeight;
+				(bool ch, bool d) = filter.Listing(listing, locked);
+				changed |= ch;
+				if (d)
+					removedFilters.Add(filter);
+
+				// Highlight the filters that pass for selected objects (useful for "any" filters)
+				if (!(filter is ListFilterGroup) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
+				{
+					highlightRect.height = listing.CurHeight - heightBefore;
+					Widgets.DrawHighlight(highlightRect);
+				}
+			}
+
+			owner.RemoveAll(removedFilters);
+			return changed;
+		}
+
+		public static void DrawAddRow(this IFilterOwner owner, Listing_StandardIndent listing)
 		{
 			Rect addRow = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
@@ -37,7 +61,7 @@ namespace List_Everything
 			}
 		}
 
-		public static void DoFloatAllFilters(this IFilterOwnerAdder owner)
+		public static void DoFloatAllFilters(this IFilterOwner owner)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterSelectableDef def in ListFilterMaker.SelectableList)
@@ -56,7 +80,7 @@ namespace List_Everything
 			Find.WindowStack.Add(new FloatMenu(options));
 		}
 
-		public static void DoFloatAllCategory(this IFilterOwnerAdder owner, ListFilterCategoryDef cDef)
+		public static void DoFloatAllCategory(this IFilterOwner owner, ListFilterCategoryDef cDef)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in cDef.SubFilters)

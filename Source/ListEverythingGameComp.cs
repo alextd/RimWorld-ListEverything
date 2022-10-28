@@ -26,7 +26,7 @@ namespace List_Everything
 			{
 				FindDescription desc = new FindDescription();
 				ListFilter filter = ListFilterMaker.NameFilter(desc);
-				desc.filters.Add(filter);
+				desc.Add(filter);
 				filter.Focus();
 				MainTabWindow_List.OpenWith(desc);
 			}

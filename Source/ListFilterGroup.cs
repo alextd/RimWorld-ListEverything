@@ -26,9 +26,9 @@ namespace List_Everything
 		public static readonly Texture2D GreaterThan = ContentFinder<Texture2D>.Get("GreaterThan", true);
 	}
 
-	public class ListFilterGroup : ListFilter, IFilterOwnerAdder
+	public class ListFilterGroup : ListFilter, IFilterOwner
 	{
-		protected List<ListFilter> filters = new List<ListFilter>() { };
+		private List<ListFilter> filters = new List<ListFilter>() { };
 		protected bool any = true; // or all
 
 		protected override bool FilterApplies(Thing t) => 
@@ -74,7 +74,7 @@ namespace List_Everything
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
 
 			//Draw filters
-			bool changed = MainTabWindow_List.DoFilters(listing, filters, locked);
+			bool changed = this.DoFilters(listing, locked);
 
 			if (!locked)
 				this.DrawAddRow(listing);
@@ -86,6 +86,11 @@ namespace List_Everything
 		public void Add(ListFilter newFilter)
 		{
 			filters.Add(newFilter);
+		}
+		public IEnumerable<ListFilter> Filters => filters;
+		public void RemoveAll(HashSet<ListFilter> removedFilters)
+		{
+			filters.RemoveAll(f => removedFilters.Contains(f));
 		}
 	}
 

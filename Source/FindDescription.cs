@@ -7,16 +7,18 @@ using RimWorld;
 
 namespace List_Everything
 {
-	// The FindDescription is the root owner of a set of filters.
+	// The FindDescription is the root owner of a set of filters,
 	// (It's a little more than a mere ListFilterGroup)
-	// - Get() method to actually perform the search
+	// - Holds the list of things and performs the search
 	// - BaseListType which narrows what that things to look at
-	// - Checkbox bools that apply to all nested filters
+	// - Checkbox bool allMaps that apply to all nested filters
 	// - Apparently support for alerts which I'll probably separate out
-	public class FindDescription : IExposable, IFilterOwnerAdder
+	public class FindDescription : IExposable, IFilterOwner
 	{
 		public string name = "TD.NewFindFilters".Translate();
 		public List<Thing> listedThings;
+		private List<ListFilter> filters = new List<ListFilter>();
+		public IEnumerable<ListFilter> Filters => filters;
 
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
@@ -35,7 +37,6 @@ namespace List_Everything
 				RemakeList();
 			}
 		}
-		public List<ListFilter> filters = new List<ListFilter>();
 
 		public void RemakeList()
 		{
@@ -162,6 +163,10 @@ namespace List_Everything
 		{
 			filters.Add(newFilter);
 			RemakeList();
+		}
+		public void RemoveAll(HashSet<ListFilter> removedFilters)
+		{
+			filters.RemoveAll(f => removedFilters.Contains(f));
 		}
 	}
 

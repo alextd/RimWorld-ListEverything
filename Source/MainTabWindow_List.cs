@@ -27,9 +27,10 @@ namespace List_Everything
 			if (findDesc == null)
 			{
 				findDesc = new FindDescription();
-				findDesc.filters.Add(ListFilterMaker.NameFilter(findDesc));
+				findDesc.Add(ListFilterMaker.NameFilter(findDesc));
 			}
-			findDesc.RemakeList();
+			else
+				findDesc.RemakeList();	//Add remakes the list
 		}
 
 		public override void DoWindowContents(Rect fillRect)
@@ -136,7 +137,7 @@ namespace List_Everything
 			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
 
 			//Draw Scrolling list:
-			if (DoFilters(filterListing, findDesc.filters, locked))
+			if (findDesc.DoFilters(filterListing, locked))
 				changed = true;
 
 			if (!locked)
@@ -224,31 +225,6 @@ namespace List_Everything
 			//Update if needed
 			if (changed)
 				findDesc.RemakeList();
-		}
-
-		public static bool DoFilters(Listing_StandardIndent listing, List<ListFilter> filters, bool locked)
-		{
-			bool changed = false;
-			HashSet<ListFilter> removedFilters = new();
-			foreach (ListFilter filter in filters)
-			{
-				Rect highlightRect = listing.GetRect(0);
-				float heightBefore = listing.CurHeight;
-				(bool ch, bool d) = filter.Listing(listing, locked);
-				changed |= ch;
-				if (d)
-					removedFilters.Add(filter);
-
-				// Highlight the filters that pass for selected objects (useful for "any" filters)
-				if (!(filter is ListFilterGroup) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
-				{
-					highlightRect.height = listing.CurHeight - heightBefore;
-					Widgets.DrawHighlight(highlightRect);
-				}
-			}
-
-			filters.RemoveAll(f => removedFilters.Contains(f));
-			return changed;
 		}
 
 
