@@ -75,7 +75,7 @@ namespace List_Everything
 				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
 				rowRect.y += RowHeight;
 
-				row.Label(alert.Label, rowRect.width / 4);
+				row.Label(alert.desc.name + alert.mapLabel, rowRect.width / 4);
 
 				if(row.ButtonText("Rename".Translate()))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));

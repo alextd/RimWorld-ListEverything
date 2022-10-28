@@ -31,8 +31,8 @@ namespace List_Everything
 		private List<ListFilter> filters = new List<ListFilter>() { };
 		protected bool any = true; // or all
 
-		protected override bool FilterApplies(Thing t) => 
-			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) : 
+		protected override bool FilterApplies(Thing t) =>
+			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) :
 			filters.All(f => !f.Enabled || f.AppliesTo(t));
 
 		public override void ExposeData()
@@ -86,13 +86,18 @@ namespace List_Everything
 		public void Add(ListFilter newFilter, bool remake = false)
 		{
 			filters.Add(newFilter);
-			if(remake)	RootFindDesc.RemakeList();
+			if (remake) RootFindDesc.RemakeList();
 		}
+
 		public IEnumerable<ListFilter> Filters => filters;
+
 		public void RemoveAll(HashSet<ListFilter> removedFilters)
 		{
 			filters.RemoveAll(f => removedFilters.Contains(f));
 		}
+
+		public override bool Check(Predicate<ListFilter> check) =>
+			base.Check(check) || filters.Any(f => f.Check(check));
 	}
 
 	public class ListFilterInventory : ListFilterGroup

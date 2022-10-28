@@ -12,7 +12,36 @@ namespace List_Everything
 	public class FindAlertData : IExposable
 	{
 		public Map map;
-		public FindDescription desc;
+		public bool currentMapOnly;
+		public string mapLabel;
+
+		private FindDescription _desc;
+		public FindDescription desc
+		{
+			get => _desc;
+			set
+			{
+				_desc = value;
+				currentMapOnly = desc.Check(f => f.CurrentMapOnly);
+
+				StringBuilder sb = new(" (");
+
+				if (currentMapOnly)
+				{
+					sb.Append("Current Map");
+					map = null;
+				}
+				else if (map?.Parent.LabelCap is string label)
+					sb.Append(label);
+				else
+					sb.Append("TD.AllMaps".Translate());
+
+				sb.Append(")");
+
+				mapLabel = sb.ToString();
+			}
+		}
+
 
 		public FindAlertData() { }
 
@@ -25,10 +54,12 @@ namespace List_Everything
 		public void ExposeData()
 		{
 			Scribe_References.Look(ref map, "map");
-			Scribe_Deep.Look(ref desc, "desc");
-		}
+			Scribe_Deep.Look(ref _desc, "desc");
 
-		public string Label => desc.name + " (" + (map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")";
+			//couuld re-regenate these.
+			Scribe_Values.Look(ref currentMapOnly, "currentMapOnly");
+			Scribe_Values.Look(ref mapLabel, "mapLabel");
+		}
 	}
 
 
@@ -112,7 +143,7 @@ namespace List_Everything
 		{
 			var things = FoundThings();
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(defaultLabel + " (" + (alertData.map?.Parent.LabelCap ?? "TD.AllMaps".Translate()) + ")");
+			stringBuilder.Append(defaultLabel + alertData.mapLabel);
 			stringBuilder.AppendLine(" - " + MainTabWindow_List.LabelCountThings(things));
 			stringBuilder.AppendLine("");
 			foreach (Thing thing in things.Take(maxItems))
@@ -135,10 +166,16 @@ namespace List_Everything
 			foundThingsCache = new List<Thing>();
 			currentTick = Find.TickManager.TicksGame;
 			
+			//Current map only
+			if (alertData.currentMapOnly)
+				foreach (Thing t in alertData.desc.Get(Find.CurrentMap))
+					foundThingsCache.Add(t);
+
 			//Single map
-			if (alertData.map != null)
+			else if (alertData.map != null)
 				foreach (Thing t in alertData.desc.Get(alertData.map))
 					foundThingsCache.Add(t);
+
 			//All maps
 			else
 				foreach(Map m in Find.Maps)

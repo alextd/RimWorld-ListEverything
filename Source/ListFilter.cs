@@ -161,7 +161,8 @@ namespace List_Everything
 		}
 		protected virtual bool DrawUnder(Listing_StandardIndent listing, bool locked) => false;
 
-		public virtual bool ValidForAllMaps => true;
+		public virtual bool ValidForAllMaps => true && !CurrentMapOnly;
+		public virtual bool CurrentMapOnly => false;
 
 		public virtual string DisableReason =>
 			!ValidForAllMaps && RootFindDesc.allMaps
@@ -184,6 +185,8 @@ namespace List_Everything
 				}
 			}
 		}
+
+		public virtual bool Check(Predicate<ListFilter> check) => check(this);
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
@@ -980,4 +983,11 @@ namespace List_Everything
 		public override string NameFor(ModContentPack o) => o.Name;
 	}
 
+	class ListFilterOnScreen : ListFilter
+	{
+		protected override bool FilterApplies(Thing thing) =>
+			thing.OccupiedRect().Overlaps(Find.CameraDriver.CurrentViewRect);
+
+		public override bool CurrentMapOnly => true;
+	}
 }

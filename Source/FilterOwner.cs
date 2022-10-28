@@ -14,6 +14,7 @@ namespace List_Everything
 		public void Add(ListFilter newFilter, bool remake = false);
 		public IEnumerable<ListFilter> Filters { get; }
 		public void RemoveAll(HashSet<ListFilter> removedFilters);
+		public bool Check(Predicate<ListFilter> check);
 	}
 	public static class IFilterOwnerExtensions
 	{

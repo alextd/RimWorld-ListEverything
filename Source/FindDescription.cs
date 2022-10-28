@@ -65,7 +65,7 @@ namespace List_Everything
 				allMaps = allMaps
 			};
 			newDesc.filters = filters.Select(f => f.Clone(newDesc)).ToList();
-			if(map != null)
+			if (map != null)
 				newDesc.filters.ForEach(f => f.DoResolveReference(map));
 			return newDesc;
 		}
@@ -75,14 +75,14 @@ namespace List_Everything
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch (BaseType)
 			{
-				case BaseListType.Selectable:	//Known as "Map"
+				case BaseListType.Selectable: //Known as "Map"
 					allThings = map.listerThings.AllThings.Where(t => t.def.selectable);
 					break;
 				case BaseListType.Buildings:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
 					break;
 				case BaseListType.Natural:
-					allThings = map.listerThings.AllThings.Where(t => t.def.filthLeaving == ThingDefOf.Filth_RubbleRock); 
+					allThings = map.listerThings.AllThings.Where(t => t.def.filthLeaving == ThingDefOf.Filth_RubbleRock);
 					break;
 				case BaseListType.Plants:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
@@ -138,8 +138,8 @@ namespace List_Everything
 		}
 
 		//Probably a good filter
-		public static bool ValidDef(ThingDef def) => 
-			!typeof(Mote).IsAssignableFrom(def.thingClass) && 
+		public static bool ValidDef(ThingDef def) =>
+			!typeof(Mote).IsAssignableFrom(def.thingClass) &&
 			def.drawerType != DrawerType.None;
 
 		public virtual void ExposeData()
@@ -162,12 +162,16 @@ namespace List_Everything
 		public void Add(ListFilter newFilter, bool remake = false)
 		{
 			filters.Add(newFilter);
-			if(remake)	RemakeList();
+			if (remake) RemakeList();
 		}
+
 		public void RemoveAll(HashSet<ListFilter> removedFilters)
 		{
 			filters.RemoveAll(f => removedFilters.Contains(f));
 		}
+
+		public bool Check(Predicate<ListFilter> check) =>
+			filters.Any(f => f.Check(check));
 	}
 
 	public enum BaseListType

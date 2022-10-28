@@ -61,7 +61,6 @@ namespace List_Everything
 		//NEW THINGS
 
 		public FindAlertData GetAlert(string name) => savedAlerts[name];
-		public Map GetMapFor(string name) => savedAlerts[name].map;
 
 		public void AddAlert(string name, FindDescription desc)
 		{
