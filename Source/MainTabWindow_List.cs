@@ -34,9 +34,10 @@ namespace List_Everything
 			{
 				SetFindDesc(new FindDescription());
 				findDesc.Add(ListFilterMaker.NameFilter(findDesc));
+				//Don't make the list - everything would match.
 			}
 			else
-				findDesc.RemakeList();	//Add remakes the list
+				findDesc.RemakeList();	
 		}
 
 		public override void DoWindowContents(Rect fillRect)

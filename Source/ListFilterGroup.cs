@@ -83,10 +83,10 @@ namespace List_Everything
 			return changed;
 		}
 
-		public void Add(ListFilter newFilter)
+		public void Add(ListFilter newFilter, bool remake)
 		{
 			filters.Add(newFilter);
-			RootFindDesc.RemakeList();
+			if(remake)	RootFindDesc.RemakeList();
 		}
 		public IEnumerable<ListFilter> Filters => filters;
 		public void RemoveAll(HashSet<ListFilter> removedFilters)

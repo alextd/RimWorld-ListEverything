@@ -11,7 +11,7 @@ namespace List_Everything
 	public interface IFilterOwner
 	{
 		public FindDescription RootFindDesc { get; }
-		public void Add(ListFilter newFilter);
+		public void Add(ListFilter newFilter, bool remake);
 		public IEnumerable<ListFilter> Filters { get; }
 		public void RemoveAll(HashSet<ListFilter> removedFilters);
 	}
@@ -69,7 +69,7 @@ namespace List_Everything
 				if (def is ListFilterDef fDef)
 					options.Add(new FloatMenuOption(
 						fDef.LabelCap,
-						() => owner.Add(ListFilterMaker.MakeFilter(fDef, owner))
+						() => owner.Add(ListFilterMaker.MakeFilter(fDef, owner), true)
 					));
 				if (def is ListFilterCategoryDef cDef)
 					options.Add(new FloatMenuOption(
@@ -88,7 +88,7 @@ namespace List_Everything
 				// I don't think we need to worry about double-nested filters
 				options.Add(new FloatMenuOption(
 					def.LabelCap,
-					() => owner.Add(ListFilterMaker.MakeFilter(def, owner))
+					() => owner.Add(ListFilterMaker.MakeFilter(def, owner), true)
 				));
 			}
 			Find.WindowStack.Add(new FloatMenu(options));

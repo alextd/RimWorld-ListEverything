@@ -16,7 +16,7 @@ namespace List_Everything
 	public class FindDescription : IExposable, IFilterOwner
 	{
 		public string name = "TD.NewFindFilters".Translate();
-		public List<Thing> listedThings;
+		public List<Thing> listedThings = new();
 		private List<ListFilter> filters = new List<ListFilter>();
 		public IEnumerable<ListFilter> Filters => filters;
 
@@ -40,15 +40,15 @@ namespace List_Everything
 
 		public void RemakeList()
 		{
+			listedThings.Clear();
 			if (allMaps)
 			{
-				listedThings = new List<Thing>();
 				foreach (Map map in Find.Maps)
 					listedThings.AddRange(Get(map));
 			}
 			else
 			{
-				listedThings = Get(Find.CurrentMap).ToList();
+				listedThings.AddRange(Get(Find.CurrentMap));
 			}
 		}
 
@@ -159,10 +159,10 @@ namespace List_Everything
 
 		public FindDescription RootFindDesc => this;
 
-		public void Add(ListFilter newFilter)
+		public void Add(ListFilter newFilter, bool remake = false)
 		{
 			filters.Add(newFilter);
-			RemakeList();
+			if(remake)	RemakeList();
 		}
 		public void RemoveAll(HashSet<ListFilter> removedFilters)
 		{
