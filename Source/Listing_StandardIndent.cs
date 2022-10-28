@@ -69,9 +69,9 @@ namespace List_Everything
 		}
 
 		//1.3 just removed Listing Scrollviews?
-		public void EndScrollView(ref Rect viewRect)
+		public void EndScrollView(ref float listingHeight)
 		{
-			viewRect = new Rect(0f, 0f, listingRect.width, curY);
+			listingHeight = curY;
 			Widgets.EndScrollView();
 			End();
 		}

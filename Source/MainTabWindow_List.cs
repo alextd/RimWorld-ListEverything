@@ -144,16 +144,16 @@ namespace List_Everything
 			if (scrollViewHeightFilt > listRect.height)
 				viewWidth -= 16f;
 
-			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
-
 			//Lock out input to filters.
 			if (findDesc.locked && 
 				Event.current.type != EventType.Repaint &&
 				Event.current.type != EventType.Layout &&
 				Event.current.type != EventType.Ignore &&
 				Event.current.type != EventType.Used &&
-				Mouse.IsOver(viewRect))
+				Mouse.IsOver(listRect))
 				Event.current.Use();
+
+			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
 
 			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
 
@@ -164,8 +164,7 @@ namespace List_Everything
 			if (!findDesc.locked)
 				DrawAddRow(filterListing, findDesc);
 
-			filterListing.EndScrollView(ref viewRect);
-			scrollViewHeightFilt = viewRect.height;
+			filterListing.EndScrollView(ref scrollViewHeightFilt);
 
 
 			//Extra options:
