@@ -111,18 +111,8 @@ namespace List_Everything
 					(int from, int to) => Reorder(from, to, true),
 					ReorderableDirection.Vertical,
 					viewRect, 1f,
-					extraDraggedItemOnGUI: delegate (int index, Vector2 dragStartPos)
-					{
-						Vector2 mousePosition = Event.current.mousePosition + Vector2.one * 12;
-
-						Rect dragRect = new Rect(mousePosition, new(listRect.width - 100, Text.LineHeight));
-						ListFilter dragFilter = Filters.ElementAt(index);
-
-						//Same id 34003428 as GenUI.DrawMouseAttachment
-						Find.WindowStack.ImmediateWindow(34003428, dragRect, WindowLayer.Super,
-							() => dragFilter.DrawMain(dragRect.AtZero(), true),
-							doBackground: false, absorbInputAroundWindow: false, 0f); ;
-					}); ;
+					extraDraggedItemOnGUI: (int index, Vector2 dragStartPos) =>
+						DrawMouseAttachedFilter(Filters.ElementAt(index), listRect.width - 100));
 			}
 			bool changed = false;
 			HashSet<ListFilter> removedFilters = new();
@@ -155,6 +145,17 @@ namespace List_Everything
 			listing.EndScrollView(ref scrollViewHeightFilt);
 
 			return changed;
+		}
+
+		public static void DrawMouseAttachedFilter(ListFilter dragFilter, float width)
+		{
+			Vector2 mousePositionOffset = Event.current.mousePosition + Vector2.one * 12;
+			Rect dragRect = new Rect(mousePositionOffset, new(width, Text.LineHeight));
+
+			//Same id 34003428 as GenUI.DrawMouseAttachment
+			Find.WindowStack.ImmediateWindow(34003428, dragRect, WindowLayer.Super,
+				() => dragFilter.DrawMain(dragRect.AtZero(), true),
+				doBackground: false, absorbInputAroundWindow: false, 0f);
 		}
 
 		public void DrawAddRow(Listing_StandardIndent listing)
