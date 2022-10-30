@@ -154,7 +154,7 @@ namespace List_Everything
 		}
 
 
-		protected virtual bool DrawMain(Rect rect, bool locked)
+		public virtual bool DrawMain(Rect rect, bool locked)
 		{
 			Widgets.Label(rect, def.LabelCap);
 			return false;
@@ -199,7 +199,7 @@ namespace List_Everything
 
 		public static readonly string namedLabel = "Named: ";
 		public static readonly float namedLabelWidth = Text.CalcSize(namedLabel).x;
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			Widgets.Label(rect, namedLabel);
 			rect.xMin += namedLabelWidth;
@@ -471,7 +471,7 @@ namespace List_Everything
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
 		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changeSelection = false;
 			bool changed = false;
@@ -579,7 +579,7 @@ namespace List_Everything
 
 		protected override bool FilterApplies(Thing thing) =>
 			thing is Plant p && sel.Includes(p.Growth);
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			base.DrawMain(rect, locked);
 			FloatRange newRange = sel;
@@ -736,7 +736,7 @@ namespace List_Everything
 			return pct != null && sel.Includes(pct.Value);
 		}
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			base.DrawMain(rect, locked);
 			FloatRange newRange = sel;
@@ -758,7 +758,7 @@ namespace List_Everything
 			thing.TryGetQuality(out QualityCategory qc) &&
 			sel.Includes(qc);
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			base.DrawMain(rect, locked);
 			QualityRange newRange = sel;

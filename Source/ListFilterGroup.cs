@@ -54,7 +54,7 @@ namespace List_Everything
 			filters.ForEach(f => f.DoResolveReference(map));
 		}
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -74,7 +74,7 @@ namespace List_Everything
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
 
 			//Draw filters
-			bool changed = this.DoFilters(listing, locked);
+			bool changed = this.DrawFilters(listing, locked);
 
 			if (!locked)
 				this.DrawAddRow(listing);
@@ -98,6 +98,16 @@ namespace List_Everything
 
 		public override bool Check(Predicate<ListFilter> check) =>
 			base.Check(check) || filters.Any(f => f.Check(check));
+
+
+		public void Reorder(int from, int to, bool remake = false)
+		{
+			var f = filters[from];
+			filters.RemoveAt(from);
+			filters.Insert(to, f);
+
+			if (remake) RootFindDesc.RemakeList();
+		}
 	}
 
 	public class ListFilterInventory : ListFilterGroup
@@ -134,7 +144,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -181,7 +191,7 @@ namespace List_Everything
 			return clone;
 		}
 
-		protected override bool DrawMain(Rect rect, bool locked)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);

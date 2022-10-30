@@ -87,5 +87,7 @@ namespace List_Everything
 
 			return prev != checkOn;
 		}
+
+		public Vector2 CurPos => new(curX, curY);
 	}
 }

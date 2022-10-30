@@ -172,6 +172,15 @@ namespace List_Everything
 
 		public bool Check(Predicate<ListFilter> check) =>
 			filters.Any(f => f.Check(check));
+
+		public void Reorder(int from, int to, bool remake = false)
+		{
+			var f = filters[from];
+			filters.RemoveAt(from);
+			filters.Insert(to, f);
+
+			if (remake) RemakeList();
+		}
 	}
 
 	public enum BaseListType

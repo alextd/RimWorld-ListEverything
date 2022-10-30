@@ -63,8 +63,6 @@ namespace List_Everything
 			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
 
-		private Vector2 scrollPositionFilt = Vector2.zero;
-		private float scrollViewHeightFilt;
 		//Draw Filters
 		public void DoFilter(Rect rect)
 		{
@@ -121,12 +119,6 @@ namespace List_Everything
 
 			//Draw Filters!!!
 			Rect listRect = listing.GetRect(500);
-			Listing_StandardIndent filterListing = new Listing_StandardIndent()
-			{ maxOneColumn = true };
-
-			float viewWidth = listRect.width;
-			if (scrollViewHeightFilt > listRect.height)
-				viewWidth -= 16f;
 
 			//Lock out input to filters.
 			if (locked &&
@@ -139,18 +131,8 @@ namespace List_Everything
 				Event.current.Use();
 			}
 
-			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
-
-			filterListing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
-
 			//Draw Scrolling list:
-			if (findDesc.DoFilters(filterListing, locked))
-				changed = true;
-
-			if (!locked)
-				findDesc.DrawAddRow(filterListing);
-
-			filterListing.EndScrollView(ref scrollViewHeightFilt);
+			changed |= findDesc.DrawFilters(listRect, locked);
 
 
 			//Extra options:
