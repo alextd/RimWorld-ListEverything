@@ -32,7 +32,7 @@ namespace List_Everything
 			base.PreOpen();
 			if (findDesc == null)
 			{
-				SetFindDesc(new FindDescription());
+				SetFindDesc();
 				findDesc.Children.Add(ListFilterMaker.NameFilter(findDesc));
 				//Don't make the list - everything would match.
 			}
