@@ -131,7 +131,7 @@ namespace List_Everything
 				Event.current.Use();
 			}
 
-			//Draw Scrolling list:
+			//Draw Filters:
 			changed |= findDesc.Children.DrawFilters(listRect, locked);
 
 
