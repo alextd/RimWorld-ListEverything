@@ -23,8 +23,8 @@ namespace List_Everything
 	public abstract partial class ListFilter : IExposable
 	{
 		public ListFilterDef def;
-		public IFilterOwner owner;
-		public FindDescription RootFindDesc => owner.RootFindDesc;
+		public IFilterHolder parent;
+		public FindDescription RootFindDesc => parent.RootFindDesc;
 
 
 		protected int id; //For Widgets.draggingId purposes
@@ -55,12 +55,12 @@ namespace List_Everything
 			Scribe_Values.Look(ref include, "include", true);
 		}
 
-		public virtual ListFilter Clone(IFilterOwner newOwner)
+		public virtual ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
+			ListFilter clone = ListFilterMaker.MakeFilter(def, newHolder);
 			clone.enabled = enabled;
 			clone.include = include;
-			//clone.owner = newOwner; //No - MakeFilter just set it.
+			//clone.parent = newHolder; //No - MakeFilter just set it.
 			return clone;
 		}
 		public virtual void DoResolveReference(Map map) { }
@@ -91,7 +91,11 @@ namespace List_Everything
 
 
 		// Seems to be GameFont.Small on load so we're good
-		public static float IncExcWidth = Mathf.Max(Text.CalcSize("TD.IncludeShort".Translate()).x, Text.CalcSize("TD.ExcludeShort".Translate()).x);
+		public static float? incExcWidth;
+		public static float IncExcWidth =>
+			incExcWidth.HasValue ? incExcWidth.Value :
+			(incExcWidth = Mathf.Max(Text.CalcSize("TD.IncludeShort".Translate()).x, Text.CalcSize("TD.ExcludeShort".Translate()).x)).Value;
+
 		public (bool, bool) Listing(Listing_StandardIndent listing, bool locked)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
@@ -198,11 +202,15 @@ namespace List_Everything
 			sel == "" || thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
 		public static readonly string namedLabel = "Named: ";
-		public static readonly float namedLabelWidth = Text.CalcSize(namedLabel).x;
+		public static float? namedLabelWidth;
+		public static float NamedLabelWidth =>
+			namedLabelWidth.HasValue ? namedLabelWidth.Value :
+			(namedLabelWidth = Text.CalcSize(namedLabel).x).Value;
+
 		public override bool DrawMain(Rect rect, bool locked)
 		{
 			Widgets.Label(rect, namedLabel);
-			rect.xMin += namedLabelWidth;
+			rect.xMin += NamedLabelWidth;
 
 			if(locked)
 			{
@@ -396,9 +404,9 @@ namespace List_Everything
 			else
 				Scribe_Values.Look(ref _sel, "sel");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(newOwner);
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(newHolder);
 
 			clone.extraOption = extraOption;
 			if (extraOption > 0)

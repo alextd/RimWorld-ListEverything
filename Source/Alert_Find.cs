@@ -22,7 +22,7 @@ namespace List_Everything
 			set
 			{
 				_desc = value;
-				currentMapOnly = desc.Check(f => f.CurrentMapOnly);
+				currentMapOnly = desc.Children.Check(f => f.CurrentMapOnly);
 
 				StringBuilder sb = new(" (");
 

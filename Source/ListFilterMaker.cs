@@ -17,33 +17,33 @@ namespace List_Everything
 		public static ListFilterDef Filter_Zone;
 		public static ListFilterDef Filter_Group;
 
-		public static ListFilter MakeFilter(ListFilterDef def, IFilterOwner owner)
+		public static ListFilter MakeFilter(ListFilterDef def, IFilterHolder holder)
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
-			filter.owner = owner;
+			filter.parent = holder;
 			return filter;
 		}
 
-		public static ListFilter NameFilter(FindDescription owner) =>
-			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
+		public static ListFilter NameFilter(IFilterHolder holder) =>
+			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, holder);
 
 
-		public static ListFilter FilterForSelected(FindDescription owner)
+		public static ListFilter FilterForSelected(IFilterHolder holder)
 		{
 			if (Find.Selector.SingleSelectedThing is Thing thing)
 			{
 				ThingDef def = thing.def;
 				if (Find.Selector.SelectedObjectsListForReading.All(o => o is Thing t && t.def == def))
 				{
-					ListFilterThingDef filterDef = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, owner);
+					ListFilterThingDef filterDef = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, holder);
 					filterDef.sel = thing.def;
 					return filterDef;
 				}
 			}
 			else if (Find.Selector.SelectedZone is Zone zone)
 			{
-				ListFilterZone filterZone = (ListFilterZone)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Zone, owner);
+				ListFilterZone filterZone = (ListFilterZone)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Zone, holder);
 				filterZone.sel = zone;
 				return filterZone;
 			}
@@ -52,14 +52,14 @@ namespace List_Everything
 
 			if(defs.Count > 0)
 			{
-				ListFilterGroup groupDef = (ListFilterGroup)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Group, owner);
+				ListFilterGroup groupFilter = (ListFilterGroup)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Group, holder);
 				foreach(ThingDef def in defs)
 				{
-					ListFilterThingDef filterDef = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, groupDef);
-					filterDef.sel = def;
-					groupDef.Add(filterDef);
+					ListFilterThingDef defFilter = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, groupFilter);
+					defFilter.sel = def;
+					groupFilter.Children.Add(defFilter);
 				}
-				return groupDef;
+				return groupFilter;
 			}
 
 			return null;

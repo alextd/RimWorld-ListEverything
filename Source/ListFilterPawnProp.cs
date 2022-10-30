@@ -29,9 +29,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref skillRange, "skillRange");
 			Scribe_Values.Look(ref passion, "passion");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterSkill clone = (ListFilterSkill)base.Clone(newOwner);
+			ListFilterSkill clone = (ListFilterSkill)base.Clone(newHolder);
 			clone.skillRange = skillRange;
 			clone.passion = passion;
 			return clone;
@@ -91,9 +91,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref traitDegree, "traitDegree");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterTrait clone = (ListFilterTrait)base.Clone(newOwner);
+			ListFilterTrait clone = (ListFilterTrait)base.Clone(newHolder);
 			clone.traitDegree = traitDegree;
 			return clone;
 		}
@@ -217,9 +217,9 @@ namespace List_Everything
 
 			Scribe_Values.Look(ref stageRange, "stageRange");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterThought clone = (ListFilterThought)base.Clone(newOwner);
+			ListFilterThought clone = (ListFilterThought)base.Clone(newHolder);
 			clone.stageRange = stageRange;
 			return clone;
 		}
@@ -354,9 +354,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref needRange, "needRange");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterNeed clone = (ListFilterNeed)base.Clone(newOwner);
+			ListFilterNeed clone = (ListFilterNeed)base.Clone(newHolder);
 			clone.needRange = needRange;
 			return clone;
 		}
@@ -397,9 +397,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref severityRange, "severityRange");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterHealth clone = (ListFilterHealth)base.Clone(newOwner);
+			ListFilterHealth clone = (ListFilterHealth)base.Clone(newHolder);
 			clone.severityRange = severityRange;
 			return clone;
 		}
@@ -660,9 +660,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref petness, "petness");
 			Scribe_Defs.Look(ref trainability, "trainability");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterRaceProps clone = (ListFilterRaceProps)base.Clone(newOwner);
+			ListFilterRaceProps clone = (ListFilterRaceProps)base.Clone(newHolder);
 			clone.intelligence = intelligence;
 			clone.wild = wild;
 			clone.petness = petness;
@@ -781,9 +781,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref countRange, "countRange");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterProduct clone = (ListFilterProduct)base.Clone(newOwner);
+			ListFilterProduct clone = (ListFilterProduct)base.Clone(newHolder);
 			clone.countRange = countRange;
 			return clone;
 		}
@@ -938,9 +938,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref progressRange, "progressRange");
 		}
-		public override ListFilter Clone(IFilterOwner newOwner)
+		public override ListFilter Clone(IFilterHolder newHolder)
 		{
-			ListFilterProductProgress clone = (ListFilterProductProgress)base.Clone(newOwner);
+			ListFilterProductProgress clone = (ListFilterProductProgress)base.Clone(newHolder);
 			clone.progressRange = progressRange;
 			return clone;
 		}

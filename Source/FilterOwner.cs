@@ -8,23 +8,66 @@ using UnityEngine;
 
 namespace List_Everything
 {
-	public interface IFilterOwner
+	public interface IFilterHolder
 	{
+		public FilterHolder Children { get; }
 		public FindDescription RootFindDesc { get; }
-		public void Add(ListFilter newFilter, bool remake = false);
-		public IEnumerable<ListFilter> Filters { get; }
-		public void RemoveAll(HashSet<ListFilter> removedFilters);
-		public bool Check(Predicate<ListFilter> check);
-		public void Reorder(int from, int to, bool remake = false);
 	}
-	public static class IFilterOwnerExtensions
+	public class FilterHolder : IExposable
 	{
+		private IFilterHolder parent;
+		private List<ListFilter> filters = new List<ListFilter>() { };
+
+		public FilterHolder(IFilterHolder p)
+		{
+			parent = p;
+		}
+
+
+		public IEnumerable<ListFilter> Filters => filters;
+
+		public void ExposeData()
+		{
+			Scribe_Collections.Look(ref filters, "filters");
+		}
+
+		public FilterHolder Clone(IFilterHolder newHolder)
+		{
+			FilterHolder clone = new FilterHolder(newHolder);
+			clone.filters = filters.Select(f => f.Clone(newHolder)).ToList();
+			return clone;
+		}
+
+		public void Add(ListFilter newFilter, bool remake = false)
+		{
+			filters.Add(newFilter);
+			if (remake) parent.RootFindDesc.RemakeList();
+		}
+
+		public void RemoveAll(HashSet<ListFilter> removedFilters)
+		{
+			filters.RemoveAll(f => removedFilters.Contains(f));
+		}
+
+		public bool Check(Predicate<ListFilter> check) =>
+			filters.Any(f => f.Check(check));
+
+		public void Reorder(int from, int to, bool remake = false)
+		{
+			var f = filters[from];
+			filters.RemoveAt(from);
+			filters.Insert(from < to ? to - 1 : to, f);
+
+
+			if (remake) parent.RootFindDesc.RemakeList();
+		}
+
 		// draw filters continuing a Listing_StandardIndent
-		public static bool DrawFilters(this IFilterOwner owner, Listing_StandardIndent listing, bool locked)
+		public bool DrawFilters(Listing_StandardIndent listing, bool locked)
 		{
 			bool changed = false;
 			HashSet<ListFilter> removedFilters = new();
-			foreach (ListFilter filter in owner.Filters)
+			foreach (ListFilter filter in Filters)
 			{
 				Rect highlightRect = listing.GetRect(0);
 				float heightBefore = listing.CurHeight;
@@ -34,23 +77,23 @@ namespace List_Everything
 					removedFilters.Add(filter);
 
 				// Highlight the filters that pass for selected objects (useful for "any" filters)
-				if (!(filter is IFilterOwner) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
+				if (!(filter is IFilterHolder) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
 				{
 					highlightRect.height = listing.CurHeight - heightBefore;
 					Widgets.DrawHighlight(highlightRect);
 				}
 			}
 
-			owner.RemoveAll(removedFilters);
+			RemoveAll(removedFilters);
 			return changed;
 		}
 
 
 		//Draw filters completely, in a rect
-		private static Vector2 scrollPositionFilt = Vector2.zero;
-		public static float scrollViewHeightFilt;
-		private static int reorderID;
-		public static bool DrawFilters(this IFilterOwner owner, Rect listRect, bool locked)
+		private Vector2 scrollPositionFilt = Vector2.zero;
+		public float scrollViewHeightFilt;
+		private int reorderID;
+		public bool DrawFilters(Rect listRect, bool locked)
 		{
 			Listing_StandardIndent listing = new Listing_StandardIndent()
 				{ maxOneColumn = true };
@@ -65,7 +108,7 @@ namespace List_Everything
 			if (Event.current.type == EventType.Repaint)
 			{
 				reorderID = ReorderableWidget.NewGroup(
-					(int from, int to) => owner.Reorder(from, from < to ? to - 1 : to, true),
+					(int from, int to) => Reorder(from, to, true),
 					ReorderableDirection.Vertical,
 					viewRect, 1f,
 					extraDraggedItemOnGUI: delegate (int index, Vector2 dragStartPos)
@@ -73,7 +116,7 @@ namespace List_Everything
 						Vector2 mousePosition = Event.current.mousePosition + Vector2.one * 12;
 
 						Rect dragRect = new Rect(mousePosition, new(listRect.width - 100, Text.LineHeight));
-						ListFilter dragFilter = owner.Filters.ElementAt(index);
+						ListFilter dragFilter = Filters.ElementAt(index);
 
 						//Same id 34003428 as GenUI.DrawMouseAttachment
 						Find.WindowStack.ImmediateWindow(34003428, dragRect, WindowLayer.Super,
@@ -83,7 +126,7 @@ namespace List_Everything
 			}
 			bool changed = false;
 			HashSet<ListFilter> removedFilters = new();
-			foreach (ListFilter filter in owner.Filters)
+			foreach (ListFilter filter in Filters)
 			{
 				Rect usedRect = listing.GetRect(0);
 				float heightBefore = listing.CurHeight;
@@ -97,24 +140,24 @@ namespace List_Everything
 				ReorderableWidget.Reorderable(reorderID, usedRect);
 
 				// Highlight the filters that pass for selected objects (useful for "any" filters)
-				if (!(filter is IFilterOwner) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
+				if (!(filter is IFilterHolder) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
 				{
 					usedRect.height = listing.CurHeight - heightBefore;
 					Widgets.DrawHighlight(usedRect);
 				}
 			}
 
-			owner.RemoveAll(removedFilters);
+			RemoveAll(removedFilters);
 
 			if (!locked)
-				owner.DrawAddRow(listing);
+				DrawAddRow(listing);
 
 			listing.EndScrollView(ref scrollViewHeightFilt);
 
 			return changed;
 		}
 
-		public static void DrawAddRow(this IFilterOwner owner, Listing_StandardIndent listing)
+		public void DrawAddRow(Listing_StandardIndent listing)
 		{
 			Rect addRow = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
@@ -129,11 +172,11 @@ namespace List_Everything
 
 			if (Widgets.ButtonInvisible(addRow))
 			{
-				DoFloatAllFilters(owner);
+				DoFloatAllFilters();
 			}
 		}
 
-		public static void DoFloatAllFilters(this IFilterOwner owner)
+		public void DoFloatAllFilters()
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterSelectableDef def in ListFilterMaker.SelectableList)
@@ -141,18 +184,18 @@ namespace List_Everything
 				if (def is ListFilterDef fDef)
 					options.Add(new FloatMenuOption(
 						fDef.LabelCap,
-						() => owner.Add(ListFilterMaker.MakeFilter(fDef, owner), true)
+						() => Add(ListFilterMaker.MakeFilter(fDef, parent), true)
 					));
 				if (def is ListFilterCategoryDef cDef)
 					options.Add(new FloatMenuOption(
 						"+ " + cDef.LabelCap,
-						() => owner.DoFloatAllCategory(cDef)
+						() => DoFloatAllCategory(cDef)
 					));
 			}
 			Find.WindowStack.Add(new FloatMenu(options));
 		}
 
-		public static void DoFloatAllCategory(this IFilterOwner owner, ListFilterCategoryDef cDef)
+		public void DoFloatAllCategory(ListFilterCategoryDef cDef)
 		{
 			List<FloatMenuOption> options = new List<FloatMenuOption>();
 			foreach (ListFilterDef def in cDef.SubFilters)
@@ -160,7 +203,7 @@ namespace List_Everything
 				// I don't think we need to worry about double-nested filters
 				options.Add(new FloatMenuOption(
 					def.LabelCap,
-					() => owner.Add(ListFilterMaker.MakeFilter(def, owner), true)
+					() => Add(ListFilterMaker.MakeFilter(def, parent), true)
 				));
 			}
 			Find.WindowStack.Add(new FloatMenu(options));

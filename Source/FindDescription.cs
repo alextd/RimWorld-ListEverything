@@ -13,12 +13,13 @@ namespace List_Everything
 	// - BaseListType which narrows what that things to look at
 	// - Checkbox bool allMaps that apply to all nested filters
 	// - Apparently support for alerts which I'll probably separate out
-	public class FindDescription : IExposable, IFilterOwner
+	public class FindDescription : IExposable, IFilterHolder
 	{
 		public string name = "TD.NewFindFilters".Translate();
 		public List<Thing> listedThings = new();
-		private List<ListFilter> filters = new List<ListFilter>();
-		public IEnumerable<ListFilter> Filters => filters;
+		private FilterHolder children;
+		public FilterHolder Children => children;
+		public FindDescription RootFindDesc => this;
 
 		public AlertPriority alertPriority;
 		public int ticksToShowAlert;
@@ -26,6 +27,11 @@ namespace List_Everything
 		public CompareType countComp;
 
 		public bool allMaps = false;
+
+		public FindDescription()
+		{
+			children = new FilterHolder(this);
+		}
 
 		private BaseListType _baseType;
 		public BaseListType BaseType
@@ -64,9 +70,11 @@ namespace List_Everything
 				countComp = countComp,
 				allMaps = allMaps
 			};
-			newDesc.filters = filters.Select(f => f.Clone(newDesc)).ToList();
+			newDesc.children = children.Clone(newDesc);
 			if (map != null)
-				newDesc.filters.ForEach(f => f.DoResolveReference(map));
+				foreach (var f in newDesc.Children.Filters)
+					f.DoResolveReference(map);
+
 			return newDesc;
 		}
 
@@ -130,7 +138,7 @@ namespace List_Everything
 				allThings = allThings.Where(t => ValidDef(t.def));
 				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
 			}
-			foreach (ListFilter filter in filters)
+			foreach (ListFilter filter in Children.Filters)
 				allThings = filter.Apply(allThings);
 
 			//Sort
@@ -146,40 +154,13 @@ namespace List_Everything
 		{
 			Scribe_Values.Look(ref name, "name");
 			Scribe_Values.Look(ref _baseType, "baseType");
-			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref alertPriority, "alertPriority");
 			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
 			Scribe_Values.Look(ref countComp, "countComp");
 			Scribe_Values.Look(ref allMaps, "allMaps");
 
-			//Should we set filters owner to this? Only map clones that are copied need it, and they get it in the clone.
-		}
-
-
-		public FindDescription RootFindDesc => this;
-
-		public void Add(ListFilter newFilter, bool remake = false)
-		{
-			filters.Add(newFilter);
-			if (remake) RemakeList();
-		}
-
-		public void RemoveAll(HashSet<ListFilter> removedFilters)
-		{
-			filters.RemoveAll(f => removedFilters.Contains(f));
-		}
-
-		public bool Check(Predicate<ListFilter> check) =>
-			filters.Any(f => f.Check(check));
-
-		public void Reorder(int from, int to, bool remake = false)
-		{
-			var f = filters[from];
-			filters.RemoveAt(from);
-			filters.Insert(to, f);
-
-			if (remake) RemakeList();
+			Children.ExposeData();
 		}
 	}
 

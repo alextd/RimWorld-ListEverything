@@ -33,7 +33,7 @@ namespace List_Everything
 			if (findDesc == null)
 			{
 				SetFindDesc(new FindDescription());
-				findDesc.Add(ListFilterMaker.NameFilter(findDesc));
+				findDesc.Children.Add(ListFilterMaker.NameFilter(findDesc));
 				//Don't make the list - everything would match.
 			}
 			else
@@ -132,7 +132,7 @@ namespace List_Everything
 			}
 
 			//Draw Scrolling list:
-			changed |= findDesc.DrawFilters(listRect, locked);
+			changed |= findDesc.Children.DrawFilters(listRect, locked);
 
 
 			//Extra options:
