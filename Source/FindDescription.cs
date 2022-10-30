@@ -58,7 +58,20 @@ namespace List_Everything
 			}
 		}
 
-		public virtual FindDescription Clone(Map map)
+
+		public void ExposeData()
+		{
+			Scribe_Values.Look(ref name, "name");
+			Scribe_Values.Look(ref _baseType, "baseType");
+			Scribe_Values.Look(ref alertPriority, "alertPriority");
+			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
+			Scribe_Values.Look(ref countToAlert, "countToAlert");
+			Scribe_Values.Look(ref countComp, "countComp");
+			Scribe_Values.Look(ref allMaps, "allMaps");
+
+			Children.ExposeData();
+		}
+		public FindDescription Clone(Map map)
 		{
 			FindDescription newDesc = new FindDescription()
 			{
@@ -149,19 +162,6 @@ namespace List_Everything
 		public static bool ValidDef(ThingDef def) =>
 			!typeof(Mote).IsAssignableFrom(def.thingClass) &&
 			def.drawerType != DrawerType.None;
-
-		public virtual void ExposeData()
-		{
-			Scribe_Values.Look(ref name, "name");
-			Scribe_Values.Look(ref _baseType, "baseType");
-			Scribe_Values.Look(ref alertPriority, "alertPriority");
-			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
-			Scribe_Values.Look(ref countToAlert, "countToAlert");
-			Scribe_Values.Look(ref countComp, "countComp");
-			Scribe_Values.Look(ref allMaps, "allMaps");
-
-			Children.ExposeData();
-		}
 	}
 
 	public enum BaseListType
