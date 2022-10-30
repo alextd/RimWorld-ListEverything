@@ -23,7 +23,12 @@ namespace List_Everything
 	public abstract partial class ListFilter : IExposable
 	{
 		public ListFilterDef def;
+
 		public IFilterHolder parent;
+		// parent is not set after ExposeData, that'll be done in Clone.
+		// parent is only used in UI or actual processing so as is made clear below,
+		// An ExpostData-loaded ListFilter needs to be cloned before actual use
+
 		public FindDescription RootFindDesc => parent.RootFindDesc;
 
 
@@ -38,15 +43,18 @@ namespace List_Everything
 		private bool include = true; //or exclude
 
 
-		// The basic gist here is:
+		// Okay, save/load. The basic gist here is:
 		// ExposeData saves any filter fine.
-		// After ExposeData loading, they need to be cloned
-		// After Cloning, they get DoResolveReference
+		// ExposeData can load a filter for reference, but it's not yet usable.
+		// After ExposeData loading, filters need to be cloned
+		// After Cloning, they get DoResolveReference on a map
+		// Then filters can actually be used.
 
-		// ExposeData+Clone overrides should copy data but not process much.
+
+		// Any overridden ExposeData+Clone should copy data but not process much.
 		// If there's proessing to do, do it in ResolveReference. 
-		// e.g. refName in ListFilterWithOption is set in clone, not the actual selection
-		// So don't use it in Clone! Use it in ResolveReference.
+		// e.g. ListFilterWithOption sets refName in Clone,
+		//  but sets the actual selection in ResolveReference
 
 		public virtual void ExposeData()
 		{
@@ -292,6 +300,7 @@ namespace List_Everything
 		}
 
 		// A subclass should often set sel in the constructor
+		// which will call the property setter above
 		// If the default is null, and there's no PostSelected to do,
 		// then it's fine to skip defining a constructor
 		protected ListFilterWithOption()
