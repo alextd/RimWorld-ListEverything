@@ -211,7 +211,10 @@ namespace List_Everything
 				if (d)
 					removedFilters.Add(filter);
 
-				//Reorder box with only one line tall
+				//Reorder box with only one line tall ;
+				//TODO: make its yMax = filter.CurHeight,
+				//but then you can't drag AWAY from subfilters,
+				//though it's correct where you drag TO
 				usedRect.height = Text.LineHeight;
 				ReorderableWidget.Reorderable(reorderID, usedRect);
 
