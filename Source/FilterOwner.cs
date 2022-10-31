@@ -132,16 +132,20 @@ namespace List_Everything
 				return null;
 			}).First();
 
+			IFilterHolder newHolder = null;
 			ForEach(delegate (object o)
 			{
 				if (o is IFilterHolder holder && holder.Children.reorderID == toGroup)
 					// Hold up, don't drop inside yourself
 					if (draggedFilter != o)
-					{
-						draggedFilter.parent.Children.filters.Remove(draggedFilter);
-						holder.Children.Add(draggedFilter, to);
-					}
+						newHolder = holder;	//todo: abort early?
 			});
+
+			if (newHolder != null)
+			{
+				draggedFilter.parent.Children.filters.Remove(draggedFilter);
+				newHolder.Children.Add(draggedFilter, to);
+			}
 		}
 
 		//Draw filters completely, in a rect
