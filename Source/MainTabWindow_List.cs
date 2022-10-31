@@ -125,6 +125,7 @@ namespace List_Everything
 				Event.current.type != EventType.Layout &&
 				Event.current.type != EventType.Ignore &&
 				Event.current.type != EventType.Used &&
+				Event.current.type != EventType.ScrollWheel &&
 				Mouse.IsOver(listRect))
 			{
 				Event.current.Use();
