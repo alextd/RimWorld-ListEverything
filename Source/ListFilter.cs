@@ -481,6 +481,7 @@ namespace List_Everything
 			if (sel is Def def)
 				return def.defName;
 
+			// Many subclasses will just use NameFor, so do it here.
 			return sel != null ? NameFor(sel) : base.MakeRefName();
 		}
 
@@ -986,6 +987,7 @@ namespace List_Everything
 
 
 		public override bool UsesRefName => true;
+		protected override string MakeRefName() => sel.ToString();
 
 		protected override ModContentPack ResolveReference(Map map) =>
 			LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageIdPlayerFacing == refName);
