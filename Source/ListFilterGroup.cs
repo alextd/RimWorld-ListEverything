@@ -82,9 +82,6 @@ namespace List_Everything
 			//Draw filters
 			bool changed = Children.DrawFilters(listing, locked);
 
-			if (!locked)
-				Children.DrawAddRow(listing);
-
 			listing.NestedOutdent();
 			return changed;
 		}

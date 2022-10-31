@@ -62,64 +62,56 @@ namespace List_Everything
 			if (remake) parent.RootFindDesc.RemakeList();
 		}
 
-		// draw filters continuing a Listing_StandardIndent
-		public bool DrawFilters(Listing_StandardIndent listing, bool locked)
-		{
-			bool changed = false;
-			HashSet<ListFilter> removedFilters = new();
-			foreach (ListFilter filter in Filters)
-			{
-				Rect highlightRect = listing.GetRect(0);
-				float heightBefore = listing.CurHeight;
-				(bool ch, bool d) = filter.Listing(listing, locked);
-				changed |= ch;
-				if (d)
-					removedFilters.Add(filter);
-
-				// Highlight the filters that pass for selected objects (useful for "any" filters)
-				if (!(filter is IFilterHolder) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
-				{
-					highlightRect.height = listing.CurHeight - heightBefore;
-					Widgets.DrawHighlight(highlightRect);
-				}
-			}
-
-			RemoveAll(removedFilters);
-			return changed;
-		}
-
-
 		//Draw filters completely, in a rect
 		private Vector2 scrollPositionFilt = Vector2.zero;
-		public float scrollViewHeightFilt;
-		private int reorderID;
+		private float scrollHeight;
+
 		public bool DrawFilters(Rect listRect, bool locked)
 		{
 			Listing_StandardIndent listing = new Listing_StandardIndent()
 				{ maxOneColumn = true };
 
 			float viewWidth = listRect.width;
-			if (scrollViewHeightFilt > listRect.height)
+			if (scrollHeight > listRect.height)
 				viewWidth -= 16f;
-			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollViewHeightFilt);
+			Rect viewRect = new Rect(0f, 0f, viewWidth, scrollHeight);
 
 			listing.BeginScrollView(listRect, ref scrollPositionFilt, viewRect);
 
+			bool changed = DrawFilters(listing, locked);
+
+			listing.EndScrollView(ref scrollHeight);
+
+			return changed;
+		}
+
+
+		// draw filters continuing a Listing_StandardIndent
+		private int reorderID;
+		private float reorderRectHeight;
+
+		public bool DrawFilters(Listing_StandardIndent listing, bool locked)
+		{
+			float heightBeforeAll = listing.CurHeight;
+
+
+			Rect coveredRect = new Rect(0f, heightBeforeAll, listing.ColumnWidth, reorderRectHeight);
 			if (Event.current.type == EventType.Repaint)
 			{
 				reorderID = ReorderableWidget.NewGroup(
 					(int from, int to) => Reorder(from, to, true),
 					ReorderableDirection.Vertical,
-					viewRect, 1f,
+					coveredRect, 1f,
 					extraDraggedItemOnGUI: (int index, Vector2 dragStartPos) =>
-						DrawMouseAttachedFilter(Filters.ElementAt(index), listRect.width - 100));
+						DrawMouseAttachedFilter(Filters.ElementAt(index), coveredRect.width - 100));
 			}
+
 			bool changed = false;
 			HashSet<ListFilter> removedFilters = new();
 			foreach (ListFilter filter in Filters)
 			{
 				Rect usedRect = listing.GetRect(0);
-				float heightBefore = listing.CurHeight;
+				float heightBeforeSingle = listing.CurHeight;
 				(bool ch, bool d) = filter.Listing(listing, locked);
 				changed |= ch;
 				if (d)
@@ -132,17 +124,17 @@ namespace List_Everything
 				// Highlight the filters that pass for selected objects (useful for "any" filters)
 				if (!(filter is IFilterHolder) && Find.Selector.SelectedObjects.Any(o => o is Thing t && filter.AppliesTo(t)))
 				{
-					usedRect.height = listing.CurHeight - heightBefore;
+					usedRect.height = listing.CurHeight - heightBeforeSingle;
 					Widgets.DrawHighlight(usedRect);
 				}
 			}
+
+			reorderRectHeight = listing.CurHeight - heightBeforeAll;
 
 			RemoveAll(removedFilters);
 
 			if (!locked)
 				DrawAddRow(listing);
-
-			listing.EndScrollView(ref scrollViewHeightFilt);
 
 			return changed;
 		}
