@@ -243,6 +243,9 @@ namespace List_Everything
 			Rect addRow = listing.GetRect(Text.LineHeight);
 			listing.Gap(listing.verticalSpacing);
 
+			if (ReorderableWidget.Dragging)
+				return;
+
 			Rect butRect = addRow; butRect.width = Text.LineHeight;
 			Widgets.DrawTextureFitted(butRect, TexButton.Plus, 1.0f);
 
