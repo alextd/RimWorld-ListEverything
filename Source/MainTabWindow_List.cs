@@ -33,7 +33,7 @@ namespace List_Everything
 			if (findDesc == null)
 			{
 				SetFindDesc();
-				findDesc.Children.Add(ListFilterMaker.NameFilter(findDesc));
+				findDesc.Children.Add(ListFilterMaker.NameFilter());
 				//Don't make the list - everything would match.
 			}
 			else
@@ -79,7 +79,6 @@ namespace List_Everything
 			if (Widgets.ButtonImage(headerButRect, TexButton.CancelTex))
 			{
 				SetFindDesc();
-				findDesc.RemakeList();
 			}
 			TooltipHandler.TipRegion(headerButRect, "ClearAll".Translate().CapitalizeFirst());
 

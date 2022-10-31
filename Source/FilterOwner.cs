@@ -34,13 +34,24 @@ namespace List_Everything
 		public FilterHolder Clone(IFilterHolder newHolder)
 		{
 			FilterHolder clone = new FilterHolder(newHolder);
-			clone.filters = filters.Select(f => f.Clone(newHolder)).ToList();
+			foreach (var f in Filters.Select(f => f.Clone()))
+				clone.Add(f);
 			return clone;
 		}
 
 		public void Add(ListFilter newFilter, bool remake = false)
 		{
+			newFilter.parent = parent;
 			filters.Add(newFilter);
+
+			if (remake) parent.RootFindDesc.RemakeList();
+		}
+
+		public void Add(ListFilter newFilter, int index, bool remake = false)
+		{
+			newFilter.parent = parent;
+			filters.Insert(index, newFilter);
+
 			if (remake) parent.RootFindDesc.RemakeList();
 		}
 
@@ -50,16 +61,13 @@ namespace List_Everything
 		}
 
 		public bool Check(Predicate<ListFilter> check) =>
-			filters.Any(f => f.Check(check));
+			Filters.Any(f => f.Check(check));
 
 		public void Reorder(int from, int to, bool remake = false)
 		{
-			var f = filters[from];
+			var draggerFilter = filters[from];
 			filters.RemoveAt(from);
-			filters.Insert(from < to ? to - 1 : to, f);
-
-
-			if (remake) parent.RootFindDesc.RemakeList();
+			Add(draggerFilter, from < to ? to - 1 : to, remake);
 		}
 
 		//Gather method that passes in both FindDescription and all ListFilters to selector
@@ -118,27 +126,21 @@ namespace List_Everything
 
 			ListFilter draggedFilter = Gather(delegate (object o)
 			{
-				if (o is IFilterHolder holder)
-				{
-					if (holder.Children.reorderID == fromGroup)
-					{
-						ListFilter result = holder.Children.filters.ElementAt(from);
-						holder.Children.filters.RemoveAt(from);
-						return result;
-					}
-				}
+				if (o is IFilterHolder holder && holder.Children.reorderID == fromGroup)
+					return holder.Children.filters.ElementAt(from);
+
 				return null;
 			}).First();
 
 			ForEach(delegate (object o)
 			{
-				if (o is IFilterHolder holder)
-				{
-					if (holder.Children.reorderID == toGroup)
+				if (o is IFilterHolder holder && holder.Children.reorderID == toGroup)
+					// Hold up, don't drop inside yourself
+					if (draggedFilter != o)
 					{
-						holder.Children.filters.Insert(to, draggedFilter);
+						draggedFilter.parent.Children.filters.Remove(draggedFilter);
+						holder.Children.Add(draggedFilter, to);
 					}
-				}
 			});
 		}
 
@@ -268,7 +270,7 @@ namespace List_Everything
 				if (def is ListFilterDef fDef)
 					options.Add(new FloatMenuOption(
 						fDef.LabelCap,
-						() => Add(ListFilterMaker.MakeFilter(fDef, parent), true)
+						() => Add(ListFilterMaker.MakeFilter(fDef), remake: true)
 					));
 				if (def is ListFilterCategoryDef cDef)
 					options.Add(new FloatMenuOption(
@@ -287,7 +289,7 @@ namespace List_Everything
 				// I don't think we need to worry about double-nested filters
 				options.Add(new FloatMenuOption(
 					def.LabelCap,
-					() => Add(ListFilterMaker.MakeFilter(def, parent), true)
+					() => Add(ListFilterMaker.MakeFilter(def), remake: true)
 				));
 			}
 			Find.WindowStack.Add(new FloatMenu(options));

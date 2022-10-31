@@ -17,33 +17,35 @@ namespace List_Everything
 		public static ListFilterDef Filter_Zone;
 		public static ListFilterDef Filter_Group;
 
-		public static ListFilter MakeFilter(ListFilterDef def, IFilterHolder holder)
+		// The result is to be added to a IFilterHolder with Add()
+		// (Either a FindDescription or a ListFilterGroup)
+		public static ListFilter MakeFilter(ListFilterDef def)
 		{
 			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
 			filter.def = def;
-			filter.parent = holder;
 			return filter;
 		}
 
-		public static ListFilter NameFilter(IFilterHolder holder) =>
-			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, holder);
+		// example filter
+		public static ListFilter NameFilter() =>
+			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name);
 
 
-		public static ListFilter FilterForSelected(IFilterHolder holder)
+		public static ListFilter FilterForSelected()
 		{
 			if (Find.Selector.SingleSelectedThing is Thing thing)
 			{
 				ThingDef def = thing.def;
 				if (Find.Selector.SelectedObjectsListForReading.All(o => o is Thing t && t.def == def))
 				{
-					ListFilterThingDef filterDef = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, holder);
+					ListFilterThingDef filterDef = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def);
 					filterDef.sel = thing.def;
 					return filterDef;
 				}
 			}
 			else if (Find.Selector.SelectedZone is Zone zone)
 			{
-				ListFilterZone filterZone = (ListFilterZone)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Zone, holder);
+				ListFilterZone filterZone = (ListFilterZone)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Zone);
 				filterZone.sel = zone;
 				return filterZone;
 			}
@@ -52,10 +54,10 @@ namespace List_Everything
 
 			if(defs.Count > 0)
 			{
-				ListFilterGroup groupFilter = (ListFilterGroup)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Group, holder);
+				ListFilterGroup groupFilter = (ListFilterGroup)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Group);
 				foreach(ThingDef def in defs)
 				{
-					ListFilterThingDef defFilter = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def, groupFilter);
+					ListFilterThingDef defFilter = (ListFilterThingDef)ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Def);
 					defFilter.sel = def;
 					groupFilter.Children.Add(defFilter);
 				}

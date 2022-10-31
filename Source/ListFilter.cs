@@ -63,9 +63,9 @@ namespace List_Everything
 			Scribe_Values.Look(ref include, "include", true);
 		}
 
-		public virtual ListFilter Clone(IFilterHolder newHolder)
+		public virtual ListFilter Clone()
 		{
-			ListFilter clone = ListFilterMaker.MakeFilter(def, newHolder);
+			ListFilter clone = ListFilterMaker.MakeFilter(def);
 			clone.enabled = enabled;
 			clone.include = include;
 			//clone.parent = newHolder; //No - MakeFilter just set it.
@@ -413,9 +413,9 @@ namespace List_Everything
 			else
 				Scribe_Values.Look(ref _sel, "sel");
 		}
-		public override ListFilter Clone(IFilterHolder newHolder)
+		public override ListFilter Clone()
 		{
-			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(newHolder);
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone();
 
 			clone.extraOption = extraOption;
 			if (extraOption > 0)

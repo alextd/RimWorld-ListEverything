@@ -26,11 +26,11 @@ namespace List_Everything
 			{
 				FindDescription desc = new FindDescription();
 
-				ListFilter filter = ListFilterMaker.FilterForSelected(desc);
+				ListFilter filter = ListFilterMaker.FilterForSelected();
 				bool selectedFilter = filter != null;
 
 				if (!selectedFilter)
-					filter = ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, desc);
+					filter = ListFilterMaker.NameFilter();
 
 				desc.Children.Add(filter);
 				filter.Focus();

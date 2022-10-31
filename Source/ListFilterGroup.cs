@@ -47,9 +47,9 @@ namespace List_Everything
 
 			Children.ExposeData();
 		}
-		public override ListFilter Clone(IFilterHolder newHolder)
+		public override ListFilter Clone()
 		{
-			ListFilterGroup clone = (ListFilterGroup)base.Clone(newHolder);
+			ListFilterGroup clone = (ListFilterGroup)base.Clone();
 			clone.children = children.Clone(clone);
 			clone.any = any;
 			return clone;
@@ -116,9 +116,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref holdingThis, "holdingThis", true);
 		}
-		public override ListFilter Clone(IFilterHolder newHolder)
+		public override ListFilter Clone()
 		{
-			ListFilterInventory clone = (ListFilterInventory)base.Clone(newHolder);
+			ListFilterInventory clone = (ListFilterInventory)base.Clone();
 			clone.holdingThis = holdingThis;
 			return clone;
 		}
@@ -163,9 +163,9 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone(IFilterHolder newHolder)
+		public override ListFilter Clone()
 		{
-			ListFilterNearby clone = (ListFilterNearby)base.Clone(newHolder);
+			ListFilterNearby clone = (ListFilterNearby)base.Clone();
 			clone.range = range;
 			return clone;
 		}
