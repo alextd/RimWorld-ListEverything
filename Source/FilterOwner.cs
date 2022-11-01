@@ -31,14 +31,15 @@ namespace List_Everything
 			Scribe_Collections.Look(ref filters, "filters");
 		}
 
-		public FilterHolder Clone(IFilterHolder newHolder)
+		public FilterHolder Clone(IFilterHolder newParent)
 		{
-			FilterHolder clone = new FilterHolder(newHolder);
+			FilterHolder clone = new FilterHolder(newParent);
 			foreach (var f in Filters.Select(f => f.Clone()))
 				clone.Add(f);
 			return clone;
 		}
 
+		// Add filter and set its parent to this (well, the same parent IFilterHolder of this)
 		public void Add(ListFilter newFilter, bool remake = false)
 		{
 			newFilter.parent = parent;
