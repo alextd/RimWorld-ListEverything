@@ -15,7 +15,7 @@ namespace List_Everything
 		private bool locked;
 		public void SetFindDesc(FindDescription fd = null, bool l = false)
 		{
-			_findDesc = fd ?? new FindDescription();
+			_findDesc = fd ?? new FindDescription(Find.CurrentMap);
 			locked = l;
 		}
 

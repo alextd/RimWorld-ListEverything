@@ -11,48 +11,42 @@ namespace List_Everything
 	public enum CompareType { Greater,Equal,Less}
 	public class FindAlertData : IExposable
 	{
-		public Map map;
-		public string mapLabel;
+		public FindDescription desc;
 
-		private FindDescription _desc;
-		public FindDescription desc
-		{
-			get => _desc;
-			set
-			{
-				_desc = value;
-
-				StringBuilder sb = new(" (");
-
-				if (_desc.CurrentMapOnly)
-					sb.Append("Current Map");
-				else if (map?.Parent.LabelCap is string label)
-					sb.Append(label);
-				else
-					sb.Append("TD.AllMaps".Translate());
-
-				sb.Append(")");
-
-				mapLabel = sb.ToString();
-			}
-		}
-
+		public AlertPriority alertPriority;
+		public int ticksToShowAlert;
+		public int countToAlert;
+		public CompareType countComp;
 
 		public FindAlertData() { }
 
-		public FindAlertData(Map m, FindDescription d)
+		public FindAlertData(FindDescription d)
 		{
-			map = m;
 			desc = d;
 		}
 
+		public Map _scribeMap;
 		public void ExposeData()
 		{
-			Scribe_References.Look(ref map, "map");
-			Scribe_Deep.Look(ref _desc, "desc");
+			Scribe_Deep.Look(ref desc, "desc");
 
-			//couuld re-regenate these.
-			Scribe_Values.Look(ref mapLabel, "mapLabel");
+			Scribe_Values.Look(ref alertPriority, "alertPriority");
+			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
+			Scribe_Values.Look(ref countToAlert, "countToAlert");
+			Scribe_Values.Look(ref countComp, "countComp");
+
+			Log.Message($"{Scribe.mode} : {desc.map}");
+
+			if (Scribe.mode == LoadSaveMode.Saving)
+				_scribeMap = desc.map;
+
+			Scribe_References.Look(ref _scribeMap, "map");
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				desc.map = _scribeMap;
+				_scribeMap = null;
+			}
 		}
 	}
 
@@ -73,7 +67,7 @@ namespace List_Everything
 		public Alert_Find(FindAlertData d) : this()
 		{
 			defaultLabel = d.desc.name;
-			defaultPriority = d.desc.alertPriority;
+			defaultPriority = d.alertPriority;
 			alertData = d;
 		}
 
@@ -102,11 +96,11 @@ namespace List_Everything
 		public void SetPriority(AlertPriority p)
 		{
 			defaultPriority = p;
-			alertData.desc.alertPriority = p;
+			alertData.alertPriority = p;
 		}
-		public void SetTicks(int t) => alertData.desc.ticksToShowAlert = t;
-		public void SetCount(int c) => alertData.desc.countToAlert = c;
-		public void SetComp(CompareType c) => alertData.desc.countComp = c;
+		public void SetTicks(int t) => alertData.ticksToShowAlert = t;
+		public void SetCount(int c) => alertData.countToAlert = c;
+		public void SetComp(CompareType c) => alertData.countComp = c;
 		
 		public override AlertReport GetReport()
 		{
@@ -116,15 +110,15 @@ namespace List_Everything
 			var things = FoundThings();
 			int count = things.Sum(t => t.stackCount);
 			bool active = false;
-			switch(alertData.desc.countComp)
+			switch(alertData.countComp)
 			{
-				case CompareType.Greater: active = count > alertData.desc.countToAlert;	break;
-				case CompareType.Equal:		active = count == alertData.desc.countToAlert;	break;
-				case CompareType.Less:		active = count < alertData.desc.countToAlert;	break;
+				case CompareType.Greater: active = count > alertData.countToAlert;	break;
+				case CompareType.Equal:		active = count == alertData.countToAlert;	break;
+				case CompareType.Less:		active = count < alertData.countToAlert;	break;
 			}
 			if (!active)
 				tickStarted = Find.TickManager.TicksGame;
-			else if (Find.TickManager.TicksGame - tickStarted >= alertData.desc.ticksToShowAlert)
+			else if (Find.TickManager.TicksGame - tickStarted >= alertData.ticksToShowAlert)
 			{
 				if (count == 0)
 					return AlertReport.Active;
@@ -137,7 +131,7 @@ namespace List_Everything
 		{
 			var things = FoundThings();
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(defaultLabel + alertData.mapLabel);
+			stringBuilder.Append(defaultLabel + alertData.desc.mapLabel);
 			stringBuilder.AppendLine(" - " + MainTabWindow_List.LabelCountThings(things));
 			stringBuilder.AppendLine("");
 			foreach (Thing thing in things.Take(maxItems))
@@ -159,7 +153,7 @@ namespace List_Everything
 
 			currentTick = Find.TickManager.TicksGame;
 
-			alertData.desc.RemakeList(alertData.map);
+			alertData.desc.RemakeList();
 
 
 			return alertData.desc.ListedThings;
@@ -175,7 +169,7 @@ namespace List_Everything
 			//rect.x -= this.alertBounce.CalculateHorizontalOffset();
 			if (Event.current.button == 1 && Widgets.ButtonInvisible(rect, false))
 			{
-				MainTabWindow_List.OpenWith(alertData.desc.Clone(Find.CurrentMap), true);
+				MainTabWindow_List.OpenWith(alertData.desc.Clone(alertData.desc.map), true);
 
 				Event.current.Use();
 			}

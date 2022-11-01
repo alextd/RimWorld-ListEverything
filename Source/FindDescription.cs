@@ -16,28 +16,54 @@ namespace List_Everything
 	public class FindDescription : IExposable, IFilterHolder
 	{
 		public string name = "TD.NewFindFilters".Translate();
-
+		
 		private List<Thing> listedThings = new();
 		public IEnumerable<Thing> ListedThings => listedThings;
 
 		private FilterHolder children;
 		public FilterHolder Children => children;
 
+		// from IFilterHolder
 		public FindDescription RootFindDesc => this;
 
-		public AlertPriority alertPriority;
-		public int ticksToShowAlert;
-		public int countToAlert;
-		public CompareType countComp;
-
+		//Map stuff. Not saved to file. Clone(map) to set map.
+		private Map _map;
+		public string mapLabel;
 		public bool allMaps = false;
+		public Map map
+		{
+			get => _map;
+			set
+			{
+				_map = value;
+
+				StringBuilder sb = new(" (");
+
+				if (CurrentMapOnly())
+					sb.Append("Current Map");
+				else if (_map?.Parent.LabelCap is string label)
+					sb.Append(label);
+				else
+					sb.Append("TD.AllMaps".Translate());
+
+				sb.Append(")");
+
+				mapLabel = sb.ToString();
+			}
+		}
 
 		//Certain filters only work on the current map, so the entire tree will only work on the current map
-		public bool CurrentMapOnly => Children.Check(f => f.CurrentMapOnly);
+		public bool CurrentMapOnly() => Children.Check(f => f.CurrentMapOnly);
+
 
 		public FindDescription()
 		{
 			children = new FilterHolder(this);
+		}
+
+		public FindDescription(Map m)
+		{
+			map = m;
 		}
 
 		private BaseListType _baseType;
@@ -51,27 +77,28 @@ namespace List_Everything
 			}
 		}
 
-		public void RemakeList(Map map = null)
+		public void RemakeList()
 		{
 			listedThings.Clear();
 
 
 			// "Current map only" overrides other choices
-			if (CurrentMapOnly)
+			if (CurrentMapOnly())
 				listedThings.AddRange(Get(Find.CurrentMap));
-
-			// Single map
-			else if (map != null)
-				listedThings.AddRange(Get(map));
 
 			// All maps
 			else if (allMaps)
 				foreach (Map m in Find.Maps)
 					listedThings.AddRange(Get(m));
 
+			// Single map
+			else if (map != null)
+				listedThings.AddRange(Get(map));
+
+			// Probably don't want to
 			// Assume you want the current map!
-			else
-				listedThings.AddRange(Get(Find.CurrentMap));
+			//else
+			//	listedThings.AddRange(Get(Find.CurrentMap));
 		}
 
 
@@ -79,30 +106,24 @@ namespace List_Everything
 		{
 			Scribe_Values.Look(ref name, "name");
 			Scribe_Values.Look(ref _baseType, "baseType");
-			Scribe_Values.Look(ref alertPriority, "alertPriority");
-			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
-			Scribe_Values.Look(ref countToAlert, "countToAlert");
-			Scribe_Values.Look(ref countComp, "countComp");
 			Scribe_Values.Look(ref allMaps, "allMaps");
+			//Does not save/load _map : Clone(map) a loaded FindDescription
 
 			Children.ExposeData();
 		}
-		public FindDescription Clone(Map map, bool resolve = true)
+		public FindDescription Clone(Map newMap, bool resolve = true)
 		{
 			FindDescription newDesc = new FindDescription()
 			{
 				_baseType = _baseType,
 				name = name,
-				alertPriority = alertPriority,
-				ticksToShowAlert = ticksToShowAlert,
-				countToAlert = countToAlert,
-				countComp = countComp,
-				allMaps = allMaps
+				allMaps = allMaps,
+				map = newMap
 			};
 			newDesc.children = children.Clone(newDesc);
 			if (resolve)
 				foreach (var f in newDesc.Children.Filters)
-					f.DoResolveReference(map);
+					f.DoResolveReference(newMap);
 
 			return newDesc;
 		}
@@ -192,6 +213,8 @@ namespace List_Everything
 		Plants,
 		Inventory,
 		All,
+
+		//devmode options
 		Haulables,
 		Mergables,
 		FilthInHomeArea

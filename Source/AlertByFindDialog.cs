@@ -59,7 +59,6 @@ namespace List_Everything
 			inRect.yMin += listing.CurHeight;
 
 			//Useful things:
-			Map map = Find.CurrentMap;
 			ListEverythingGameComp comp = Current.Game.GetComponent<ListEverythingGameComp>();
 			string remove = null;
 
@@ -71,27 +70,26 @@ namespace List_Everything
 			foreach (string name in comp.AlertNames())
 			{
 				FindAlertData alert = comp.GetAlert(name);
-				FindDescription desc = alert.desc;
 				WidgetRow row = new WidgetRow(rowRect.x, rowRect.y, UIDirection.RightThenDown, rowRect.width);
 				rowRect.y += RowHeight;
 
-				row.Label(alert.desc.name + alert.mapLabel, rowRect.width / 4);
+				row.Label(alert.desc.name + alert.desc.mapLabel, rowRect.width / 4);
 
 				if(row.ButtonText("Rename".Translate()))
 					Find.WindowStack.Add(new Dialog_Name(newName => comp.RenameAlert(name, newName)));
 
 				if (row.ButtonText("Load".Translate()))
-					MainTabWindow_List.OpenWith(desc.Clone(map), true);
+					MainTabWindow_List.OpenWith(alert.desc.Clone(alert.desc.map), true);
 				
 				if (row.ButtonText("Delete".Translate()))
 					remove = name;
 
-				bool crit = desc.alertPriority == AlertPriority.Critical;
+				bool crit = alert.alertPriority == AlertPriority.Critical;
 				row.ToggleableIcon(ref crit, TexButton.PassionMajorIcon, "TD.CriticalAlert".Translate());
 				comp.SetPriority(name, crit ? AlertPriority.Critical : AlertPriority.Medium);
 
 				row.Label("TD.SecondsUntilShown".Translate());
-				int sec = desc.ticksToShowAlert / 60;
+				int sec = alert.ticksToShowAlert / 60;
 				string secStr = sec.ToString();
 				Rect textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref sec, ref secStr, 0, 999999);
@@ -99,10 +97,10 @@ namespace List_Everything
 				comp.SetTicks(name, sec * 60);
 
 				row.Label("TD.ShowWhen".Translate());
-				if (row.ButtonIcon(TexFor(desc.countComp)))
-					comp.SetComp(name, (CompareType)((int)(desc.countComp + 1) % 3));
+				if (row.ButtonIcon(TexFor(alert.countComp)))
+					comp.SetComp(name, (CompareType)((int)(alert.countComp + 1) % 3));
 
-				int count = desc.countToAlert;
+				int count = alert.countToAlert;
 				string countStr = count.ToString();
 				textRect = row.GetRect(64); textRect.height -= 4; textRect.width -= 4;
 				Widgets.TextFieldNumeric(textRect, ref count, ref countStr, 0, 999999);

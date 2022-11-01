@@ -50,6 +50,10 @@ namespace List_Everything
 		// After Cloning, they get DoResolveReference on a map
 		// Then filters can actually be used.
 
+		// Even if map is null and it's searching all maps,
+		// Even if it's a def that could've been loaded already.
+		// ResolveRef is when any named thing get resolved
+
 
 		// Any overridden ExposeData+Clone should copy data but not process much.
 		// If there's proessing to do, do it in ResolveReference. 
