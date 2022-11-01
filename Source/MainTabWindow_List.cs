@@ -256,7 +256,7 @@ namespace List_Everything
 
 			//Count text
 			Text.Anchor = TextAnchor.UpperRight;
-			Widgets.Label(listRect, LabelCountThings(findDesc.listedThings));
+			Widgets.Label(listRect, LabelCountThings(findDesc.ListedThings));
 			Text.Anchor = TextAnchor.UpperLeft;
 			listRect.yMin += 34;
 
@@ -292,7 +292,7 @@ namespace List_Everything
 			Widgets.BeginScrollView(listRect, ref scrollPositionList, viewRect);
 			Rect thingRect = new Rect(viewRect.x, 0, viewRect.width, 32);
 
-			foreach (Thing thing in findDesc.listedThings)
+			foreach (Thing thing in findDesc.ListedThings)
 			{
 				//Be smart about drawing only what's shown.
 				if (thingRect.y + 32 >= scrollPositionList.y)
@@ -305,16 +305,16 @@ namespace List_Everything
 			}
 
 			if (Event.current.type == EventType.Layout)
-				scrollViewHeightList = findDesc.listedThings.Count() * 34f;
+				scrollViewHeightList = findDesc.ListedThings.Count() * 34f;
 
 			//Select all 
 			if (selectAll)
-				foreach (Thing t in findDesc.listedThings)
+				foreach (Thing t in findDesc.ListedThings)
 					TrySelect.Select(t, false);
 
 			//Select all for double-click
 			if (selectAllDef != null)
-				foreach(Thing t in findDesc.listedThings)
+				foreach(Thing t in findDesc.ListedThings)
 					if (t.def == selectAllDef)
 						TrySelect.Select(t, false);
 

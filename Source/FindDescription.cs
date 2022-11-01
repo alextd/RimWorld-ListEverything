@@ -16,9 +16,13 @@ namespace List_Everything
 	public class FindDescription : IExposable, IFilterHolder
 	{
 		public string name = "TD.NewFindFilters".Translate();
-		public List<Thing> listedThings = new();
+
+		private List<Thing> listedThings = new();
+		public IEnumerable<Thing> ListedThings => listedThings;
+
 		private FilterHolder children;
 		public FilterHolder Children => children;
+
 		public FindDescription RootFindDesc => this;
 
 		public AlertPriority alertPriority;
@@ -27,6 +31,9 @@ namespace List_Everything
 		public CompareType countComp;
 
 		public bool allMaps = false;
+
+		//Certain filters only work on the current map, so the entire tree will only work on the current map
+		public bool CurrentMapOnly => Children.Check(f => f.CurrentMapOnly);
 
 		public FindDescription()
 		{
@@ -44,18 +51,27 @@ namespace List_Everything
 			}
 		}
 
-		public void RemakeList()
+		public void RemakeList(Map map = null)
 		{
 			listedThings.Clear();
-			if (allMaps)
-			{
-				foreach (Map map in Find.Maps)
-					listedThings.AddRange(Get(map));
-			}
-			else
-			{
+
+
+			// "Current map only" overrides other choices
+			if (CurrentMapOnly)
 				listedThings.AddRange(Get(Find.CurrentMap));
-			}
+
+			// Single map
+			else if (map != null)
+				listedThings.AddRange(Get(map));
+
+			// All maps
+			else if (allMaps)
+				foreach (Map m in Find.Maps)
+					listedThings.AddRange(Get(m));
+
+			// Assume you want the current map!
+			else
+				listedThings.AddRange(Get(Find.CurrentMap));
 		}
 
 
@@ -71,7 +87,7 @@ namespace List_Everything
 
 			Children.ExposeData();
 		}
-		public FindDescription Clone(Map map)
+		public FindDescription Clone(Map map, bool resolve = true)
 		{
 			FindDescription newDesc = new FindDescription()
 			{
@@ -84,14 +100,14 @@ namespace List_Everything
 				allMaps = allMaps
 			};
 			newDesc.children = children.Clone(newDesc);
-			if (map != null)
+			if (resolve)
 				foreach (var f in newDesc.Children.Filters)
 					f.DoResolveReference(map);
 
 			return newDesc;
 		}
 
-		public IEnumerable<Thing> Get(Map map)
+		private IEnumerable<Thing> Get(Map map)
 		{
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
 			switch (BaseType)

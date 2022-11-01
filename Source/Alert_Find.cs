@@ -12,7 +12,6 @@ namespace List_Everything
 	public class FindAlertData : IExposable
 	{
 		public Map map;
-		public bool currentMapOnly;
 		public string mapLabel;
 
 		private FindDescription _desc;
@@ -22,15 +21,11 @@ namespace List_Everything
 			set
 			{
 				_desc = value;
-				currentMapOnly = desc.Children.Check(f => f.CurrentMapOnly);
 
 				StringBuilder sb = new(" (");
 
-				if (currentMapOnly)
-				{
+				if (_desc.CurrentMapOnly)
 					sb.Append("Current Map");
-					map = null;
-				}
 				else if (map?.Parent.LabelCap is string label)
 					sb.Append(label);
 				else
@@ -57,7 +52,6 @@ namespace List_Everything
 			Scribe_Deep.Look(ref _desc, "desc");
 
 			//couuld re-regenate these.
-			Scribe_Values.Look(ref currentMapOnly, "currentMapOnly");
 			Scribe_Values.Look(ref mapLabel, "mapLabel");
 		}
 	}
@@ -119,7 +113,7 @@ namespace List_Everything
 			if (alertData == null || !enableAll)	//Alert_Find auto-added as an Alert subclass, exists but never displays anything
 				return AlertReport.Inactive;
 
-			List<Thing> things = FoundThings();
+			var things = FoundThings();
 			int count = things.Sum(t => t.stackCount);
 			bool active = false;
 			switch(alertData.desc.countComp)
@@ -157,32 +151,18 @@ namespace List_Everything
 		}
 
 		int currentTick;
-		List<Thing> foundThingsCache;
-		private List<Thing> FoundThings()
+		private IEnumerable<Thing> FoundThings()
 		{
-			if (Find.TickManager.TicksGame == currentTick && this.foundThingsCache != null)
-				return this.foundThingsCache;
-
-			foundThingsCache = new List<Thing>();
-			currentTick = Find.TickManager.TicksGame;
 			
-			//Current map only
-			if (alertData.currentMapOnly)
-				foreach (Thing t in alertData.desc.Get(Find.CurrentMap))
-					foundThingsCache.Add(t);
+			if (Find.TickManager.TicksGame == currentTick)
+				return alertData.desc.ListedThings;
 
-			//Single map
-			else if (alertData.map != null)
-				foreach (Thing t in alertData.desc.Get(alertData.map))
-					foundThingsCache.Add(t);
+			currentTick = Find.TickManager.TicksGame;
 
-			//All maps
-			else
-				foreach(Map m in Find.Maps)
-					foreach (Thing t in alertData.desc.Get(m))
-						foundThingsCache.Add(t);
+			alertData.desc.RemakeList(alertData.map);
 
-			return foundThingsCache;
+
+			return alertData.desc.ListedThings;
 		}
 
 		public override Rect DrawAt(float topY, bool minimized)

@@ -31,7 +31,7 @@ namespace List_Everything
 			{
 				desc.name = name;	//Remember for current copy
 
-				FindDescription newDesc = desc.Clone(null);
+				FindDescription newDesc = desc.Clone(null, false);
 				newDesc.name = name;
 				savedFilters[name] = newDesc;
 			}
