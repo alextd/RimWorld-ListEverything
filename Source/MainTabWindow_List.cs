@@ -55,11 +55,11 @@ namespace List_Everything
 
 		//Filters:
 
-		public static void OpenWith(FindDescription desc, bool locked = false)
+		public static void OpenWith(FindDescription desc, bool locked = false, bool remake = true)
 		{
 			MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 			tab.SetFindDesc(desc, locked);
-			tab.findDesc.RemakeList();
+			if(remake)	tab.findDesc.RemakeList();
 			Find.MainTabsRoot.SetCurrentTab(ListDefOf.TD_List);
 		}
 

@@ -34,7 +34,7 @@ namespace List_Everything
 
 				desc.Children.Add(filter);
 				filter.Focus();
-				MainTabWindow_List.OpenWith(desc, selectedFilter);
+				MainTabWindow_List.OpenWith(desc, locked: selectedFilter, remake: selectedFilter);
 			}
 		}
 
