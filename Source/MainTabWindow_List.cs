@@ -249,10 +249,22 @@ namespace List_Everything
 			//Continuous refresh
 			buttRect.x += 34;
 			ref bool refresh = ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh;
-			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.yellow : Color.white, Color.Lerp(Color.yellow,Color.white, 0.5f)))
+			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.green : Color.white, Color.Lerp(Color.green,Color.white, 0.5f)))
 				refresh = !refresh;
 			GUI.color = Color.white;//Because Widgets.ButtonImage doesn't set it back
-			TooltipHandler.TipRegion(buttRect, "TD.ContinuousRefreshAboutEverySecond".Translate());
+
+			// It's not updating while paused
+			if (Find.TickManager.Paused)
+			{
+				GUI.color = new Color(1, 1, 1, .5f);
+				GUI.DrawTexture(buttRect, TexButton.CancelTex);
+				GUI.color = Color.white;
+			}
+
+			TooltipHandler.TipRegion(buttRect,
+				Find.TickManager.Paused 
+				? "(Does not refresh when paused)"
+				: "TD.ContinuousRefreshAboutEverySecond".Translate());
 
 			//Count text
 			Text.Anchor = TextAnchor.UpperRight;
