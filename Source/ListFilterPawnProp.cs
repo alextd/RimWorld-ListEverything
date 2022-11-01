@@ -1006,5 +1006,20 @@ namespace List_Everything
 			return false;
 		}
 	}
-	
+
+
+	class ListFilterInspiration : ListFilterDropDown<InspirationDef>
+	{
+		protected override bool FilterApplies(Thing thing) =>
+			thing is Pawn p && 
+			(extraOption == 1 ?
+				p.InspirationDef != null :
+				sel == p.InspirationDef);
+
+		public override string NullOption() => "None".Translate();
+
+		public override int ExtraOptionsCount => 1;
+		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
+	}
+
 }
