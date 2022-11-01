@@ -315,10 +315,8 @@ namespace List_Everything
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (int stageI in SelectableStages)
-				{
-					int localI = OrderedIndex(stageI);
-					options.Add(new FloatMenuOptionAndRefresh(NameForStage(stageI), () => selectedAction(localI), this));
-				}
+					options.Add(new FloatMenuOptionAndRefresh(NameForStage(stageI), () => selectedAction(stageI), this));
+
 				DoFloatOptions(options);
 			}
 		}
