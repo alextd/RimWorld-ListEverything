@@ -76,8 +76,8 @@ namespace List_Everything
 
 		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
 		{
-			listing.Gap();
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
+			listing.Gap();
 
 			//Draw filters
 			bool changed = Children.DrawFilters(listing, locked);
