@@ -48,10 +48,10 @@ namespace List_Everything
 			if (row.ButtonText(GetPassionText(passion)))
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>{
-					new FloatMenuOption(GetPassionText(0), () => passion = 0),
-					new FloatMenuOption(GetPassionText(1), () => passion = 1),
-					new FloatMenuOption(GetPassionText(2), () => passion = 2),
-					new FloatMenuOption(GetPassionText(3), () => passion = 3),
+					new FloatMenuOptionAndRefresh(GetPassionText(0), () => passion = 0, this),
+					new FloatMenuOptionAndRefresh(GetPassionText(1), () => passion = 1, this),
+					new FloatMenuOptionAndRefresh(GetPassionText(2), () => passion = 2, this),
+					new FloatMenuOptionAndRefresh(GetPassionText(3), () => passion = 3, this),
 				};
 				DoFloatOptions(options);
 			}
@@ -122,7 +122,7 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 				foreach (TraitDegreeData deg in sel.degreeDatas)
 				{
-					options.Add(new FloatMenuOption(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree));
+					options.Add(new FloatMenuOptionAndRefresh(deg.label.CapitalizeFirst(), () => traitDegree = deg.degree, this));
 				}
 				DoFloatOptions(options);
 			}
@@ -317,7 +317,7 @@ namespace List_Everything
 				foreach (int stageI in SelectableStages)
 				{
 					int localI = OrderedIndex(stageI);
-					options.Add(new FloatMenuOption(NameForStage(stageI), () => selectedAction(localI)));
+					options.Add(new FloatMenuOptionAndRefresh(NameForStage(stageI), () => selectedAction(localI), this));
 				}
 				DoFloatOptions(options);
 			}
@@ -709,7 +709,7 @@ namespace List_Everything
 					{
 						foreach (Intelligence intel in Enum.GetValues(typeof(Intelligence)))
 						{
-							options.Add(new FloatMenuOption(intel.TranslateEnum(), () => intelligence = intel));
+							options.Add(new FloatMenuOptionAndRefresh(intel.TranslateEnum(), () => intelligence = intel, this));
 						}
 						DoFloatOptions(options);
 					}
@@ -735,7 +735,7 @@ namespace List_Everything
 					{
 						foreach (TrainabilityDef def in DefDatabase<TrainabilityDef>.AllDefsListForReading)
 						{
-							options.Add(new FloatMenuOption(def.LabelCap, () => trainability = def));
+							options.Add(new FloatMenuOptionAndRefresh(def.LabelCap, () => trainability = def, this));
 						}
 						DoFloatOptions(options);
 					}

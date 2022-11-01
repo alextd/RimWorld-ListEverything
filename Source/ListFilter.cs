@@ -186,19 +186,29 @@ namespace List_Everything
 			if (options.NullOrEmpty())
 				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
 			else
-			{
-				foreach (FloatMenuOption opt in options)
-				{
-					// append RootFindDesc.RemakeList to actions
-					Action action = opt.action;
-					opt.action = () => { action(); RootFindDesc.RemakeList(); };
-
-					Find.WindowStack.Add(new FloatMenu(options));
-				}
-			}
+				Find.WindowStack.Add(new FloatMenu(options));
 		}
 
 		public virtual bool Check(Predicate<ListFilter> check) => check(this);
+	}
+
+	class FloatMenuOptionAndRefresh : FloatMenuOption
+	{
+		ListFilter owner;
+		public FloatMenuOptionAndRefresh(string label, Action action, ListFilter f) : base(label, action)
+		{
+			owner = f;
+		}
+
+		public override bool DoGUI(Rect rect, bool colonistOrdering, FloatMenu floatMenu)
+		{
+			bool result = base.DoGUI(rect, colonistOrdering, floatMenu);
+
+			if (result)
+				owner.RootFindDesc.RemakeList();
+
+			return result;
+		}
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
@@ -475,7 +485,7 @@ namespace List_Everything
 		}
 
 		public virtual bool Ordered => false;
-		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
+		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.RawText : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
 		protected override string MakeRefName()
 		{
 			if (sel is Def def)
@@ -495,7 +505,7 @@ namespace List_Everything
 			bool changed = false;
 			if (HasSpecial)
 			{
-				// No label, selected option button on left, special on right
+				// Label, Selection option button on left, special on the remaining rect
 				WidgetRow row = new WidgetRow(rect.x, rect.y);
 				row.Label(def.LabelCap);
 				changeSelection = row.ButtonText(GetLabel());
@@ -514,13 +524,13 @@ namespace List_Everything
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
 
 				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => sel = default)); //can't null because T isn't bound as reftype
+					options.Add(new FloatMenuOptionAndRefresh(nullOption, () => sel = default, this)); //can't null because T isn't bound as reftype
 
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOption(NameFor(o), () => sel = o));
+					options.Add(new FloatMenuOptionAndRefresh(NameFor(o), () => sel = o, this));
 
 				foreach (int ex in ExtraOptions())
-					options.Add(new FloatMenuOption(NameForExtra(ex), () => extraOption = ex));
+					options.Add(new FloatMenuOptionAndRefresh(NameForExtra(ex), () => extraOption = ex, this));
 
 				DoFloatOptions(options);
 			}
