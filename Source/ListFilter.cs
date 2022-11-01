@@ -181,7 +181,7 @@ namespace List_Everything
 				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
 				: null;
 
-		public void DoFloatOptions(List<FloatMenuOption> options)
+		public static void DoFloatOptions(List<FloatMenuOption> options)
 		{
 			if (options.NullOrEmpty())
 				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
@@ -599,6 +599,41 @@ namespace List_Everything
 			ex == 1 ? "TD.Spoils".Translate() :
 			ex == 2 ? "TD.Refrigerated".Translate() : 
 			"TD.Frozen".Translate();
+	}
+
+	class ListFilterTimeToRot : ListFilter
+	{
+		IntRange ticksRange = new IntRange(0, GenDate.TicksPerDay * 10);
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref ticksRange, "ticksRange");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterTimeToRot clone = (ListFilterTimeToRot)base.Clone();
+			clone.ticksRange = ticksRange;
+			return clone;
+		}
+
+		protected override bool FilterApplies(Thing thing) =>
+			thing.TryGetComp<CompRottable>()?.TicksUntilRotAtCurrentTemp is int t && ticksRange.Includes(t);
+
+		public override bool DrawMain(Rect rect, bool locked)
+		{
+			base.DrawMain(rect, locked);
+
+			IntRange newRange = ticksRange;
+			Widgets.IntRange(rect.RightPart(0.5f), id, ref newRange, 0, GenDate.TicksPerDay * 20,
+				$"{ticksRange.min*1f/GenDate.TicksPerDay:0.0} - {ticksRange.max * 1f / GenDate.TicksPerDay:0.0}");
+			if (newRange != ticksRange)
+			{
+				ticksRange = newRange;
+				return true;
+			}
+			return false;
+		}
 	}
 
 	class ListFilterGrowth : ListFilterWithOption<FloatRange>
