@@ -138,7 +138,6 @@ namespace List_Everything
 				foreach (FindAlertData alert in savedAlerts.Values)
 				{
 					//alert's ExposeData set alert.desc.map Map. Still needs to be properly cloned though.
-					Log.Message($"alert.desc.Clone({alert.desc.map})");
 					alert.desc = alert.desc.Clone(alert.desc.map);
 					AlertByFind.AddAlert(alert, overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
 				}

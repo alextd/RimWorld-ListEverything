@@ -35,8 +35,6 @@ namespace List_Everything
 			Scribe_Values.Look(ref countToAlert, "countToAlert");
 			Scribe_Values.Look(ref countComp, "countComp");
 
-			Log.Message($"{Scribe.mode} : {desc.map}");
-
 			if (Scribe.mode == LoadSaveMode.Saving)
 				_scribeMap = desc.map;
 
