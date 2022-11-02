@@ -1120,6 +1120,11 @@ namespace List_Everything
 			return clone;
 		}
 
+		public override IEnumerable<StatDef> Options() => base.Options().Where(d => !d.alwaysHide);
+
+
+		public override string NameFor(StatDef def) => def.LabelForFullStatListCap;
+
 		protected override bool FilterApplies(Thing t) =>
 			valueRange.Includes(t.GetStatValue(sel, cacheStaleAfterTicks: 1));
 
