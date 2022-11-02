@@ -1093,4 +1093,47 @@ namespace List_Everything
 
 		public override bool CurrentMapOnly => true;
 	}
+
+	class ListFilterStat : ListFilterDropDown<StatDef>
+	{
+		FloatRange valueRange;
+
+		public ListFilterStat()
+		{
+			sel = StatDefOf.GeneralLaborSpeed;
+		}
+
+		protected override void PostSelected()
+		{
+			valueRange = new FloatRange(sel.minValue, sel.maxValue);
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref valueRange, "valueRange");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterStat clone = (ListFilterStat)base.Clone();
+			clone.valueRange = valueRange;
+			return clone;
+		}
+
+		protected override bool FilterApplies(Thing t) =>
+			valueRange.Includes(t.GetStatValue(sel, cacheStaleAfterTicks: 1));
+
+		public override bool DrawCustom(Rect rect, WidgetRow row)
+		{
+			FloatRange newRange = valueRange;
+			Widgets.FloatRange(rect, id, ref newRange, sel.minValue, sel.maxValue,
+				$"{valueRange.min.ToStringByStyle(sel.toStringStyle, sel.toStringNumberSense)} - {valueRange.max.ToStringByStyle(sel.toStringStyle, sel.toStringNumberSense)}");
+			if (newRange != valueRange)
+			{
+				valueRange = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
 }
