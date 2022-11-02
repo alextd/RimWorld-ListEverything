@@ -61,7 +61,7 @@ namespace List_Everything
 			children = new FilterHolder(this);
 		}
 
-		public FindDescription(Map m)
+		public FindDescription(Map m) : this()
 		{
 			map = m;
 		}
