@@ -9,61 +9,74 @@ using UnityEngine;
 
 namespace List_Everything
 {
-	public class ListFilterDef : Def
+	public class ListFilterDef : ListFilterSelectableDef
 	{
-		public ListFilterDef parent;
 		public Type filterClass;
-		public bool devOnly;
-		public List<ListFilterDef> subFilters = new List<ListFilterDef>();
 
-		public override void ResolveReferences()
+		public override IEnumerable<string> ConfigErrors()
 		{
-			base.ResolveReferences();
-			foreach (ListFilterDef def in DefDatabase<ListFilterDef>.AllDefs)
-				if (def.subFilters?.Contains(this) ?? false)
-					parent = def;
+			if (filterClass == null)
+				yield return "ListFilterDef needs filterClass set";
 		}
 	}
 
-	[DefOf]
-	public static class ListFilterMaker
+	public abstract partial class ListFilter : IExposable
 	{
-		public static ListFilterDef Filter_Name;
-		public static ListFilterDef Filter_Group;
-
-		public static ListFilter MakeFilter(ListFilterDef def, FindDescription owner)
-		{
-			ListFilter filter = (ListFilter)Activator.CreateInstance(def.filterClass);
-			filter.def = def;
-			filter.owner = owner;
-			filter.PostMake();
-			return filter;
-		}
-		public static ListFilter NameFilter(FindDescription owner) =>
-			ListFilterMaker.MakeFilter(ListFilterMaker.Filter_Name, owner);
-	}
-
-	[StaticConstructorOnStartup]
-	public abstract class ListFilter : IExposable
-	{
-		public int id;//For window focus purposes
-		public static int nextID = 1;
 		public ListFilterDef def;
-		public FindDescription owner;
 
-		protected ListFilter()	// Of course protected here doesn't make subclasses protected sooo ?
-		{
-			id = nextID++;
-		}
+		public IFilterHolder parent;
+		// parent is not set after ExposeData, that'll be done in Clone.
+		// parent is only used in UI or actual processing so as is made clear below,
+		// An ExpostData-loaded ListFilter needs to be cloned before actual use
+
+		public FindDescription RootFindDesc => parent.RootFindDesc;
+
+
+		protected int id; //For Widgets.draggingId purposes
+		private static int nextID = 1;
+		protected ListFilter() { id = nextID++; }
+
 
 		private bool enabled = true; //simply turn off but keep in list
-		public bool Enabled
+		public bool Enabled => enabled && DisableReason == null;
+
+		private bool include = true; //or exclude
+
+
+		// Okay, save/load. The basic gist here is:
+		// ExposeData saves any filter fine.
+		// ExposeData can load a filter for reference, but it's not yet usable.
+		// After ExposeData loading, filters need to be cloned
+		// After Cloning, they get DoResolveReference on a map
+		// Then filters can actually be used.
+
+		// Even if map is null and it's searching all maps,
+		// Even if it's a def that could've been loaded already.
+		// ResolveRef is when any named thing get resolved
+
+
+		// Any overridden ExposeData+Clone should copy data but not process much.
+		// If there's proessing to do, do it in ResolveReference. 
+		// e.g. ListFilterWithOption sets refName in Clone,
+		//  but sets the actual selection in ResolveReference
+
+		public virtual void ExposeData()
 		{
-			get => enabled && !ForceDisable();
+			Scribe_Defs.Look(ref def, "def");
+			Scribe_Values.Look(ref enabled, "enabled", true);
+			Scribe_Values.Look(ref include, "include", true);
 		}
-		public bool include = true; //or exclude
-		public bool topLevel = true;
-		public bool delete;
+
+		public virtual ListFilter Clone()
+		{
+			ListFilter clone = ListFilterMaker.MakeFilter(def);
+			clone.enabled = enabled;
+			clone.include = include;
+			//clone.parent = newHolder; //No - MakeFilter just set it.
+			return clone;
+		}
+		public virtual void DoResolveReference(Map map) { }
+
 
 		public IEnumerable<Thing> Apply(IEnumerable<Thing> list)
 		{
@@ -71,21 +84,43 @@ namespace List_Everything
 		}
 
 		//This can be problematic for minified things: We want the qualities of the inner things,
-		//But position/status of outer thing. So it just checks both -- but then something like 'no stuff' always applies. Oh well
-		public bool AppliesTo(Thing thing) => (FilterApplies(thing.GetInnerThing()) || FilterApplies(thing)) == include;
+		// but position/status of outer thing. So it just checks both -- but then something like 'no stuff' always applies. Oh well
+		public bool AppliesTo(Thing thing)
+		{
+			bool applies = FilterApplies(thing);
+			if (!applies && thing.GetInnerThing() is Thing innerThing && innerThing != thing)
+				applies = FilterApplies(innerThing);
 
-		public abstract bool FilterApplies(Thing thing);
+			return applies == include;
+		}
 
-		public bool Listing(Listing_StandardIndent listing)
+		protected abstract bool FilterApplies(Thing thing);
+
+
+		private bool shouldFocus;
+		public void Focus() => shouldFocus = true;
+		protected virtual void DoFocus() { }
+
+
+		// Seems to be GameFont.Small on load so we're good
+		public static float? incExcWidth;
+		public static float IncExcWidth =>
+			incExcWidth.HasValue ? incExcWidth.Value :
+			(incExcWidth = Mathf.Max(Text.CalcSize("TD.IncludeShort".Translate()).x, Text.CalcSize("TD.ExcludeShort".Translate()).x)).Value;
+
+		public (bool, bool) Listing(Listing_StandardIndent listing, bool locked)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
 
 			bool changed = false;
+			bool delete = false;
 
-			if (owner.locked)
+			if (locked)
 			{
-				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate());
+				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
+					IncExcWidth, "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
+				row.Gap(4);
 			}
 			else
 			{
@@ -104,7 +139,9 @@ namespace List_Everything
 				}
 
 				//Include/Exclude
-				if (row.ButtonText(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(), "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate()))
+				if (row.ButtonText(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
+					"TD.IncludeOrExcludeThingsMatchingThisFilter".Translate(),
+					fixedWidth: IncExcWidth))
 				{
 					include = !include;
 					changed = true;
@@ -114,74 +151,95 @@ namespace List_Everything
 
 			//Draw option row
 			rowRect.width -= (rowRect.xMax - row.FinalX);
-			changed |= DrawOption(rowRect);
-			changed |= DrawMore(listing);
-			if(shouldFocus)
+			changed |= DrawMain(rowRect, locked);
+			changed |= DrawUnder(listing, locked);
+			if (shouldFocus)
 			{
 				DoFocus();
 				shouldFocus = false;
 			}
-			if (ForceDisable())
+			if (DisableReason is string reason)
 			{
 				Widgets.DrawBoxSolid(rowRect, new Color(0.5f, 0, 0, 0.25f));
 
-				TooltipHandler.TipRegion(rowRect, "TD.ThisFilterDoesntWorkWithAllMaps".Translate());
+				TooltipHandler.TipRegion(rowRect, reason);
 			}
 
 			listing.Gap(listing.verticalSpacing);
-			return changed;
+			return (changed, delete);
 		}
 
 
-		public virtual bool DrawOption(Rect rect)
+		public virtual bool DrawMain(Rect rect, bool locked)
 		{
-			if(topLevel)	Widgets.Label(rect, def.LabelCap);
+			Widgets.Label(rect, def.LabelCap);
 			return false;
 		}
-		public virtual bool DrawMore(Listing_StandardIndent listing) => false;
+		protected virtual bool DrawUnder(Listing_StandardIndent listing, bool locked) => false;
 
-		private bool shouldFocus;
-		public void Focus() => shouldFocus = true;
-		protected virtual void DoFocus() { }
+		public virtual bool ValidForAllMaps => true && !CurrentMapOnly;
+		public virtual bool CurrentMapOnly => false;
 
-		public virtual void ExposeData() => BaseExposeData();
-		protected void BaseExposeData()
+		public virtual string DisableReason =>
+			!ValidForAllMaps && RootFindDesc.allMaps
+				? "TD.ThisFilterDoesntWorkWithAllMaps".Translate()
+				: null;
+
+		public static void DoFloatOptions(List<FloatMenuOption> options)
 		{
-			Scribe_Defs.Look(ref def, "def");
-			Scribe_Values.Look(ref enabled, "enabled", true);
-			Scribe_Values.Look(ref include, "include", true);
-			Scribe_Values.Look(ref topLevel, "topLevel", true);
+			if (options.NullOrEmpty())
+				Messages.Message("TD.ThereAreNoOptionsAvailablePerhapsYouShouldUncheckOnlyAvailableThings".Translate(), MessageTypeDefOf.RejectInput);
+			else
+				Find.WindowStack.Add(new FloatMenu(options));
 		}
 
-		//Clone, and resolve references if map specified
-		public virtual ListFilter Clone(Map map, FindDescription newOwner) =>
-			BaseClone(map, newOwner);
+		public virtual bool Check(Predicate<ListFilter> check) => check(this);
+	}
 
-		protected ListFilter BaseClone(Map map, FindDescription newOwner)
+	class FloatMenuOptionAndRefresh : FloatMenuOption
+	{
+		ListFilter owner;
+		public FloatMenuOptionAndRefresh(string label, Action action, ListFilter f) : base(label, action)
 		{
-			ListFilter clone = ListFilterMaker.MakeFilter(def, newOwner);
-			clone.enabled = enabled;
-			clone.include = include;
-			clone.topLevel = topLevel;
-			//clone.owner = newOwner; //No - MakeFilter sets it.
-			return clone;
+			owner = f;
 		}
 
-		public virtual void PostMake() { }
-		public virtual bool ValidForAllMaps => true;
-		public bool ForceDisable() => !ValidForAllMaps && owner.allMaps;
+		public override bool DoGUI(Rect rect, bool colonistOrdering, FloatMenu floatMenu)
+		{
+			bool result = base.DoGUI(rect, colonistOrdering, floatMenu);
+
+			if (result)
+				owner.RootFindDesc.RemakeList();
+
+			return result;
+		}
 	}
 
 	class ListFilterName : ListFilterWithOption<string>
 	{
-		public ListFilterName() => Sel = "";
+		public ListFilterName() => sel = "";
 
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			//thing.Label.Contains(sel, CaseInsensitiveComparer.DefaultInvariant);	//Contains doesn't accept comparer with strings. okay.
-			defaultSel || thing.Label.IndexOf(Sel, StringComparison.OrdinalIgnoreCase) >= 0;
+			sel == "" || thing.Label.IndexOf(sel, StringComparison.OrdinalIgnoreCase) >= 0;
 
-		public override bool DrawOption(Rect rect)
+		public static readonly string namedLabel = "Named: ";
+		public static float? namedLabelWidth;
+		public static float NamedLabelWidth =>
+			namedLabelWidth.HasValue ? namedLabelWidth.Value :
+			(namedLabelWidth = Text.CalcSize(namedLabel).x).Value;
+
+		public override bool DrawMain(Rect rect, bool locked)
 		{
+			Widgets.Label(rect, namedLabel);
+			rect.xMin += NamedLabelWidth;
+
+			if(locked)
+			{
+				Widgets.Label(rect, '"' + sel + '"');
+				return false;
+			}
+
 			if (GUI.GetNameOfFocusedControl() == $"LIST_FILTER_NAME_INPUT{id}" &&
 				Mouse.IsOver(rect) && Event.current.type == EventType.MouseDown && Event.current.button == 1)
 			{
@@ -190,16 +248,16 @@ namespace List_Everything
 			}
 
 			GUI.SetNextControlName($"LIST_FILTER_NAME_INPUT{id}");
-			string newStr = Widgets.TextField(rect.LeftPart(0.9f), Sel);
-			if (newStr != Sel)
+			string newStr = Widgets.TextField(rect.LeftPart(0.9f), sel);
+			if (newStr != sel)
 			{
-				Sel = newStr;
+				sel = newStr;
 				return true;
 			}
 			if (Widgets.ButtonImage(rect.RightPartPixels(rect.height), TexUI.RotLeftTex))
 			{
 				GUI.FocusControl("");
-				Sel = "";
+				sel = "";
 				return true;
 			}
 			return false;
@@ -214,12 +272,12 @@ namespace List_Everything
 	enum ForbiddenType{ Forbidden, Allowed, Forbiddable}
 	class ListFilterForbidden : ListFilterDropDown<ForbiddenType>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			bool forbiddable = thing.def.HasComp(typeof(CompForbiddable)) && thing.Spawned;
 			if (!forbiddable) return false;
 			bool forbidden = thing.IsForbidden(Faction.OfPlayer);
-			switch (Sel)
+			switch (sel)
 			{
 				case ForbiddenType.Forbidden: return forbidden;
 				case ForbiddenType.Allowed: return !forbidden;
@@ -231,192 +289,295 @@ namespace List_Everything
 	//automated ExposeData + Clone 
 	public abstract class ListFilterWithOption<T> : ListFilter
 	{
-		private T sel;//selection
-		protected bool defaultSel = true;
+		// selection
+		private T _sel;
+		protected string refName;// if UsesRefName,  = SaveLoadXmlConstants.IsNullAttributeName;
+		private int _extraOption; //0 meaning use _sel, what 1+ means is defined in subclass
 
-		protected T Sel
+		// A subclass with extra fields needs to override ExposeData and Clone to copy them
+
+		public string selectionError; // Probably set on load when selection is invalid (missing mod?)
+		public override string DisableReason => base.DisableReason ?? selectionError;
+
+		// would like this to be T const * sel;
+		public T sel
 		{
-			get => sel;
+			get => _sel;
 			set
 			{
-				sel = value;
-				defaultSel = sel == null || sel.Equals(default(T));
+				_sel = value;
+				_extraOption = 0;
+				selectionError = null;
+				if (UsesRefName) refName = MakeRefName();
+				PostSelected();
 			}
 		}
 
-		//References must be saved by name in case of T: ILoadReferenceable, since they not game specific
-		//(probably could be in ListFilter)
-		//ExposeData saves refName instead of sel
-		//Only saved lists get ExposeData called, so only saved lists have refName set
-		//(The in-game list will NOT have this set; The saved lists will have this set)
-		//Saving the list will generate refName from the current filter on Clone(null) via MakeRefName()
-		//Loading will use refName from the saved list to resolve references in Clone(map) via ResolveReference()
-		//Cloning between two reference types makes the ref from current map and resolves on the new map
-		string refName;
+		// A subclass should often set sel in the constructor
+		// which will call the property setter above
+		// If the default is null, and there's no PostSelected to do,
+		// then it's fine to skip defining a constructor
+		protected ListFilterWithOption()
+		{
+			if (UsesRefName)
+				refName = SaveLoadXmlConstants.IsNullAttributeName;
+		}
+		protected virtual void PostSelected()
+		{
+			// A subclass with fields whose validity depends on the selection should override this
+			// Most common usage is to set a default value that is valid for the selection
+			// e.g. the skill filter has a range 0-20, but that's valid for all skills, so no need to reset here
+			// e.g. the hediff filter has a range too, but that depends on the selected hediff, so the selected range needs to be set here
+		}
+
+		// This method works double duty:
+		// Both telling if Sel can be set to null, and the string to show for null selection
+		public virtual string NullOption() => null;
+
+		protected int extraOption
+		{
+			get => _extraOption;
+			set
+			{
+				_extraOption = value;
+				_sel = default;
+				selectionError = null;
+				refName = null;
+			}
+		}
+
+		//Okay, so, references.
+		//A simple filter e.g. string search is usable everywhere.
+		//In-game, as an alert, as a saved filter to load in, saved to file to load into another game, etc.
+		//ExposeData and Clone can just copy T sel, because a string is the same everywhere.
+		//But a filter that references in-game things can't be used universally
+		//When such a filter is run in-game, it does of course set 'sel' and reference it like normal
+		//But when such a filter is saved, it cannot be bound to an instance
+		//So ExposeData saves and loads 'string refName' instead of the 'T sel'
+		//When showing that filter as an option to load, that's fine, sel isn't set but refName is.
+		//When the filter is copied, loaded or saved in any way, it is cloned with Clone(), which will copy refName but not sel
+		//When loading or copying into a map, whoever called Clone will also call ResolveReference(Map) to bind to that map
+		//(even if a copy ends up referencing the same thing, the reference is re-resolved for simplicity's sake)
+
+		//TL;DR there are two 'modes' a ListFilter can be: active or inactive.
+		//When active, it's bound to a map, ready to do actual filtering based on sel
+		//When inactive, it's in storage - it only knows the name of sel
+		//When loading an inactive filter, the refname+map are used to find and set sel
+		//When saving an active filter, just refname is saved
+		//When copinying an active filter, refname is copied and sel is found again
+		//(Of course if you don't use refname, the filter just copies sel around)
+
+		protected readonly static bool IsDef = typeof(Def).IsAssignableFrom(typeof(T));
+		protected readonly static bool IsRef = typeof(ILoadReferenceable).IsAssignableFrom(typeof(T));
+		protected readonly static bool IsEnum = typeof(T).IsEnum;
+
+		public virtual bool UsesRefName => IsRef || IsDef;
+		protected virtual string MakeRefName() => sel?.ToString() ?? SaveLoadXmlConstants.IsNullAttributeName;
+
+		// Subclasses where UsesRefName==true need to implement ResolveReference()
+		// (unless it's just a Def)
+		// return matching object based on refName (refName will not be "null")
+		// returning null produces a selection error and the filter will be disabled
+		protected virtual T ResolveReference(Map map)
+		{
+			if (IsDef)
+			{
+				//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
+				//_sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
+
+				//DefFromNodeUnsafe also doesn't work since it logs errors - so here's custom code copied to remove the logging:
+
+				return (T)(object)GenDefDatabase.GetDefSilentFail(typeof(T), refName, false);
+			}
+
+			throw new NotImplementedException();
+		}
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
 
-			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
-			if (typeof(Def).IsAssignableFrom(typeof(T)))
+			Scribe_Values.Look(ref _extraOption, "ex");
+			if (_extraOption > 0)
 			{
-				//From Scribe_Collections:
-				if (Scribe.mode == LoadSaveMode.Saving)
-				{
-					Def temp = sel as Def;
-					Scribe_Defs.Look(ref temp, "sel");
-				}
-				else if (Scribe.mode == LoadSaveMode.LoadingVars)
-				{
-					//Scribe_Defs.Look doesn't work since it needs the subtype of "Def" and T isn't boxed to be a Def so DefFromNodeUnsafe instead
-					sel = ScribeExtractor.DefFromNodeUnsafe<T>(Scribe.loader.curXmlParent["sel"]);
-				}
+				if (Scribe.mode == LoadSaveMode.LoadingVars)
+					extraOption = _extraOption;	// property setter to set other fields null
+
+				// No need to worry about sel or refname, we're done!
+				return;
 			}
-			else if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
+
+			//Oh Jesus T can be anything but Scribe doesn't like that much flexibility so here we are:
+			//(avoid using property 'sel' so it doesn't MakeRefName())
+			if (UsesRefName)
 			{
-				//Of course between games you can't get references so just save by name should be good enough.
-				//objects saved here need to be copies made with Clone(null)
-				Scribe_Values.Look(ref refName, "refName"); //And Clone will handle references
+				// Of course between games you can't get references so just save by name should be good enough
+				// (even if it's from the same game, it can still resolve the reference all the same)
+
+				// Saving a null refName saves "IsNull"
+				Scribe_Values.Look(ref refName, "refName");
+
+				// ResolveReferences() will be called when loaded onto a map for actual use
 			}
 			else if (typeof(IExposable).IsAssignableFrom(typeof(T)))
 			{
-				Scribe_Deep.Look(ref sel, "sel");
+				//This might just be to handle ListFilterSelection
+				Scribe_Deep.Look(ref _sel, "sel");
 			}
 			else
-				Scribe_Values.Look(ref sel, "sel");
-
-			if(Scribe.mode == LoadSaveMode.PostLoadInit)
-				defaultSel = sel == null || sel.Equals(default(T));	//since we cant work with 'Sel = ...' with refs
+				Scribe_Values.Look(ref _sel, "sel");
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone()
 		{
-			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone(map, newOwner);
+			ListFilterWithOption<T> clone = (ListFilterWithOption<T>)base.Clone();
 
-			if (typeof(ILoadReferenceable).IsAssignableFrom(typeof(T)))
-			{
-				if (map == null)//SAVING: I don't have refName, but I make it and tell saved clone
-				{
-					clone.refName = Sel == null ? "null" : MakeRefName();
-				}
-				else //LOADING: use my refName to resolve loaded clone's reference
-				{
-					if (refName == "null")
-					{
-						clone.Sel = default(T);
-					}
-					{
-						if (refName == null)
-							clone.ResolveReference(MakeRefName(), map);//Cloning from ref to ref
-						else
-							clone.ResolveReference(refName, map);
+			clone.extraOption = extraOption;
+			if (extraOption > 0)
+				return clone;
 
-						if (clone.Sel == null)
-							Messages.Message("TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
-					}
-				}
-			}
+			if (UsesRefName)
+				clone.refName = refName;
 			else
-				clone.Sel = Sel;
+				clone._sel = _sel;	//todo handle if sel needs to be deep-copied. Perhaps sel should be T const * sel...
 
 			return clone;
 		}
-		public virtual string MakeRefName() => Sel.ToString();
-		public virtual void ResolveReference(string refName, Map map) => throw new NotImplementedException();
+		public override void DoResolveReference(Map map)
+		{
+			if (!UsesRefName || extraOption > 0) return;
+
+			if (refName == SaveLoadXmlConstants.IsNullAttributeName)
+			{
+				_sel = default; //can't use null because generic T isn't bound as reftype
+			}
+			else
+			{
+				_sel = ResolveReference(map);
+
+				if (_sel == null)
+				{
+					selectionError = $"Missing {def.LabelCap}: {refName}?";
+					Messages.Message("TD.TriedToLoad0FilterNamed1ButCouldNotBeFound".Translate(def.LabelCap, refName), MessageTypeDefOf.RejectInput);
+				}
+			}
+		}
 	}
 
-	public enum DropDownDrawStyle {NameAndOptions, OptionsAndDrawSpecial}
 	abstract class ListFilterDropDown<T> : ListFilterWithOption<T>
 	{
-		protected DropDownDrawStyle drawStyle;
-		public int extraOption; //0 being use T, 1+ defined in subclass
+		private string GetLabel()
+		{
+			if (selectionError != null)
+				return refName;
 
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look(ref extraOption, "ex");
-		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
-		{
-			ListFilterDropDown<T> clone =
-				extraOption == 0 ?
-				(ListFilterDropDown<T>)base.Clone(map, newOwner) ://ListFilterwithOption handles sel, and refName for sel if needed
-				(ListFilterDropDown<T>)BaseClone(map, newOwner);  //This is not needed with extraOption, so bypass ListFilterWithOption<T> to ListFilter
-			clone.extraOption = extraOption;
-			return clone;
+			if (extraOption > 0)
+				return NameForExtra(extraOption);
+
+			if (sel != null)
+				return NameFor(sel);
+
+			return NullOption() ?? "??Null selection??";
 		}
 
-		private string GetLabel() => extraOption > 0 ? NameForExtra(extraOption): Sel != null ? NameFor(Sel) : NullOption();
-		public virtual string NullOption() => null;
 		public virtual IEnumerable<T> Options()
 		{
-			if (typeof(T).IsEnum)
+			if (IsEnum)
 				return Enum.GetValues(typeof(T)).OfType<T>();
-			if (typeof(Def).IsAssignableFrom(typeof(T)))
+			if (IsDef)
 				return GenDefDatabase.GetAllDefsInDatabaseForDef(typeof(T)).Cast<T>();
 			throw new NotImplementedException();
 		}
+
 		public virtual bool Ordered => false;
-		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.Resolve() : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
-		public override string MakeRefName() => NameFor(Sel);	//refname should not apply for defs or enums so this'll be ^^ o.ToString()
-		protected virtual void Callback(T o) { Sel = o; extraOption = 0; }
+		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.RawText : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
+		protected override string MakeRefName()
+		{
+			if (sel is Def def)
+				return def.defName;
+
+			// Many subclasses will just use NameFor, so do it here.
+			return sel != null ? NameFor(sel) : base.MakeRefName();
+		}
 
 		public virtual int ExtraOptionsCount => 0;
 		private IEnumerable<int> ExtraOptions() => Enumerable.Range(1, ExtraOptionsCount);
 		public virtual string NameForExtra(int ex) => throw new NotImplementedException();
-		private void CallbackExtra(int ex) => extraOption = ex;
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changeSelection = false;
 			bool changed = false;
-			switch(drawStyle)
+			if (HasSpecial)
 			{
-				case DropDownDrawStyle.NameAndOptions:
-					base.DrawOption(rect);
-					changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
-					break;
-				case DropDownDrawStyle.OptionsAndDrawSpecial:
-					WidgetRow row = new WidgetRow(rect.x, rect.y);
-					changeSelection = row.ButtonText(GetLabel());
+				// Label, Selection option button on left, special on the remaining rect
+				WidgetRow row = new WidgetRow(rect.x, rect.y);
+				row.Label(def.LabelCap);
+				changeSelection = row.ButtonText(GetLabel());
 
-					rect.xMin = row.FinalX;
-					changed = DrawSpecial(rect, row);
-					break;
+				rect.xMin = row.FinalX;
+				changed = DrawCustom(rect, row);
+			}
+			else
+			{
+				//Just the label on left, and selected option button on right
+				base.DrawMain(rect, locked);
+				changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
 			}
 			if (changeSelection)
 			{
 				List<FloatMenuOption> options = new List<FloatMenuOption>();
-				if (NullOption() is string nullOption)
-					options.Add(new FloatMenuOption(nullOption, () => Callback(default(T))));
-				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOption(NameFor(o), () => Callback(o)));
-				foreach (int ex in ExtraOptions())
-					options.Add(new FloatMenuOption(NameForExtra(ex), () => CallbackExtra(ex)));
-				MainTabWindow_List.DoFloatMenu(options);
 
-				changed = true;
+				if (NullOption() is string nullOption)
+					options.Add(new FloatMenuOptionAndRefresh(nullOption, () => sel = default, this)); //can't null because T isn't bound as reftype
+
+				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
+					options.Add(new FloatMenuOptionAndRefresh(NameFor(o), () => sel = o, this));
+
+				foreach (int ex in ExtraOptions())
+					options.Add(new FloatMenuOptionAndRefresh(NameForExtra(ex), () => extraOption = ex, this));
+
+				DoFloatOptions(options);
 			}
 			return changed;
 		}
 
-		//Use either rect or WidgetRow
-		public virtual bool DrawSpecial(Rect rect, WidgetRow row) => throw new NotImplementedException();
+		// Subclass can override DrawCustom to draw anything custom
+		// (otherwise it's just label and option selection button)
+		// Use either rect or WidgetRow in the implementation
+		public virtual bool DrawCustom(Rect rect, WidgetRow row) => throw new NotImplementedException();
+
+		// Auto detection of subclasses that use DrawCustom:
+		private static readonly HashSet<Type> specialDrawers = null;
+		private bool HasSpecial => specialDrawers?.Contains(GetType()) ?? false;
+		static ListFilterDropDown()//<T>	//Remember there's a specialDrawers for each <T> but functionally that doesn't change anything
+		{
+			Type baseType = typeof(ListFilterDropDown<T>);
+			foreach (Type subclass in baseType.AllSubclassesNonAbstract())
+			{
+				if (subclass.GetMethod(nameof(DrawCustom)).DeclaringType != baseType)
+				{
+					if(specialDrawers == null)
+						specialDrawers = new HashSet<Type>();
+
+					specialDrawers.Add(subclass);
+				}
+			}
+		}
 	}
 
 	class ListFilterDesignation : ListFilterDropDown<DesignationDef>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			Sel != null ?
-			(Sel.targetType == TargetType.Thing ? thing.MapHeld.designationManager.DesignationOn(thing, Sel) != null :
-			thing.MapHeld.designationManager.DesignationAt(thing.PositionHeld, Sel) != null) :
+		protected override bool FilterApplies(Thing thing) =>
+			sel != null ?
+			(sel.targetType == TargetType.Thing ? thing.MapHeld.designationManager.DesignationOn(thing, sel) != null :
+			thing.MapHeld.designationManager.DesignationAt(thing.PositionHeld, sel) != null) :
 			(thing.MapHeld.designationManager.DesignationOn(thing) != null ||
 			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<DesignationDef> Options() =>
-			ContentsUtility.onlyAvailable ?
-				Find.CurrentMap.designationManager.allDesignations.Select(d => d.def).Distinct() :
+			ContentsUtility.OnlyAvailable ?
+				Find.CurrentMap.designationManager.AllDesignations.Select(d => d.def).Distinct() :
 				base.Options();
 
 		public override bool Ordered => true;
@@ -425,14 +586,14 @@ namespace List_Everything
 
 	class ListFilterFreshness : ListFilterDropDown<RotStage>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			CompRottable rot = thing.TryGetComp<CompRottable>();
 			return 
 				extraOption == 1 ? rot != null : 
 				extraOption == 2 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) is float r && r>0 && r<1 : 
 				extraOption == 3 ? GenTemperature.RotRateAtTemperature(thing.AmbientTemperature) <= 0 : 
-				rot?.Stage == Sel;
+				rot?.Stage == sel;
 		}
 
 		public override string NameFor(RotStage o) => ("RotState"+o.ToString()).Translate();
@@ -444,20 +605,55 @@ namespace List_Everything
 			"TD.Frozen".Translate();
 	}
 
+	class ListFilterTimeToRot : ListFilter
+	{
+		IntRange ticksRange = new IntRange(0, GenDate.TicksPerDay * 10);
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref ticksRange, "ticksRange");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterTimeToRot clone = (ListFilterTimeToRot)base.Clone();
+			clone.ticksRange = ticksRange;
+			return clone;
+		}
+
+		protected override bool FilterApplies(Thing thing) =>
+			thing.TryGetComp<CompRottable>()?.TicksUntilRotAtCurrentTemp is int t && ticksRange.Includes(t);
+
+		public override bool DrawMain(Rect rect, bool locked)
+		{
+			base.DrawMain(rect, locked);
+
+			IntRange newRange = ticksRange;
+			Widgets.IntRange(rect.RightPart(0.5f), id, ref newRange, 0, GenDate.TicksPerDay * 20,
+				$"{ticksRange.min*1f/GenDate.TicksPerDay:0.0} - {ticksRange.max * 1f / GenDate.TicksPerDay:0.0}");
+			if (newRange != ticksRange)
+			{
+				ticksRange = newRange;
+				return true;
+			}
+			return false;
+		}
+	}
+
 	class ListFilterGrowth : ListFilterWithOption<FloatRange>
 	{
-		public ListFilterGrowth() => Sel = FloatRange.ZeroToOne;
+		public ListFilterGrowth() => sel = FloatRange.ZeroToOne;
 
-		public override bool FilterApplies(Thing thing) =>
-			thing is Plant p && Sel.Includes(p.Growth);
-		public override bool DrawOption(Rect rect)
+		protected override bool FilterApplies(Thing thing) =>
+			thing is Plant p && sel.Includes(p.Growth);
+		public override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawOption(rect);
-			FloatRange newRange = Sel;
+			base.DrawMain(rect, locked);
+			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (Sel != newRange)
+			if (sel != newRange)
 			{
-				Sel = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
@@ -466,26 +662,32 @@ namespace List_Everything
 
 	class ListFilterPlantHarvest : ListFilter
 	{
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Plant plant && plant.HarvestableNow;
+	}
+
+	class ListFilterPlantCrop : ListFilter
+	{
+		protected override bool FilterApplies(Thing thing) =>
+			thing is Plant plant && plant.IsCrop;
 	}
 
 	class ListFilterPlantDies : ListFilter
 	{
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing is Plant plant && (plant.def.plant?.dieIfLeafless ?? false);
 	}
 
 	class ListFilterClassType : ListFilterDropDown<Type>
 	{
-		public ListFilterClassType() => Sel = typeof(Thing);
+		public ListFilterClassType() => sel = typeof(Thing);
 
-		public override bool FilterApplies(Thing thing) =>
-			Sel.IsAssignableFrom(thing.GetType());
+		protected override bool FilterApplies(Thing thing) =>
+			sel.IsAssignableFrom(thing.GetType());
 
 		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
 		public override IEnumerable<Type> Options() =>
-			ContentsUtility.onlyAvailable ?
+			ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(t => t.GetType()).OrderBy(NameFor).ToList() : 
 				types;
 	}
@@ -494,12 +696,12 @@ namespace List_Everything
 	{
 		public ListFilterFaction() => extraOption = 1;
 
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			extraOption == 1 ? thing.Faction == Faction.OfPlayer :
 			extraOption == 2 ? thing.Faction == Faction.OfMechanoids :
 			extraOption == 3 ? thing.Faction == Faction.OfInsects :
 			extraOption == 4 ? thing.Faction == null || thing.Faction.def.hidden :
-			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == Sel);
+			(thing.Faction is Faction fac && fac != Faction.OfPlayer && fac.PlayerRelationKind == sel);
 
 		public override string NameFor(FactionRelationKind o) => o.GetLabel();
 
@@ -513,13 +715,13 @@ namespace List_Everything
 	
 	class ListFilterItemCategory : ListFilterDropDown<ThingCategoryDef>
 	{
-		public ListFilterItemCategory() => Sel = ThingCategoryDefOf.Root;
+		public ListFilterItemCategory() => sel = ThingCategoryDefOf.Root;
 
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.IsWithinCategory(Sel);
+		protected override bool FilterApplies(Thing thing) =>
+			thing.def.IsWithinCategory(sel);
 
 		public override IEnumerable<ThingCategoryDef> Options() =>
-			ContentsUtility.onlyAvailable ?
+			ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(ThingCategoryDefsOfThing) :
 				base.Options();
 
@@ -538,10 +740,10 @@ namespace List_Everything
 
 	class ListFilterSpecialFilter : ListFilterDropDown<SpecialThingFilterDef>
 	{
-		public ListFilterSpecialFilter() => Sel = SpecialThingFilterDefOf.AllowFresh;
+		public ListFilterSpecialFilter() => sel = SpecialThingFilterDefOf.AllowFresh;
 
-		public override bool FilterApplies(Thing thing) =>
-			Sel.Worker.Matches(thing);
+		protected override bool FilterApplies(Thing thing) =>
+			sel.Worker.Matches(thing);
 	}
 
 	enum ListCategory
@@ -556,9 +758,9 @@ namespace List_Everything
 	}
 	class ListFilterCategory : ListFilterDropDown<ListCategory>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
-			switch(Sel)
+			switch(sel)
 			{
 				case ListCategory.Person: return thing is Pawn pawn && !pawn.NonHumanlikeOrWildMan();
 				case ListCategory.Animal: return thing is Pawn animal && animal.NonHumanlikeOrWildMan();
@@ -575,9 +777,9 @@ namespace List_Everything
 	enum MineableType { Resource, Rock, All }
 	class ListFilterMineable : ListFilterDropDown<MineableType>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
-			switch (Sel)
+			switch (sel)
 			{
 				case MineableType.Resource: return thing.def.building?.isResourceRock ?? false;
 				case MineableType.Rock: return (thing.def.building?.isNaturalRock ?? false) && (!thing.def.building?.isResourceRock ?? true);
@@ -589,26 +791,26 @@ namespace List_Everything
 
 	class ListFilterHP : ListFilterWithOption<FloatRange>
 	{
-		public ListFilterHP() => Sel = FloatRange.ZeroToOne;
+		public ListFilterHP() => sel = FloatRange.ZeroToOne;
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			float? pct = null;
 			if (thing is Pawn pawn)
 				pct = pawn.health.summaryHealth.SummaryHealthPercent;
 			if (thing.def.useHitPoints)
 				pct = (float)thing.HitPoints / thing.MaxHitPoints;
-			return pct != null && Sel.Includes(pct.Value);
+			return pct != null && sel.Includes(pct.Value);
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawOption(rect);
-			FloatRange newRange = Sel;
+			base.DrawMain(rect, locked);
+			FloatRange newRange = sel;
 			Widgets.FloatRange(rect.RightPart(0.5f), id, ref newRange, valueStyle: ToStringStyle.PercentZero);
-			if (Sel != newRange)
+			if (sel != newRange)
 			{
-				Sel = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
@@ -617,20 +819,20 @@ namespace List_Everything
 
 	class ListFilterQuality : ListFilterWithOption<QualityRange>
 	{
-		public ListFilterQuality() => Sel = QualityRange.All;
+		public ListFilterQuality() => sel = QualityRange.All;
 
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			thing.TryGetQuality(out QualityCategory qc) &&
-			Sel.Includes(qc);
+			sel.Includes(qc);
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
-			base.DrawOption(rect);
-			QualityRange newRange = Sel;
+			base.DrawMain(rect, locked);
+			QualityRange newRange = sel;
 			Widgets.QualityRange(rect.RightPart(0.5f), id, ref newRange);
-			if (Sel != newRange)
+			if (sel != newRange)
 			{
-				Sel = newRange;
+				sel = newRange;
 				return true;
 			}
 			return false;
@@ -639,19 +841,19 @@ namespace List_Everything
 
 	class ListFilterStuff : ListFilterDropDown<ThingDef>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			ThingDef stuff = thing is IConstructible c ? c.EntityToBuildStuff() : thing.Stuff;
 			return 
 				extraOption == 1 ? !thing.def.MadeFromStuff :
 				extraOption > 1 ?	stuff?.stuffProps?.categories?.Contains(DefDatabase<StuffCategoryDef>.AllDefsListForReading[extraOption - 2]) ?? false :
-				Sel == null ? stuff != null :
-				stuff == Sel;
+				sel == null ? stuff != null :
+				stuff == sel;
 		}
-
+		
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<ThingDef> Options() => 
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(t => t.Stuff)
 				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
 		
@@ -663,26 +865,26 @@ namespace List_Everything
 
 	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
 	{
-		public override bool FilterApplies(Thing thing) =>
-			thing.def.drawerType == Sel;
+		protected override bool FilterApplies(Thing thing) =>
+			thing.def.drawerType == sel;
 	}
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Pawn pawn = thing as Pawn;
 			if (pawn == null) return false;
 
 			return
 				extraOption == 1 ? pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
-				Sel == null ? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
-				pawn.RaceProps.body.GetPartsWithDef(Sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
+				sel == null ? !pawn.health.hediffSet.GetMissingPartsCommonAncestors().NullOrEmpty() :
+				pawn.RaceProps.body.GetPartsWithDef(sel).Any(r => pawn.health.hediffSet.PartIsMissing(r));
 		}
 
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<BodyPartDef> Options() =>
-			ContentsUtility.onlyAvailable
+			ContentsUtility.OnlyAvailable
 				? ContentsUtility.AvailableInGame(
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
 				: base.Options();
@@ -695,14 +897,17 @@ namespace List_Everything
 	enum BaseAreas { Home, BuildRoof, NoRoof, SnowClear };
 	class ListFilterArea : ListFilterDropDown<Area>
 	{
-		public ListFilterArea() => extraOption = 1;
+		public ListFilterArea()
+		{
+			extraOption = 1;
+		}
 
-		public override void ResolveReference(string refName, Map map) =>
-			Sel = map.areaManager.GetLabeled(refName);
+		protected override Area ResolveReference(Map map) =>
+			map.areaManager.GetLabeled(refName);
 
-		public override bool ValidForAllMaps => extraOption > 0 || Sel == null;
+		public override bool ValidForAllMaps => extraOption > 0 || sel == null;
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Map map = thing.MapHeld;
 			IntVec3 pos = thing.PositionHeld;
@@ -711,7 +916,7 @@ namespace List_Everything
 				return pos.Roofed(map);
 
 			if(extraOption == 0)
-				return Sel != null ? Sel[pos] :
+				return sel != null ? sel[pos] :
 				map.areaManager.AllAreas.Any(a => a[pos]);
 
 			switch((BaseAreas)(extraOption - 1))
@@ -745,19 +950,19 @@ namespace List_Everything
 
 	class ListFilterZone : ListFilterDropDown<Zone>
 	{
-		public override void ResolveReference(string refName, Map map) =>
-			Sel = map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
+		protected override Zone ResolveReference(Map map) =>
+			map.zoneManager.AllZones.FirstOrDefault(z => z.label == refName);
 
-		public override bool ValidForAllMaps => extraOption != 0 || Sel == null;
+		public override bool ValidForAllMaps => extraOption != 0 || sel == null;
 
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			IntVec3 pos = thing.PositionHeld;
 			Zone zoneAtPos = thing.MapHeld.zoneManager.ZoneAt(pos);
 			return 
 				extraOption == 1 ? zoneAtPos is Zone_Stockpile :
 				extraOption == 2 ? zoneAtPos is Zone_Growing :
-				Sel != null ? zoneAtPos == Sel :
+				sel != null ? zoneAtPos == sel :
 				zoneAtPos != null;
 		}
 
@@ -770,18 +975,18 @@ namespace List_Everything
 
 	class ListFilterDeterioration : ListFilter
 	{
-		public override bool FilterApplies(Thing thing) =>
+		protected override bool FilterApplies(Thing thing) =>
 			SteadyEnvironmentEffects.FinalDeteriorationRate(thing) >= 0.001f;
 	}
 
 	enum DoorOpenFilter { Open, Close, HoldOpen, BlockedOpenMomentary }
 	class ListFilterDoorOpen : ListFilterDropDown<DoorOpenFilter>
 	{
-		public override bool FilterApplies(Thing thing)
+		protected override bool FilterApplies(Thing thing)
 		{
 			Building_Door door = thing as Building_Door;
 			if (door == null) return false;
-			switch (Sel)
+			switch (sel)
 			{
 				case DoorOpenFilter.Open: return door.Open;
 				case DoorOpenFilter.Close: return !door.Open;
@@ -805,40 +1010,87 @@ namespace List_Everything
 
 	class ListFilterThingDef : ListFilterDropDown<ThingDef>
 	{
-		public ListFilterThingDef() => Sel = ThingDefOf.WoodLog;
+		public IntRange stackRange;
+		public ListFilterThingDef()
+		{
+			sel = ThingDefOf.WoodLog;
+		}
+		protected override void PostSelected()
+		{
+			stackRange.min = 1;
+			stackRange.max = sel.stackLimit;
+		}
 
-		public override bool FilterApplies(Thing thing) =>
-			Sel == thing.def;
-		
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref stackRange, "stackRange");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterThingDef clone = (ListFilterThingDef)base.Clone();
+			clone.stackRange = stackRange;
+			return clone;
+		}
+
+
+		protected override bool FilterApplies(Thing thing) =>
+			sel == thing.def &&
+			(sel.stackLimit <= 1 || stackRange.Includes(thing.stackCount));
+
 		public override IEnumerable<ThingDef> Options() =>
-			(ContentsUtility.onlyAvailable ?
+			(ContentsUtility.OnlyAvailable ?
 				ContentsUtility.AvailableInGame(t => t.def) :
 				base.Options())
 			.Where(def => FindDescription.ValidDef(def));
 
 		public override bool Ordered => true;
+
+		public override bool DrawCustom(Rect rect, WidgetRow row)
+		{
+			if (sel.stackLimit > 1)
+			{
+				IntRange newRange = stackRange;
+				Widgets.IntRange(rect, id, ref newRange, 1, sel.stackLimit);
+				if (newRange != stackRange)
+				{
+					stackRange = newRange;
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	class ListFilterModded : ListFilterDropDown<ModContentPack>
 	{
-		public ListFilterModded() => Sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
-
-		public override void ExposeData()
+		public ListFilterModded()
 		{
-			BaseExposeData();
-			string packageId = Sel.PackageId;
-			Scribe_Values.Look(ref packageId, "sel");
-			if(Scribe.mode == LoadSaveMode.LoadingVars)
-				Sel = LoadedModManager.RunningMods.First(mod => mod.PackageId == packageId);
+			sel = LoadedModManager.RunningMods.First(mod => mod.IsCoreMod);
 		}
 
-		public override bool FilterApplies(Thing thing) =>
-			Sel == thing.ContentSource;
-		
+
+		public override bool UsesRefName => true;
+		protected override string MakeRefName() => sel.ToString();
+
+		protected override ModContentPack ResolveReference(Map map) =>
+			LoadedModManager.RunningMods.FirstOrDefault(mod => mod.PackageIdPlayerFacing == refName);
+
+
+		protected override bool FilterApplies(Thing thing) =>
+			sel == thing.ContentSource;
+
 		public override IEnumerable<ModContentPack> Options() =>
 			LoadedModManager.RunningMods.Where(mod => mod.AllDefs.Any(d => d is ThingDef));
 
 		public override string NameFor(ModContentPack o) => o.Name;
 	}
 
+	class ListFilterOnScreen : ListFilter
+	{
+		protected override bool FilterApplies(Thing thing) =>
+			thing.OccupiedRect().Overlaps(Find.CameraDriver.CurrentViewRect);
+
+		public override bool CurrentMapOnly => true;
+	}
 }

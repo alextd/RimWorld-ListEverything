@@ -19,7 +19,7 @@
 	<TD.EnableThisFilter>Enable this filter</TD.EnableThisFilter>
 	<TD.IncludeOrExcludeThingsMatchingThisFilter>Include or Exclude things matching this filter</TD.IncludeOrExcludeThingsMatchingThisFilter>
 	<TD.ThisFilterDoesntWorkWithAllMaps>This filter doesn't work with all maps</TD.ThisFilterDoesntWorkWithAllMaps>
-	<TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>Tried to load {0} filter named ({1}) but the current map doesn't have any by that name</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
+	<TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>Tried to load "{0}" filter named "{1}" but none could be found</TD.TriedToLoad0FilterNamed1ButCouldNotBeFound>
 	<TD.Spoils>Spoils</TD.Spoils>
 	<TD.Refrigerated>Refrigerated</TD.Refrigerated>
 	<TD.Frozen>Frozen</TD.Frozen>
@@ -58,7 +58,7 @@
 	<TD.MakeAlert>Make Alert</TD.MakeAlert>
 	<TD.LoadAlert>Load Alert</TD.LoadAlert>
 	<TD.ManageAlerts>Manage Alerts</TD.ManageAlerts>
-	<TD.OnlyShowFilterOptionsForAvailableThings>Only show filter options for available things</TD.OnlyShowFilterOptionsForAvailableThings>
+	<TD.OnlyShowFilterOptionsForAvailableThings>Only show existing things as an option (shift invert)</TD.OnlyShowFilterOptionsForAvailableThings>
 	<TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>For example, don't show the option 'Made from Plasteel' if nothing is made from plasteel</TD.ForExampleDontShowTheOptionMadeFromPlasteelIfNothingIsMadeFromPlasteel>
 	<TD.AddNewFilter...>Add new filter...</TD.AddNewFilter...>
 	<TD.SelectAllGameAllowsUpTo80>Select All ( game allows up to 80 )</TD.SelectAllGameAllowsUpTo80>
@@ -68,5 +68,5 @@
 	<TD.AnyOption>Any</TD.AnyOption>
 	<TD.AllOptions>All</TD.AllOptions>
 	<TD.EnableAlerts>Enable Alerts</TD.EnableAlerts>
-	<TD.LabelCountThings>{0} things</TD.LabelCountThings>
+	<TD.LabelCountThings>{0} thing(s)</TD.LabelCountThings>
 </LanguageData>

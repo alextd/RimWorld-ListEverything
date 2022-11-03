@@ -31,7 +31,7 @@ namespace List_Everything
 			{
 				desc.name = name;	//Remember for current copy
 
-				FindDescription newDesc = desc.Clone(null);
+				FindDescription newDesc = desc.Clone(null, false);
 				newDesc.name = name;
 				savedFilters[name] = newDesc;
 			}
@@ -79,7 +79,7 @@ namespace List_Everything
 
 				if (Current.Game != null && 
 					row.ButtonText("Load".Translate()))
-					MainTabWindow_List.OpenWith(desc.Clone(Find.CurrentMap));
+					MainTabWindow_List.OpenWith(desc.Clone(Find.CurrentMap), true);
 
 				if (row.ButtonText("Delete".Translate()))
 					remove = name;

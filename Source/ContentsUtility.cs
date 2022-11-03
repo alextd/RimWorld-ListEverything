@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Reflection;
 using Verse;
 using RimWorld;
+using UnityEngine;
 
 namespace List_Everything
 {
@@ -15,13 +15,9 @@ namespace List_Everything
 			=> holder.IsEnclosingContainer() && !(holder is MinifiedThing);
 
 
-		private static FieldInfo contentsKnownInfo = typeof(Building_Casket).GetField("contentsKnown", BindingFlags.NonPublic | BindingFlags.Instance);
-		public static bool get_contentsKnown(this Building_Casket building) =>
-			(bool)contentsKnownInfo.GetValue(building);
-
 		public static bool CanPeekInventory(this IThingHolder holder) =>
 			DebugSettings.godMode ||
-			(holder is Building_Casket c ? c.get_contentsKnown() : true) &&
+			(holder is Building_Casket c ? c.contentsKnown : true) &&
 			!(holder is TradeShip);
 
 		public static List<Thing> AllKnownThings(IThingHolder holder)
@@ -34,6 +30,7 @@ namespace List_Everything
 		}
 
 		public static bool onlyAvailable = true;
+		public static bool OnlyAvailable => onlyAvailable != Event.current.shift;
 		public static HashSet<T> AvailableInGame<T>(Func<Thing, IEnumerable<T>> validGetter)
 		{
 			HashSet<T> ret = new HashSet<T>();

@@ -19,7 +19,6 @@
   <TD.EnableThisFilter>开启这个筛选器</TD.EnableThisFilter>
   <TD.IncludeOrExcludeThingsMatchingThisFilter>包含或排除与此筛选器匹配的内容</TD.IncludeOrExcludeThingsMatchingThisFilter>
   <TD.ThisFilterDoesntWorkWithAllMaps>此筛选器不适用于所有地图</TD.ThisFilterDoesntWorkWithAllMaps>
-  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>尝试加载名为 {1} 的筛选器 {0} ，但是当前地图上没有此名称的筛选器</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
   <TD.Spoils>腐烂</TD.Spoils>
   <TD.Refrigerated>冷藏</TD.Refrigerated>
   <TD.Frozen>冷冻</TD.Frozen>

@@ -69,11 +69,23 @@ namespace List_Everything
 		}
 
 		//1.3 just removed Listing Scrollviews?
-		public void EndScrollView(ref Rect viewRect)
+		public void EndScrollView(ref float listingHeight)
 		{
-			viewRect = new Rect(0f, 0f, listingRect.width, curY);
+			listingHeight = curY;
 			Widgets.EndScrollView();
 			End();
+		}
+
+		public bool CheckboxLabeledChanged(string label, ref bool checkOn, string tooltip = null, float height = 0f, float labelPct = 1f)
+		{
+			bool prev = checkOn;
+
+			CheckboxLabeled(
+				"TD.AllMaps".Translate(),
+				ref checkOn,
+				"TD.CertainFiltersDontWorkForAllMaps-LikeZonesAndAreasThatAreObviouslySpecificToASingleMap".Translate());
+
+			return prev != checkOn;
 		}
 	}
 }

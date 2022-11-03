@@ -7,52 +7,140 @@ using RimWorld;
 
 namespace List_Everything
 {
-	public class FindDescription : IExposable
+	// The FindDescription is the root owner of a set of filters,
+	// (It's a little more than a mere ListFilterGroup)
+	// - Holds the list of things and performs the search
+	// - BaseListType which narrows what that things to look at
+	// - Checkbox bool allMaps that apply to all nested filters
+	// - Apparently support for alerts which I'll probably separate out
+	public class FindDescription : IExposable, IFilterHolder
 	{
 		public string name = "TD.NewFindFilters".Translate();
-		public AlertPriority alertPriority;
-		public int ticksToShowAlert;
-		public int countToAlert;
-		public CompareType countComp;
+		
+		private List<Thing> listedThings = new();
+		public IEnumerable<Thing> ListedThings => listedThings;
+
+		private FilterHolder children;
+		public FilterHolder Children => children;
+
+		// from IFilterHolder
+		public FindDescription RootFindDesc => this;
+
+		//Map stuff. Not saved to file. Clone(map) to set map.
+		private Map _map;
+		public string mapLabel;
 		public bool allMaps = false;
-		public bool locked = false;
+		public Map map
+		{
+			get => _map;
+			set
+			{
+				_map = value;
 
-		public BaseListType baseType;
-		public List<ListFilter> filters = new List<ListFilter>();
+				StringBuilder sb = new(" (");
 
-		public virtual FindDescription Clone(Map map)
+				if (CurrentMapOnly())
+					sb.Append("Current Map");
+				else if (_map?.Parent.LabelCap is string label)
+					sb.Append(label);
+				else
+					sb.Append("TD.AllMaps".Translate());
+
+				sb.Append(")");
+
+				mapLabel = sb.ToString();
+			}
+		}
+
+		//Certain filters only work on the current map, so the entire tree will only work on the current map
+		public bool CurrentMapOnly() => Children.Check(f => f.CurrentMapOnly);
+
+
+		public FindDescription()
+		{
+			children = new FilterHolder(this);
+		}
+
+		public FindDescription(Map m)
+		{
+			map = m;
+		}
+
+		private BaseListType _baseType;
+		public BaseListType BaseType
+		{
+			get => _baseType;
+			set
+			{
+				_baseType = value;
+				RemakeList();
+			}
+		}
+
+		public void RemakeList()
+		{
+			listedThings.Clear();
+
+
+			// "Current map only" overrides other choices
+			if (CurrentMapOnly())
+				listedThings.AddRange(Get(Find.CurrentMap));
+
+			// All maps
+			else if (allMaps)
+				foreach (Map m in Find.Maps)
+					listedThings.AddRange(Get(m));
+
+			// Single map
+			else if (map != null)
+				listedThings.AddRange(Get(map));
+
+			// Probably don't want to
+			// Assume you want the current map!
+			//else
+			//	listedThings.AddRange(Get(Find.CurrentMap));
+		}
+
+
+		public void ExposeData()
+		{
+			Scribe_Values.Look(ref name, "name");
+			Scribe_Values.Look(ref _baseType, "baseType");
+			Scribe_Values.Look(ref allMaps, "allMaps");
+			//Does not save/load _map : Clone(map) a loaded FindDescription
+
+			Children.ExposeData();
+		}
+		public FindDescription Clone(Map newMap, bool resolve = true)
 		{
 			FindDescription newDesc = new FindDescription()
 			{
-				baseType = baseType,
+				_baseType = _baseType,
 				name = name,
-				alertPriority = alertPriority,
-				ticksToShowAlert = ticksToShowAlert,
-				countToAlert = countToAlert,
-				countComp = countComp,
 				allMaps = allMaps,
-				locked = locked
+				map = newMap
 			};
-			newDesc.filters = filters.Select(f => f.Clone(map, newDesc)).ToList();
+			newDesc.children = children.Clone(newDesc);
+			if (resolve)
+				foreach (var f in newDesc.Children.Filters)
+					f.DoResolveReference(newMap);
+
 			return newDesc;
 		}
 
-		public List<Thing> Get(Map map)
+		private IEnumerable<Thing> Get(Map map)
 		{
 			IEnumerable<Thing> allThings = Enumerable.Empty<Thing>();
-			switch (baseType)
+			switch (BaseType)
 			{
-				case BaseListType.Selectable:
+				case BaseListType.Selectable: //Known as "Map"
 					allThings = map.listerThings.AllThings.Where(t => t.def.selectable);
-					break;
-				case BaseListType.All:
-					allThings = ContentsUtility.AllKnownThings(map);
 					break;
 				case BaseListType.Buildings:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial);
 					break;
 				case BaseListType.Natural:
-					allThings = map.listerThings.AllThings.Where(t => t.def.filthLeaving == ThingDefOf.Filth_RubbleRock); 
+					allThings = map.listerThings.AllThings.Where(t => t.def.filthLeaving == ThingDefOf.Filth_RubbleRock);
 					break;
 				case BaseListType.Plants:
 					allThings = map.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
@@ -77,8 +165,11 @@ namespace List_Everything
 				case BaseListType.Animals:
 					allThings = map.mapPawns.AllPawnsSpawned.Where(p => !p.RaceProps.Humanlike).Cast<Thing>();
 					break;
+				case BaseListType.All:
+					allThings = ContentsUtility.AllKnownThings(map);
+					break;
 
-					//Devmode options:
+				//Devmode options:
 				case BaseListType.Haulables:
 					allThings = map.listerHaulables.ThingsPotentiallyNeedingHauling();
 					break;
@@ -97,7 +188,7 @@ namespace List_Everything
 				allThings = allThings.Where(t => ValidDef(t.def));
 				allThings = allThings.Where(t => !t.PositionHeld.Fogged(map));
 			}
-			foreach (ListFilter filter in filters)
+			foreach (ListFilter filter in Children.Filters)
 				allThings = filter.Apply(allThings);
 
 			//Sort
@@ -105,38 +196,25 @@ namespace List_Everything
 		}
 
 		//Probably a good filter
-		public static bool ValidDef(ThingDef def) => 
-			!typeof(Mote).IsAssignableFrom(def.thingClass) && 
+		public static bool ValidDef(ThingDef def) =>
+			!typeof(Mote).IsAssignableFrom(def.thingClass) &&
 			def.drawerType != DrawerType.None;
-
-		public virtual void ExposeData()
-		{
-			Scribe_Values.Look(ref name, "name");
-			Scribe_Values.Look(ref baseType, "baseType");
-			Scribe_Collections.Look(ref filters, "filters");
-			Scribe_Values.Look(ref alertPriority, "alertPriority");
-			Scribe_Values.Look(ref ticksToShowAlert, "ticksToShowAlert");
-			Scribe_Values.Look(ref countToAlert, "countToAlert");
-			Scribe_Values.Look(ref countComp, "countComp");
-			Scribe_Values.Look(ref allMaps, "allMaps");
-			Scribe_Values.Look(ref locked, "locked");
-
-			//Should we set filters owner to this? Only map clones that are copied need it, and they get it in the clone.
-		}
 	}
 
 	public enum BaseListType
 	{
 		Selectable,
-		All,
-		Items,
 		Everyone,
 		Colonists,
 		Animals,
+		Items,
 		Buildings,
 		Natural,
 		Plants,
 		Inventory,
+		All,
+
+		//devmode options
 		Haulables,
 		Mergables,
 		FilthInHomeArea
@@ -145,7 +223,7 @@ namespace List_Everything
 	public static class BaseListNormalTypes
 	{
 		public static readonly BaseListType[] normalTypes =
-			{ BaseListType.Selectable, BaseListType.All, BaseListType.Items, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals,
-			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory};
+			{ BaseListType.Selectable, BaseListType.Everyone, BaseListType.Colonists, BaseListType.Animals, BaseListType.Items,
+			BaseListType.Buildings, BaseListType.Natural, BaseListType.Plants, BaseListType.Inventory, BaseListType.All};
 	}
 }

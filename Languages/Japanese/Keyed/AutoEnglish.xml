@@ -19,7 +19,6 @@
   <TD.EnableThisFilter>このフィルタを有効</TD.EnableThisFilter>
   <TD.IncludeOrExcludeThingsMatchingThisFilter>このフィルタに一致する結果を含めるか除外する</TD.IncludeOrExcludeThingsMatchingThisFilter>
   <TD.ThisFilterDoesntWorkWithAllMaps>このフィルタは全マップでは機能しません</TD.ThisFilterDoesntWorkWithAllMaps>
-  <TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>({1})という名前の{0}フィルタを読み込もうとしましたが、現在のマップにその名前のフィルタがない</TD.TriedToLoad0FilterNamed1ButTheCurrentMapDoesntHaveAnyByThatName>
   <TD.Spoils>腐敗</TD.Spoils>
   <TD.Refrigerated>冷蔵</TD.Refrigerated>
   <TD.Frozen>冷凍</TD.Frozen>

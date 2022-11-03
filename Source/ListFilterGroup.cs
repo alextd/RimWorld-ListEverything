@@ -25,31 +25,42 @@ namespace List_Everything
 		public static readonly Texture2D LessThan = ContentFinder<Texture2D>.Get("LessThan", true);
 		public static readonly Texture2D GreaterThan = ContentFinder<Texture2D>.Get("GreaterThan", true);
 	}
-	public class ListFilterGroup : ListFilter
-	{
-		protected List<ListFilter> filters = new List<ListFilter>() { };
-		protected bool any = true; // or all
 
-		public override bool FilterApplies(Thing t) => 
-			any ? filters.Any(f => f.Enabled && f.AppliesTo(t)) : 
-			filters.All(f => f.Enabled && f.AppliesTo(t));
+	public class ListFilterGroup : ListFilter, IFilterHolder
+	{
+		protected bool any = true; // or all
+		private FilterHolder children;
+		public FilterHolder Children => children;
+
+		public ListFilterGroup()
+		{
+			children = new FilterHolder(this);
+		}
+		protected override bool FilterApplies(Thing t) =>
+			any ? Children.Filters.Any(f => f.Enabled && f.AppliesTo(t)) :
+			Children.Filters.All(f => !f.Enabled || f.AppliesTo(t));
 
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Collections.Look(ref filters, "filters");
 			Scribe_Values.Look(ref any, "any", true);
+
+			Children.ExposeData();
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone()
 		{
-			ListFilterGroup clone = (ListFilterGroup)base.Clone(map, newOwner);
-			clone.filters = filters.Select(f => f.Clone(map, newOwner)).ToList();
+			ListFilterGroup clone = (ListFilterGroup)base.Clone();
+			clone.children = children.Clone(clone);
 			clone.any = any;
-			//clone.owner = newOwner; //No - MakeFilter sets it.
 			return clone;
 		}
+		public override void DoResolveReference(Map map)
+		{
+			foreach(var f in Children.Filters)
+				f.DoResolveReference(map);
+		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
@@ -63,28 +74,28 @@ namespace List_Everything
 			return changed;
 		}
 
-		public override bool DrawMore(Listing_StandardIndent listing)
+		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
 		{
-			listing.Gap();
 			listing.NestedIndent(Listing_Standard.DefaultIndent);
+			listing.Gap();
 
 			//Draw filters
-			bool changed = MainTabWindow_List.DoFilters(listing, filters);
-			if (!owner.locked)
-				MainTabWindow_List.DrawAddRow(listing, owner, filters);
+			bool changed = Children.DrawFilters(listing, locked);
 
 			listing.NestedOutdent();
 			return changed;
 		}
+		public override bool Check(Predicate<ListFilter> check) =>
+			base.Check(check) || Children.Filters.Any(f => f.Check(check));
 	}
 
 	public class ListFilterInventory : ListFilterGroup
 	{
-		protected bool parent;//or child
+		protected bool holdingThis;//or what I'm holding
 
-		public override bool FilterApplies(Thing t)
+		protected override bool FilterApplies(Thing t)
 		{
-			if (parent)
+			if (holdingThis)
 			{
 				IThingHolder parent = t.ParentHolder;
 				while (parent.IsValidHolder())
@@ -103,23 +114,23 @@ namespace List_Everything
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref parent, "parent", true);
+			Scribe_Values.Look(ref holdingThis, "holdingThis", true);
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone()
 		{
-			ListFilterInventory clone = (ListFilterInventory)base.Clone(map, newOwner);
-			clone.parent = parent;
+			ListFilterInventory clone = (ListFilterInventory)base.Clone();
+			clone.holdingThis = holdingThis;
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);
-			if (row.ButtonText(parent ? "TD.TheThingHoldingThis".Translate() : "TD.AnythingThisIsHolding".Translate()))
+			if (row.ButtonText(holdingThis ? "TD.TheThingHoldingThis".Translate() : "TD.AnythingThisIsHolding".Translate()))
 			{
 				changed = true;
-				parent = !parent;
+				holdingThis = !holdingThis;
 			}
 			row.Label("TD.Matches".Translate());
 			if (row.ButtonText(any ? "TD.AnyOption".Translate() : "TD.AllOptions".Translate()))
@@ -136,7 +147,7 @@ namespace List_Everything
 	{
 		int range;
 
-		public override bool FilterApplies(Thing t)
+		protected override bool FilterApplies(Thing t)
 		{
 			IntVec3 pos = t.PositionHeld;
 			Map map = t.MapHeld;
@@ -152,14 +163,14 @@ namespace List_Everything
 			base.ExposeData();
 			Scribe_Values.Look(ref range, "range");
 		}
-		public override ListFilter Clone(Map map, FindDescription newOwner)
+		public override ListFilter Clone()
 		{
-			ListFilterNearby clone = (ListFilterNearby)base.Clone(map, newOwner);
+			ListFilterNearby clone = (ListFilterNearby)base.Clone();
 			clone.range = range;
 			return clone;
 		}
 
-		public override bool DrawOption(Rect rect)
+		public override bool DrawMain(Rect rect, bool locked)
 		{
 			bool changed = false;
 			WidgetRow row = new WidgetRow(rect.x, rect.y);

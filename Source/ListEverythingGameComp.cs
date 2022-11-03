@@ -24,11 +24,17 @@ namespace List_Everything
 		{
 			if (ListDefOf.OpenFindTab.IsDownEvent && Event.current.control)
 			{
-				FindDescription desc = new FindDescription();
-				ListFilter filter = ListFilterMaker.NameFilter(desc);
-				desc.filters.Add(filter);
+				FindDescription desc = new FindDescription(Find.CurrentMap);
+
+				ListFilter filter = ListFilterMaker.FilterForSelected();
+				bool selectedFilter = filter != null;
+
+				if (!selectedFilter)
+					filter = ListFilterMaker.NameFilter();
+
+				desc.Children.Add(filter);
 				filter.Focus();
-				MainTabWindow_List.OpenWith(desc);
+				MainTabWindow_List.OpenWith(desc, locked: selectedFilter, remake: selectedFilter);
 			}
 		}
 
@@ -42,11 +48,7 @@ namespace List_Everything
 			{
 				MainTabWindow_List tab = ListDefOf.TD_List.TabWindow as MainTabWindow_List;
 				if (tab.IsOpen)
-				{
-					tab.RemakeList();
-
-					Log.Message("CONTINUOUS REFRESH!");
-				}
+					tab.findDesc.RemakeList();
 			}
 		}
 
@@ -59,28 +61,30 @@ namespace List_Everything
 		//NEW THINGS
 
 		public FindAlertData GetAlert(string name) => savedAlerts[name];
-		public Map GetMapFor(string name) => savedAlerts[name].map;
 
 		public void AddAlert(string name, FindDescription desc)
 		{
 			desc.name = name; //Remember for current copy
-
-			Map map = desc.allMaps ? null : Find.CurrentMap;
 			
-			//Save two FindDescriptions: One to be scribed with ref string, other put in alert with real refs
-			//This was a good idea at one point but now I don't care to consolidate them into one ist
-			FindDescription refDesc = desc.Clone(null); //This one has ref string
-			refDesc.name = name;
-			FindDescription alertDesc = refDesc.Clone(map); //This one re-resolves reference for this map.
+			// Copy from the edit dialog into the actual alert,
+			// so editing it doesn't create live changes until saved.
+			FindDescription refDesc = desc.Clone(desc.map);
+			var newAlert = new FindAlertData(refDesc);
 
-			AlertByFind.AddAlert(new FindAlertData(map, alertDesc), okAction: () => savedAlerts[name] = new FindAlertData(map, refDesc));
+			AlertByFind.AddAlert(newAlert, okAction: () => savedAlerts[name] = newAlert);
 		}
 
 		public FindDescription LoadAlert(string name)
 		{
-			return savedAlerts[name].desc.Clone(Find.CurrentMap);
+			var desc = savedAlerts[name].desc;
+			return desc.Clone(desc.map);
 		}
 
+		//-----
+		// This section doubles up AlertByFind/savedAlerts
+		// AleryByFind deals with the actual Alert in-game
+		// Alerts have no ExposeData, that has to be done with savedAlerts 
+		//----
 		public void RenameAlert(string name, string newName)
 		{
 			FindAlertData findAlert = savedAlerts[name];
@@ -102,25 +106,25 @@ namespace List_Everything
 		public void SetPriority(string name, AlertPriority p)
 		{
 			AlertByFind.SetPriority(name, p);
-			savedAlerts[name].desc.alertPriority = p;
+			savedAlerts[name].alertPriority = p;
 		}
 
 		public void SetTicks(string name, int t)
 		{
 			AlertByFind.SetTicks(name, t);
-			savedAlerts[name].desc.ticksToShowAlert = t;
+			savedAlerts[name].ticksToShowAlert = t;
 		}
 
 		public void SetCount(string name, int c)
 		{
 			AlertByFind.SetCount(name, c);
-			savedAlerts[name].desc.countToAlert = c;
+			savedAlerts[name].countToAlert = c;
 		}
 
 		public void SetComp(string name, CompareType c)
 		{
 			AlertByFind.SetComp(name, c);
-			savedAlerts[name].desc.countComp = c;
+			savedAlerts[name].countComp = c;
 		}
 
 		public override void ExposeData()
@@ -130,9 +134,12 @@ namespace List_Everything
 			{
 				if (savedAlerts == null)	
 					savedAlerts = new Dictionary<string, FindAlertData>();
-				foreach (var kvp in savedAlerts)
+
+				foreach (FindAlertData alert in savedAlerts.Values)
 				{
-					AlertByFind.AddAlert(new FindAlertData(kvp.Value.map, kvp.Value.desc.Clone(kvp.Value.map)), overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
+					//alert's ExposeData set alert.desc.map Map. Still needs to be properly cloned though.
+					alert.desc = alert.desc.Clone(alert.desc.map);
+					AlertByFind.AddAlert(alert, overwrite: true);//Shouldn't need to overwrite, shouldn't popup window during ExposeData anyway
 				}
 			}
 		}
