@@ -1062,6 +1062,7 @@ namespace List_Everything
 		}
 	}
 
+
 	class ListFilterModded : ListFilterDropDown<ModContentPack>
 	{
 		public ListFilterModded()
@@ -1086,6 +1087,7 @@ namespace List_Everything
 		public override string NameFor(ModContentPack o) => o.Name;
 	}
 
+
 	class ListFilterOnScreen : ListFilter
 	{
 		protected override bool FilterApplies(Thing thing) =>
@@ -1093,6 +1095,7 @@ namespace List_Everything
 
 		public override bool CurrentMapOnly => true;
 	}
+
 
 	class ListFilterStat : ListFilterDropDown<StatDef>
 	{
@@ -1120,13 +1123,18 @@ namespace List_Everything
 			return clone;
 		}
 
-		public override IEnumerable<StatDef> Options() => base.Options().Where(d => !d.alwaysHide);
-
-
-		public override string NameFor(StatDef def) => def.LabelForFullStatListCap;
-
 		protected override bool FilterApplies(Thing t) =>
+			sel.Worker.ShouldShowFor(StatRequest.For(t)) &&
 			valueRange.Includes(t.GetStatValue(sel, cacheStaleAfterTicks: 1));
+
+
+		public override IEnumerable<StatDef> Options() =>
+			base.Options().Where(d => !d.alwaysHide);
+
+
+		public override string NameFor(StatDef def) =>
+			def.LabelForFullStatListCap;
+
 
 		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
