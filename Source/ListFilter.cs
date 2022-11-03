@@ -1140,13 +1140,42 @@ namespace List_Everything
 		public override bool DrawCustom(Rect rect, WidgetRow row)
 		{
 			FloatRange newRange = valueRange;
-			Widgets.FloatRange(rect, id, ref newRange, sel.minValue, sel.maxValue,
+
+			Text.Anchor = TextAnchor.MiddleCenter;
+			Widgets.Label(rect, 
 				$"{valueRange.min.ToStringByStyle(sel.toStringStyle, sel.toStringNumberSense)} - {valueRange.max.ToStringByStyle(sel.toStringStyle, sel.toStringNumberSense)}");
-			if (newRange != valueRange)
+			Text.Anchor = TextAnchor.UpperLeft;
+			
+			return false;
+		}
+
+		private string lBuffer, rBuffer;
+		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
+		{
+			if (locked) return false;
+
+			listing.Gap(listing.verticalSpacing);
+
+			Rect rect = listing.GetRect(Text.LineHeight);
+			Rect lRect = rect.LeftPart(.45f);
+			Rect rRect = rect.RightPart(.45f);
+
+			if (sel.toStringStyle == ToStringStyle.PercentOne || sel.toStringStyle == ToStringStyle.PercentTwo || sel.toStringStyle == ToStringStyle.PercentZero)
 			{
-				valueRange = newRange;
-				return true;
+				Widgets.TextFieldPercent(lRect, ref valueRange.min, ref lBuffer, float.MinValue, float.MaxValue);
+				Widgets.TextFieldPercent(rRect, ref valueRange.max, ref rBuffer, float.MinValue, float.MaxValue);
 			}
+/*			else if(sel.toStringStyle == ToStringStyle.Integer)
+			{
+				Widgets.TextFieldNumeric<int>(lRect, ref valueRangeI.min, ref lBuffer, float.MinValue, float.MaxValue);
+				Widgets.TextFieldNumeric<int>(rRect, ref valueRangeI.max, ref rBuffer, float.MinValue, float.MaxValue);
+			}*/
+			else
+			{
+				Widgets.TextFieldNumeric<float>(lRect, ref valueRange.min, ref lBuffer, float.MinValue, float.MaxValue);
+				Widgets.TextFieldNumeric<float>(rRect, ref valueRange.max, ref rBuffer, float.MinValue, float.MaxValue);
+			}
+
 			return false;
 		}
 	}
