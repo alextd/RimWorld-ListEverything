@@ -522,7 +522,10 @@ namespace List_Everything
 			{
 				//Just the label on left, and selected option button on right
 				base.DrawMain(rect, locked);
-				changeSelection = Widgets.ButtonText(rect.RightPart(0.4f), GetLabel());
+				string label = GetLabel();
+				Rect buttRect = rect.RightPart(0.4f);
+				buttRect.xMin -= Mathf.Max(buttRect.width, Text.CalcSize(label).x) - buttRect.width;
+				changeSelection = Widgets.ButtonText(buttRect, label);
 			}
 			if (changeSelection)
 			{
