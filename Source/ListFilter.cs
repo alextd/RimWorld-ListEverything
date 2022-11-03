@@ -736,6 +736,9 @@ namespace List_Everything
 					yield return pDef;
 			}
 		}
+
+		public override string NameFor(ThingCategoryDef def) =>
+			string.Concat(Enumerable.Repeat("- ", def.Parents.Count())) + base.NameFor(def);
 	}
 
 	class ListFilterSpecialFilter : ListFilterDropDown<SpecialThingFilterDef>
