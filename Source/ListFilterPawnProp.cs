@@ -256,6 +256,8 @@ namespace List_Everything
 				def.stages.FirstOrDefault(d => d?.label != null).label.CapitalizeFirst() ??
 				def.stages.FirstOrDefault(d => d?.labelSocial != null).labelSocial.CapitalizeFirst() ?? "???";
 
+			label = label.Replace("{0}", "_").Replace("{1}", "_");
+
 			return ShowMultistage(def) ? label + "*" : label;
 		}
 
