@@ -1128,6 +1128,7 @@ namespace List_Everything
 			valueRange.Includes(t.GetStatValue(sel, cacheStaleAfterTicks: 1));
 
 
+		public override bool Ordered => true;
 		public override IEnumerable<StatDef> Options() =>
 			base.Options().Where(d => !d.alwaysHide);
 
