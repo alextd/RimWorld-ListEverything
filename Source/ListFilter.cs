@@ -1164,6 +1164,8 @@ namespace List_Everything
 			//From inner TextFieldNumeric
 			controlNameL = "TextField" + lRect.y.ToString("F0") + lRect.x.ToString("F0");
 			controlNameR = "TextField" + rRect.y.ToString("F0") + rRect.x.ToString("F0");
+
+			FloatRange oldRange = valueRange;
 			if (sel.toStringStyle == ToStringStyle.PercentOne || sel.toStringStyle == ToStringStyle.PercentTwo || sel.toStringStyle == ToStringStyle.PercentZero)
 			{
 				Widgets.TextFieldPercent(lRect, ref valueRange.min, ref lBuffer, float.MinValue, float.MaxValue);
@@ -1189,7 +1191,7 @@ namespace List_Everything
 			}
 			*/
 
-			return false;
+			return valueRange != oldRange;
 		}
 
 		protected override void DoFocus()
