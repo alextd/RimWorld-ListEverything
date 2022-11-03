@@ -1109,6 +1109,7 @@ namespace List_Everything
 		protected override void PostSelected()
 		{
 			valueRange = new FloatRange(sel.minValue, sel.maxValue);
+			lBuffer = rBuffer = null;
 		}
 
 		public override void ExposeData()
