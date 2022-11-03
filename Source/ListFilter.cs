@@ -867,6 +867,16 @@ namespace List_Everything
 					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>()))
 				: base.Options();
 
+		public override string NameFor(BodyPartDef def)
+		{
+			string name = def.LabelCap;
+			string special = def.defName; //best we got
+			if (name == special)
+				return name;
+
+			return $"{name} ({special})";
+		}
+
 		public override int ExtraOptionsCount => 1;
 		public override string NameForExtra(int ex) => "None".Translate();
 	}
