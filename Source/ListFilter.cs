@@ -490,6 +490,7 @@ namespace List_Everything
 
 		public virtual bool Ordered => false;
 		public virtual string NameFor(T o) => o is Def def ? def.LabelCap.RawText : typeof(T).IsEnum ? o.TranslateEnum() : o.ToString();
+		public virtual string DropdownNameFor(T o) => NameFor(o);
 		protected override string MakeRefName()
 		{
 			if (sel is Def def)
@@ -531,7 +532,7 @@ namespace List_Everything
 					options.Add(new FloatMenuOptionAndRefresh(nullOption, () => sel = default, this)); //can't null because T isn't bound as reftype
 
 				foreach (T o in Ordered ? Options().OrderBy(o => NameFor(o)) : Options())
-					options.Add(new FloatMenuOptionAndRefresh(NameFor(o), () => sel = o, this));
+					options.Add(new FloatMenuOptionAndRefresh(DropdownNameFor(o), () => sel = o, this));
 
 				foreach (int ex in ExtraOptions())
 					options.Add(new FloatMenuOptionAndRefresh(NameForExtra(ex), () => extraOption = ex, this));
@@ -737,7 +738,7 @@ namespace List_Everything
 			}
 		}
 
-		public override string NameFor(ThingCategoryDef def) =>
+		public override string DropdownNameFor(ThingCategoryDef def) =>
 			string.Concat(Enumerable.Repeat("- ", def.Parents.Count())) + base.NameFor(def);
 	}
 
