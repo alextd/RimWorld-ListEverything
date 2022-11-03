@@ -249,7 +249,7 @@ namespace List_Everything
 			//Continuous refresh
 			buttRect.x += 34;
 			ref bool refresh = ref Current.Game.GetComponent<ListEverythingGameComp>().continuousRefresh;
-			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.green : Color.white, Color.Lerp(Color.green,Color.white, 0.5f)))
+			if (Widgets.ButtonImage(buttRect, TexUI.ArrowTexRight, refresh ? Color.green : Color.white, Color.Lerp(Color.green, Color.white, 0.5f)))
 				refresh = !refresh;
 			GUI.color = Color.white;//Because Widgets.ButtonImage doesn't set it back
 
@@ -262,15 +262,26 @@ namespace List_Everything
 			}
 
 			TooltipHandler.TipRegion(buttRect,
-				Find.TickManager.Paused 
+				Find.TickManager.Paused
 				? "(Does not refresh when paused)"
 				: "TD.ContinuousRefreshAboutEverySecond".Translate());
+
+			//Godmode showing fogged
+			buttRect.x += 34;
+			if (DebugSettings.godMode)
+			{
+				Widgets.DrawAtlas(buttRect, Verse.TexButton.GodModeEnabled);
+				TooltipHandler.TipRegion(buttRect, "God mode is allowed you to see into fogged areas and various weird things");
+			}
+
+
 
 			//Count text
 			Text.Anchor = TextAnchor.UpperRight;
 			Widgets.Label(listRect, LabelCountThings(findDesc.ListedThings));
 			Text.Anchor = TextAnchor.UpperLeft;
 			listRect.yMin += 34;
+
 
 			//Handle mouse selection
 			if (!Input.GetMouseButton(0))
