@@ -32,8 +32,7 @@ namespace List_Everything
 				if (!selectedFilter)
 					filter = ListFilterMaker.NameFilter();
 
-				desc.Children.Add(filter);
-				filter.Focus();
+				desc.Children.Add(filter, focus: true);
 				MainTabWindow_List.OpenWith(desc, locked: selectedFilter, remake: selectedFilter);
 			}
 		}

@@ -40,11 +40,12 @@ namespace List_Everything
 		}
 
 		// Add filter and set its parent to this (well, the same parent IFilterHolder of this)
-		public void Add(ListFilter newFilter, bool remake = false)
+		public void Add(ListFilter newFilter, bool remake = false, bool focus = false)
 		{
 			newFilter.parent = parent;
 			filters.Add(newFilter);
 
+			if (focus) newFilter.Focus();
 			if (remake) parent.RootFindDesc.RemakeList();
 		}
 
@@ -278,7 +279,7 @@ namespace List_Everything
 				if (def is ListFilterDef fDef)
 					options.Add(new FloatMenuOption(
 						fDef.LabelCap,
-						() => Add(ListFilterMaker.MakeFilter(fDef), remake: true)
+						() => Add(ListFilterMaker.MakeFilter(fDef), remake: true, focus: true)
 					));
 				if (def is ListFilterCategoryDef cDef)
 					options.Add(new FloatMenuOption(
@@ -297,7 +298,7 @@ namespace List_Everything
 				// I don't think we need to worry about double-nested filters
 				options.Add(new FloatMenuOption(
 					def.LabelCap,
-					() => Add(ListFilterMaker.MakeFilter(def), remake: true)
+					() => Add(ListFilterMaker.MakeFilter(def), remake: true, focus: true)
 				));
 			}
 			Find.WindowStack.Add(new FloatMenu(options));

@@ -1150,6 +1150,7 @@ namespace List_Everything
 		}
 
 		private string lBuffer, rBuffer;
+		private string controlNameL, controlNameR;
 		protected override bool DrawUnder(Listing_StandardIndent listing, bool locked)
 		{
 			if (locked) return false;
@@ -1160,6 +1161,9 @@ namespace List_Everything
 			Rect lRect = rect.LeftPart(.45f);
 			Rect rRect = rect.RightPart(.45f);
 
+			//From inner TextFieldNumeric
+			controlNameL = "TextField" + lRect.y.ToString("F0") + lRect.x.ToString("F0");
+			controlNameR = "TextField" + rRect.y.ToString("F0") + rRect.x.ToString("F0");
 			if (sel.toStringStyle == ToStringStyle.PercentOne || sel.toStringStyle == ToStringStyle.PercentTwo || sel.toStringStyle == ToStringStyle.PercentZero)
 			{
 				Widgets.TextFieldPercent(lRect, ref valueRange.min, ref lBuffer, float.MinValue, float.MaxValue);
@@ -1176,7 +1180,21 @@ namespace List_Everything
 				Widgets.TextFieldNumeric<float>(rRect, ref valueRange.max, ref rBuffer, float.MinValue, float.MaxValue);
 			}
 
+			/* TODO: figure this out. Unity seems to have override the tab.
+			if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Tab)
+			{
+				//Why wrong place.
+				GUI.FocusControl(controlNameR);
+				Event.current.Use();
+			}
+			*/
+
 			return false;
+		}
+
+		protected override void DoFocus()
+		{
+			GUI.FocusControl(controlNameL);
 		}
 	}
 }

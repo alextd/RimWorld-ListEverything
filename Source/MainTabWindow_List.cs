@@ -33,7 +33,7 @@ namespace List_Everything
 			if (findDesc == null)
 			{
 				SetFindDesc();
-				findDesc.Children.Add(ListFilterMaker.NameFilter());
+				findDesc.Children.Add(ListFilterMaker.NameFilter(), focus: true);
 				//Don't make the list - everything would match.
 			}
 			else
