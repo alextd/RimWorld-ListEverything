@@ -731,7 +731,7 @@ namespace List_Everything
 				case RacePropsFilter.Trainability:
 					if (row.ButtonText(trainability.LabelCap))
 					{
-						foreach (TrainabilityDef def in DefDatabase<TrainabilityDef>.AllDefsListForReading)
+						foreach (TrainabilityDef def in DefDatabase<TrainabilityDef>.AllDefs)
 						{
 							options.Add(new FloatMenuOptionAndRefresh(def.LabelCap, () => trainability = def, this));
 						}
@@ -837,6 +837,7 @@ namespace List_Everything
 			}
 			return AllOptions();
 		}
+		public override bool Ordered => true;
 
 		public override string NullOption() => "None".Translate();
 

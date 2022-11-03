@@ -576,12 +576,13 @@ namespace List_Everything
 			thing.MapHeld.designationManager.AllDesignationsAt(thing.PositionHeld).Count() > 0);
 
 		public override string NullOption() => "TD.AnyOption".Translate();
+
+		public override bool Ordered => true;
 		public override IEnumerable<DesignationDef> Options() =>
 			ContentsUtility.OnlyAvailable ?
 				Find.CurrentMap.designationManager.AllDesignations.Select(d => d.def).Distinct() :
 				base.Options();
 
-		public override bool Ordered => true;
 		public override string NameFor(DesignationDef o) => o.defName; // no labels on Designation def
 	}
 
@@ -723,7 +724,7 @@ namespace List_Everything
 
 		public override IEnumerable<ThingCategoryDef> Options() =>
 			ContentsUtility.OnlyAvailable ?
-				ContentsUtility.AvailableInGame(ThingCategoryDefsOfThing) :
+				base.Options().Intersect(ContentsUtility.AvailableInGame(ThingCategoryDefsOfThing)) :
 				base.Options();
 
 		public static IEnumerable<ThingCategoryDef> ThingCategoryDefsOfThing(Thing thing)
@@ -828,10 +829,11 @@ namespace List_Everything
 		}
 		
 		public override string NullOption() => "TD.AnyOption".Translate();
-		public override IEnumerable<ThingDef> Options() => 
+		private static List<ThingDef> stuffList = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsStuff).ToList();
+		public override IEnumerable<ThingDef> Options() =>
 			ContentsUtility.OnlyAvailable
-				? ContentsUtility.AvailableInGame(t => t.Stuff)
-				: DefDatabase<ThingDef>.AllDefsListForReading.Where(d => d.IsStuff);
+				? stuffList.Intersect(ContentsUtility.AvailableInGame(t => t.Stuff))
+				: stuffList;
 		
 		public override int ExtraOptionsCount => DefDatabase<StuffCategoryDef>.DefCount + 1;
 		public override string NameForExtra(int ex) =>
@@ -861,8 +863,8 @@ namespace List_Everything
 		public override string NullOption() => "TD.AnyOption".Translate();
 		public override IEnumerable<BodyPartDef> Options() =>
 			ContentsUtility.OnlyAvailable
-				? ContentsUtility.AvailableInGame(
-					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>())
+				? base.Options().Intersect(ContentsUtility.AvailableInGame(
+					t => (t as Pawn)?.health.hediffSet.GetMissingPartsCommonAncestors().Select(h => h.Part.def) ?? Enumerable.Empty<BodyPartDef>()))
 				: base.Options();
 
 		public override int ExtraOptionsCount => 1;
