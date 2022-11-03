@@ -1021,4 +1021,74 @@ namespace List_Everything
 		public override string NameForExtra(int ex) => "TD.AnyOption".Translate();
 	}
 
+
+	class ListFilterCapacity : ListFilterDropDown<PawnCapacityDef>
+	{
+		public const float MaxReasonable = 4;
+		FloatRange capacityRange = new FloatRange(0, 1);
+
+		public ListFilterCapacity()
+		{
+			sel = PawnCapacityDefOf.Manipulation;
+		}
+
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look(ref capacityRange, "capacityRange");
+		}
+		public override ListFilter Clone()
+		{
+			ListFilterCapacity clone = (ListFilterCapacity)base.Clone();
+			clone.capacityRange = capacityRange;
+			return clone;
+		}
+
+		public override string NullOption() => "TD.AnyOption".Translate();
+
+		private bool Includes(Pawn pawn, PawnCapacityDef def)
+		{
+			float level = pawn.health.capacities.GetLevel(def);
+
+			if (capacityRange.Includes(level))
+				return true;
+
+			// Including "up to 1000%" really means "no limit"
+			if (level > MaxReasonable && capacityRange.max == MaxReasonable)
+				return true;
+
+			return false;
+		}
+		protected override bool FilterApplies(Thing thing)
+		{
+			if (thing is Pawn pawn)
+			{
+				if(sel != null)
+					return Includes(pawn, sel);
+
+				foreach (PawnCapacityDef def in DefDatabase<PawnCapacityDef>.AllDefs)
+					if (Includes(pawn, def))
+						return true;
+			}
+			return false;
+		}
+
+		public override bool DrawCustom(Rect rect, WidgetRow row)
+		{
+			FloatRange newRange = capacityRange;
+			Widgets.FloatRange(rect, id, ref newRange, max: MaxReasonable, 
+				labelKey: capacityRange.max == MaxReasonable ? $"> {capacityRange.min.ToStringByStyle(ToStringStyle.PercentZero)}" : null,
+				valueStyle: ToStringStyle.PercentZero);
+
+			if (newRange != capacityRange)
+			{
+				//round down to 1%
+				capacityRange.min = (int)(100*newRange.min)/100f;
+				capacityRange.max = (int)(100*newRange.max)/100f;
+				return true;
+			}
+			return false;
+		}
+	}
+
 }
