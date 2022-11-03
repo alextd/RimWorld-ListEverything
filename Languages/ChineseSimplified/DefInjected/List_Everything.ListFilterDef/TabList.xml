@@ -25,7 +25,6 @@
   <Filter_Prisoner.label>囚犯</Filter_Prisoner.label>
   <Filter_MissingBodyPart.label>缺失身体部件</Filter_MissingBodyPart.label>
   <Filter_ItemInfo.label>物品信息</Filter_ItemInfo.label>
-  <Filter_ItemCategory.label>物品分类</Filter_ItemCategory.label>
   <Filter_SpecialFilter.label>其他筛选器</Filter_SpecialFilter.label>
   <Filter_HP.label>耐久度%</Filter_HP.label>
   <Filter_Quality.label>品质</Filter_Quality.label>

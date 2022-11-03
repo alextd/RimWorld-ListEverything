@@ -713,9 +713,9 @@ namespace List_Everything
 			"TD.NoFaction".Translate();
 	}
 	
-	class ListFilterItemCategory : ListFilterDropDown<ThingCategoryDef>
+	class ListFilterCategory : ListFilterDropDown<ThingCategoryDef>
 	{
-		public ListFilterItemCategory() => sel = ThingCategoryDefOf.Root;
+		public ListFilterCategory() => sel = ThingCategoryDefOf.Root;
 
 		protected override bool FilterApplies(Thing thing) =>
 			thing.def.IsWithinCategory(sel);
@@ -744,34 +744,6 @@ namespace List_Everything
 
 		protected override bool FilterApplies(Thing thing) =>
 			sel.Worker.Matches(thing);
-	}
-
-	enum ListCategory
-	{
-		Person,
-		Animal,
-		Item,
-		Building,
-		Natural,
-		Plant,
-		Other
-	}
-	class ListFilterCategory : ListFilterDropDown<ListCategory>
-	{
-		protected override bool FilterApplies(Thing thing)
-		{
-			switch(sel)
-			{
-				case ListCategory.Person: return thing is Pawn pawn && !pawn.NonHumanlikeOrWildMan();
-				case ListCategory.Animal: return thing is Pawn animal && animal.NonHumanlikeOrWildMan();
-				case ListCategory.Item: return thing.def.alwaysHaulable;
-				case ListCategory.Building: return thing is Building building && building.def.filthLeaving != ThingDefOf.Filth_RubbleRock;
-				case ListCategory.Natural: return thing is Building natural && natural.def.filthLeaving == ThingDefOf.Filth_RubbleRock;
-				case ListCategory.Plant: return thing is Plant;
-				case ListCategory.Other: return !(thing is Pawn) && !(thing is Building) && !(thing is Plant) && !thing.def.alwaysHaulable;
-			}
-			return false;
-		}
 	}
 
 	enum MineableType { Resource, Rock, All }

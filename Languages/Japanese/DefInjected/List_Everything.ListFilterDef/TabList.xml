@@ -31,7 +31,6 @@
   <!-- Item filters -->
 
   <Filter_ItemInfo.label>アイテム情報</Filter_ItemInfo.label>
-  <Filter_ItemCategory.label>アイテム種別</Filter_ItemCategory.label>
   <Filter_SpecialFilter.label>特殊フィルタ</Filter_SpecialFilter.label>
   <Filter_HP.label>耐久度％</Filter_HP.label>
   <Filter_Quality.label>品質</Filter_Quality.label>

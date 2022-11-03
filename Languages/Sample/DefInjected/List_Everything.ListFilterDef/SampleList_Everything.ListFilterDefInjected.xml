@@ -22,7 +22,6 @@
 	<Filter_Gender.label>gender</Filter_Gender.label>
 	<Filter_MissingBodyPart.label>missing Body Part</Filter_MissingBodyPart.label>
 	<Filter_ItemInfo.label>item info</Filter_ItemInfo.label>
-	<Filter_ItemCategory.label>item grouping</Filter_ItemCategory.label>
 	<Filter_SpecialFilter.label>special filter</Filter_SpecialFilter.label>
 	<Filter_HP.label>health %</Filter_HP.label>
 	<Filter_Quality.label>quality</Filter_Quality.label>

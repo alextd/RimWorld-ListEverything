@@ -31,7 +31,6 @@
   <!-- Item filters -->
 
   <Filter_ItemInfo.label>инфо о предмете</Filter_ItemInfo.label>
-  <Filter_ItemCategory.label>группа предмета</Filter_ItemCategory.label>
   <Filter_SpecialFilter.label>специальный фильтр</Filter_SpecialFilter.label>
   <Filter_HP.label>здоровье %</Filter_HP.label>
   <Filter_Quality.label>качество</Filter_Quality.label>
