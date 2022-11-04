@@ -111,18 +111,22 @@ namespace List_Everything
 		public (bool, bool) Listing(Listing_StandardIndent listing, bool locked)
 		{
 			Rect rowRect = listing.GetRect(Text.LineHeight);
+
+
+			if (!include)
+			{
+				GUI.color = Color.red;
+				Widgets.DrawLineHorizontal(rowRect.x + 1, rowRect.y + Text.LineHeight / 2 - 2, 8);
+				GUI.color = Color.white;
+
+				rowRect.xMin += 12;
+			}
 			WidgetRow row = new WidgetRow(rowRect.xMax, rowRect.y, UIDirection.LeftThenDown, rowRect.width);
 
 			bool changed = false;
 			bool delete = false;
 
-			if (locked)
-			{
-				row.Label(include ? "TD.IncludeShort".Translate() : "TD.ExcludeShort".Translate(),
-					IncExcWidth, "TD.IncludeOrExcludeThingsMatchingThisFilter".Translate());
-				row.Gap(4);
-			}
-			else
+			if (!locked)
 			{
 				//Clear button
 				if (row.ButtonIcon(TexButton.CancelTex, "TD.DeleteThisFilter".Translate()))
