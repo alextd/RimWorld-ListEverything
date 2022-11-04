@@ -683,20 +683,6 @@ namespace List_Everything
 			thing is Plant plant && (plant.def.plant?.dieIfLeafless ?? false);
 	}
 
-	class ListFilterClassType : ListFilterDropDown<Type>
-	{
-		public ListFilterClassType() => sel = typeof(Thing);
-
-		protected override bool FilterApplies(Thing thing) =>
-			sel.IsAssignableFrom(thing.GetType());
-
-		public static List<Type> types = typeof(Thing).AllSubclassesNonAbstract().OrderBy(t=>t.ToString()).ToList();
-		public override IEnumerable<Type> Options() =>
-			ContentsUtility.OnlyAvailable ?
-				ContentsUtility.AvailableInGame(t => t.GetType()).OrderBy(NameFor).ToList() : 
-				types;
-	}
-
 	class ListFilterFaction : ListFilterDropDown<FactionRelationKind>
 	{
 		public ListFilterFaction() => extraOption = 1;
@@ -842,12 +828,6 @@ namespace List_Everything
 		public override string NameForExtra(int ex) =>
 			ex == 1 ? "TD.NotMadeFromStuff".Translate() : 
 			DefDatabase<StuffCategoryDef>.AllDefsListForReading[ex-2]?.LabelCap;
-	}
-
-	class ListFilterDrawerType : ListFilterDropDown<DrawerType>
-	{
-		protected override bool FilterApplies(Thing thing) =>
-			thing.def.drawerType == sel;
 	}
 
 	class ListFilterMissingBodyPart : ListFilterDropDown<BodyPartDef>
