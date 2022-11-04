@@ -166,41 +166,11 @@ namespace List_Everything
 		public IEnumerable<int> SelectableStages =>
 			orderedStages.Where(i => VisibleStage(sel.stages[i]));
 
-
-		// How to order the stages: by mood/opinion/xml-order
-		public class CompareThoughtStage : IComparer<int>
-		{
-			ThoughtDef tDef;
-			public CompareThoughtStage(ThoughtDef d) => tDef = d;
-
-			//Implementing the Compare method
-			public int Compare(int l, int r)
-			{
-				ThoughtStage stageL = tDef.stages[l];
-				ThoughtStage stageR = tDef.stages[r];
-				float moodL = stageL?.baseMoodEffect ?? 0;
-				float moodR = stageR?.baseMoodEffect ?? 0;
-
-				if (moodL > moodR)
-					return 1;
-				if (moodL < moodR)
-					return -1;
-
-				float offsL = stageL?.baseOpinionOffset ?? 0;
-				float offsR = stageR?.baseOpinionOffset ?? 0;
-				if (offsL > offsR)
-					return 1;
-				if (offsL < offsR)
-					return -1;
-
-				return l - r;
-			}
-		}
-
 		private void MakeOrderedStages()
 		{
 			orderedStages.Clear();
-			orderedStages.AddRange(Enumerable.Range(0, sel.stages.Count).OrderBy(i => i, new CompareThoughtStage(sel)));
+			orderedStages.AddRange(Enumerable.Range(0, sel.stages.Count)
+				.OrderBy(i => sel.stages[i] == null ? i : i + 1000 * sel.stages[i].baseOpinionOffset + 1000000 * sel.stages[i].baseMoodEffect));
 		}
 
 		protected override void PostSelected()
