@@ -63,6 +63,7 @@ namespace List_Everything
 
 		public FindDescription(Map m)
 		{
+			children = new FilterHolder(this);
 			map = m;
 		}
 
