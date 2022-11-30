@@ -9,12 +9,11 @@ namespace List_Everything
 	{
 		public Mod(ModContentPack content) : base(content)
 		{
-			LongEventHandler.ExecuteWhenFinished(() => {
-				Log.Warning($"Hey! List Everything has been turned into the mods Ctrl-F and Custom Alerts for 1.4. Go use those!");
+			Log.Warning($"Hey! List Everything has been turned into the mods Ctrl-F and Custom Alerts for 1.4. Go use those!");
 
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-					"Hey! List Everything has been turned into the mods Ctrl-F and Custom Alerts for 1.4. Go use those!", () => { }));
-			});
+			LongEventHandler.QueueLongEvent(() =>
+				Find.WindowStack?.Add(new Dialog_MessageBox("Hey! List Everything has been turned into the mods Ctrl-F and Custom Alerts for 1.4. Go use those!")),
+				"List Everyting", true, _ => { });
 		}
 	}
 }
