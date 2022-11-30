@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<LanguageData>
-	
-	<!-- enum Intelligence -->
-	<TD.Intelligence.Animal>Животное</TD.Intelligence.Animal>
-	<TD.Intelligence.ToolUser>Польз. инструмента</TD.Intelligence.ToolUser>
-	<TD.Intelligence.Humanlike>Гуманоид</TD.Intelligence.Humanlike>
-	
-</LanguageData>
